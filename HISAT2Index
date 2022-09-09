@@ -2,11 +2,11 @@
 
 # Let's make an index file here:
 # ~/W103/hisat2_index
+# I want the prefix for all the index files to be W103, hence ~/W103/hisat2_index/W103 in the following code
 
 #############################################################################################################################################
 #                                                              The actual code:                                                             #
 #############################################################################################################################################
-#!/bin/bash
 
 hisat2-build -p 20 ~/W103/W103.fasta ~/W103/hisat2_index/W103
 
@@ -14,8 +14,7 @@ hisat2-build -p 20 ~/W103/W103.fasta ~/W103/hisat2_index/W103
 #                                                                 That's it                                                                 #
 #############################################################################################################################################
 
-# Make that as a shell file (AlignW103.sh), then run it using something like SGE_BATCH (with a couple of parameters for SGE_BATCH specified):
-# SGE_Batch -c "AlignW103.sh" -r W103Alignment -P 14 -q hoser
+# This is a fast process and can just be run in the command line. There are some options, though.
 
 
 ######################################################
