@@ -1,0 +1,42 @@
+# Before running HISAT2, it's important to build an index from the fasta which is being used in the alignment.
+
+# Let's make an index file here:
+# ~/W103/hisat2_index
+
+#############################################################################################################################################
+#                                                              The actual code:                                                             #
+#############################################################################################################################################
+#!/bin/bash
+
+hisat2-build -p 20 ~/W103/W103.fasta ~/W103/hisat2_index/W103
+
+#############################################################################################################################################
+#                                                                 That's it                                                                 #
+#############################################################################################################################################
+
+# Make that as a shell file (AlignW103.sh), then run it using something like SGE_BATCH (with a couple of parameters for SGE_BATCH specified):
+# SGE_Batch -c "AlignW103.sh" -r W103Alignment -P 14 -q hoser
+
+
+######################################################
+# The following is from the HISAT2 Manual (9/8/2022):#
+######################################################
+# hisat2-build builds a HISAT2 index from a set of DNA sequences. hisat2-build outputs a set of 6 files with suffixes 
+# .1.ht2, .2.ht2, .3.ht2, .4.ht2, .5.ht2, .6.ht2, .7.ht2, and .8.ht2. In the case of a large index these suffixes will have a ht2l termination. 
+# These files together constitute the index: they are all that is needed to align reads to that reference. 
+# The original sequence FASTA files are no longer used by HISAT2 once the index is built.
+
+
+# Usage: hisat2-build [options]* <reference_in> <ht2_base>
+#
+# <reference_in>
+# A comma-separated list of FASTA files containing the reference sequences to be aligned to, or, if -c is specified, the sequences themselves. 
+# E.g., <reference_in> might be chr1.fa,chr2.fa,chrX.fa,chrY.fa, or, if -c is specified, this might be GGTCATCCT,ACGGGTCGT,CCGTTCTATGCGGCTTA.
+#
+# <ht2_base>
+# The basename of the index files to write. 
+# By default, hisat2-build writes files named NAME.1.ht2, NAME.2.ht2, NAME.3.ht2, NAME.4.ht2, NAME.5.ht2, NAME.6.ht2, NAME.7.ht2, and NAME.8.ht2 
+# where NAME is <ht2_base>.
+#
+# -p <int>
+# Launch NTHREADS parallel build threads (default: 1).
