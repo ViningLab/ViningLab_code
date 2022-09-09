@@ -1,0 +1,158 @@
+# After creating a HISAT2 index, HISAT2 can be run. Along with this, let's run samtools
+
+# put the output files here:
+# ~/W103/bam
+
+# The files as input must be specified as well
+# This will include the previously made HISAT2 index location:
+# ~/W103/hisat2_index/W103
+# And the actual file(s) to be aligned (depending on if this is for paired end or single end sequencing)
+# ~/RawData/lane1-s001-index--TTACCGAC-CGAATACG-A1_S1_R1_001.fastq.gz
+# ~/RawData/lane1-s001-index--TTACCGAC-CGAATACG-A1_S1_R2_001.fastq.gz
+
+#############################################################################################################################################
+#                                                              The actual code:                                                             #
+#############################################################################################################################################
+#!/bin/bash
+
+
+hisat2 --novel-splicesite-outfile ~/W103/bam/A1_S1.novelsplice.tsv \
+    --summary-file ~/W103/bam/A1_S1.sumfile.txt \
+    --met-file ~/W103/bam/A1_S1.metfile.txt \
+    -p 8 --dta -x ~/W103/hisat2_index/W103 \
+    -1 ~/RawData/lane1-s001-index--TTACCGAC-CGAATACG-A1_S1_R1_001.fastq.gz \
+    -2 ~/RawData/lane1-s001-index--TTACCGAC-CGAATACG-A1_S1_R2_001.fastq.gz \
+    | tee >(samtools flagstat - > ~/WorkingData/W103/bam/A1_S1.flagstat) \
+    | samtools sort -O BAM -@ 8 \
+    | tee ~/WorkingData/W103/bam/A1_S1.bam \
+    | samtools index - ~/WorkingData/W103/bam/A1_S1.bam.bai -@ 8
+
+
+#############################################################################################################################################
+#                                    There would need to be a line like that for every file to be aligned                                   #
+#############################################################################################################################################
+
+# Make that as a shell file (AlignW103.sh), then run it using something like SGE_BATCH (with a couple of parameters for SGE_BATCH specified):
+# SGE_Batch -c "AlignW103.sh" -r W103Alignment -P 14 -q hoser
+
+
+######################################################
+# The following is from the HISAT2 Manual (9/8/2022):#
+######################################################
+# HISAT2 is a fast and sensitive alignment program for mapping next-generation sequencing reads (whole-genome, transcriptome, and exome sequencing data) 
+# against the general human population (as well as against a single reference genome). 
+
+# Usage: hisat2 [options]* -x <hisat2-idx> {-1 <m1> -2 <m2> | -U <r> | --sra-acc <SRA accession number>} [-S <hit>]
+#
+# -x <hisat2-idx>
+# The basename of the index for the reference genome. The basename is the name of any of the index files up to but not including the final .1.ht2 / etc. 
+# hisat2 looks for the specified index first in the current directory, then in the directory specified in the HISAT2_INDEXES environment variable.
+#
+# -1 <m1>
+# Comma-separated list of files containing mate 1s (filename usually includes _1), e.g. -1 flyA_1.fq,flyB_1.fq. 
+# Sequences specified with this option must correspond file-for-file and read-for-read with those specified in <m2>. 
+# Reads may be a mix of different lengths. If - is specified, hisat2 will read the mate 1s from the “standard in” or “stdin” filehandle.
+#
+# -2 <m2>
+# Comma-separated list of files containing mate 2s (filename usually includes _2), e.g. -2 flyA_2.fq,flyB_2.fq. 
+# Sequences specified with this option must correspond file-for-file and read-for-read with those specified in <m1>. 
+# Reads may be a mix of different lengths. If - is specified, hisat2 will read the mate 2s from the “standard in” or “stdin” filehandle.
+#
+# -U <r>
+# Comma-separated list of files containing unpaired reads to be aligned, e.g. lane1.fq,lane2.fq,lane3.fq,lane4.fq. 
+# Reads may be a mix of different lengths. If - is specified, hisat2 gets the reads from the “standard in” or “stdin” filehandle.
+#
+# --sra-acc <SRA accession number>
+# Comma-separated list of SRA accession numbers, e.g. --sra-acc SRR353653,SRR353654. 
+# Information about read types is available at http://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?sp=runinfo&acc=sra-acc&retmode=xml, 
+# where sra-acc is SRA accession number. 
+# If users run HISAT2 on a computer cluster, it is recommended to disable SRA-related caching (see the instruction at SRA-MANUAL).
+#
+# -S <hit>
+# File to write SAM alignments to. By default, alignments are written to the “standard out” or “stdout” filehandle (i.e. the console).
+
+
+## Options:
+
+# Spliced alignment options: 
+#
+# --novel-splicesite-outfile <path>
+# In this mode, HISAT2 reports a list of splice sites in the file :
+#    chromosome name <tab> genomic position of the flanking base on the left side of an
+#    intron <tab> genomic position of the flanking base on the right <tab> strand (+, -, and .)
+# ’.’ indicates an unknown strand for non-canonical splice sites.
+#
+# --dta/--downstream-transcriptome-assembly
+# Report alignments tailored for transcript assemblers including StringTie. 
+# With this option, HISAT2 requires longer anchor lengths for de novo discovery of splice sites. 
+# This leads to fewer alignments with short-anchors, which helps transcript assemblers improve significantly in computation and memory usage.
+
+# Output options: 
+#
+# --summary-file
+# Print alignment summary to this file.
+#
+# --met-file <path>
+# Write hisat2 metrics to file <path>. 
+# Having alignment metric can be useful for debugging certain problems, especially performance issues. 
+# See also: --met. Default: metrics disabled.
+
+# Performance options:
+#
+# -p/--threads NTHREADS
+# Launch NTHREADS parallel search threads (default: 1). 
+# Threads will run on separate processors/cores and synchronize when parsing reads and outputting alignments. 
+# Searching for alignments is highly parallel, and speedup is close to linear. Increasing -p increases HISAT2’s memory footprint. 
+# E.g. when aligning to a human genome index, increasing -p from 1 to 8 increases the memory footprint by a few hundred megabytes. 
+# This option is only available if HISAT2 is linked with the pthreads library.
+
+
+
+########################################################
+# The following is from the SAMtools Manual (9/8/2022):#
+########################################################
+# Samtools is a suite of programs for interacting with high-throughput sequencing data. 
+# The Samtools repository is for Reading/writing/editing/indexing/viewing SAM/BAM/CRAM format
+
+
+# samtools flagstat – counts the number of alignments for each FLAG type
+# Does a full pass through the input file to calculate and print statistics to stdout.
+# Provides counts for each of 13 categories based primarily on bit flags in the FLAG field. 
+# Information on the meaning of the flags is given in the SAM specification document <https://samtools.github.io/hts-specs/SAMv1.pdf>.
+# Each category in the output is broken down into QC pass and QC fail. 
+# In the default output format, these are presented as "#PASS + #FAIL" followed by a description of the category.
+#
+# Options:
+# -@ INT
+# Set number of additional threads to use when reading the file.
+#
+# -O FORMAT
+# Set the output format. FORMAT can be set to `default', `json' or `tsv' to select the default, JSON or tab-separated values output format. 
+# If this option is not used, the default format will be selected.
+
+
+# samtools sort – sorts SAM/BAM/CRAM files
+# Sort alignments by leftmost coordinates, or by read name when -n is used. 
+# An appropriate @HD-SO sort order header tag will be added or an existing one updated if necessary.
+# The sorted output is written to standard output by default, or to the specified file (out.bam) when -o is used. 
+# This command will also create temporary files tmpprefix.%d.bam as needed when the entire alignment data cannot fit into memory (as controlled via the -m option).
+#
+# -O FORMAT
+# Write the final output as sam, bam, or cram.
+# By default, samtools tries to select a format based on the -o filename extension; if output is to standard output or no format can be deduced, bam is selected.
+#
+# -@ INT
+# Set number of sorting and compression threads. By default, operation is single-threaded.
+
+
+# samtools index – indexes SAM/BAM/CRAM files
+# Index coordinate-sorted BGZIP-compressed SAM, BAM or CRAM files for fast random access. 
+# Note for SAM this only works if the file has been BGZF compressed first. 
+# (The first synopsis with multiple input FILEs is only available with Samtools 1.16 or later.)
+# This index is needed when region arguments are used to limit samtools view and similar commands to particular regions of interest.
+#
+# -b
+# Create a BAI index. This is currently the default when no format options are used.
+#
+# -@, --threads INT
+# Number of input/output compression threads to use in addition to main thread [0].
