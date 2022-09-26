@@ -1,5 +1,15 @@
 Notes for working on our high performance computing system
 
+## New user account
+
+New users will need to request an account at the below link.
+
+https://shell.cqls.oregonstate.edu/access/
+
+In the "Comments:" section ask to be added to the "vining_lab" unix group so you will be able to use the Vining Lab filespace.
+Also ask to be added to the 'hoser' queue for the SGE system so you can have access to the server named 'hoser.'
+
+
 
 ## Is a software installed?
 
