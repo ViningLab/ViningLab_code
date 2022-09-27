@@ -65,3 +65,36 @@ Note that the first `deactivate` command backed out of the `biopython` environme
 The second `deactivate` command exited from conda.
 This can be seen in the prompt.
 
+
+## Create a new environment
+
+Frequently a project will require you to start by creating a new environment.
+This new environment may have specific software, or specific versions of a software, needed for your project.
+Here we see how to create a new environment.
+
+Typically it is good to check what envirenments you have already created.
+Sometimes you may find that you've previously created one that you need.
+
+```
+conda info --envs
+```
+
+This should list the environments that are available.
+
+```
+conda create --name snowflakes biopython
+```
+
+This should create an environment named 'snowflakes' and has as a dependency the package 'biopython'.
+While installing 'biopython' it should also install all the dependencies of 'biopython.'
+
+
+Once you have created an environment you may decide that you no longer need it.
+The following command will remove the environment named 'snowflakes'.
+
+```
+conda env remove -n snowflakes
+```
+
+
+
