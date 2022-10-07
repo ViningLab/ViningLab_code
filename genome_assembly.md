@@ -43,8 +43,9 @@ zgrep -c "^@SEQ_ID" *.fastq.gz > counts.txt
 SGE_Batch -c 'zgrep -c "^@SEQ_ID" *.fastq.gz > counts.txt' -r zg0
 ```
 
+FASTQC    
+quast    
 
-quast
 
 ## Assembly
 
