@@ -47,6 +47,12 @@ FASTQC
 quast    
 
 
+## K-mer analyses
+
+- jellyfish
+- yak
+
+
 ## Assembly
 
 hifiasm
