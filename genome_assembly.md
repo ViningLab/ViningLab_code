@@ -49,8 +49,10 @@ quast
 
 ## K-mer analyses
 
-- jellyfish
-- yak
+- jellyfish https://github.com/gmarcais/Jellyfish ; https://github.com/zippav/Jellyfish-2
+- GenomeScope http://qb.cshl.edu/genomescope/
+
+- yak https://github.com/lh3/yak
 
 
 ## Assembly
