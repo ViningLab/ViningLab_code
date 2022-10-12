@@ -62,9 +62,12 @@ hifiasm
 
 ## Assessment
 
-BUSCO;
-quast;
-minimap2, dotplotly, pafr, syri + plotsr
+- BUSCO
+- quast
+- minimap2, dotplotly, pafr, syri + plotsr
+- RagTag scaffolding https://github.com/malonge/RagTag
+- Merquery - trio binning
+
 
 ## Annotation
 
