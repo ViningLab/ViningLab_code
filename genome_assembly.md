@@ -66,7 +66,7 @@ hifiasm
 - quast
 - minimap2, dotplotly, pafr, syri + plotsr
 - RagTag scaffolding https://github.com/malonge/RagTag
-- Merquery - trio binning
+- Merquery - trio binning https://github.com/marbl/merqury
 
 
 ## Annotation
