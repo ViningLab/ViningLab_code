@@ -49,6 +49,14 @@ quast
 
 ## K-mer analyses
 
+The analysis of k-mers attempts to make inferences by cutting sequences into subsequences of length 'k'.
+For example, if we choose a k-mer size of 21 bp we will cut the input sequences up into sequences that are all 21 bp long.
+We can then count the abundance of each of these k-mers.
+This can provides an estimate of sequencing depth of the (relatively unique fraction of the) genome.
+We have used 'jellyfish' to count k-mers and 'GenomeScope' to visualize these results.
+The program 'yak' is another k-mer counting software.
+
+
 - jellyfish https://github.com/gmarcais/Jellyfish ; https://github.com/zippav/Jellyfish-2
 - GenomeScope http://qb.cshl.edu/genomescope/
 
