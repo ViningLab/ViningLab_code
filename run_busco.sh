@@ -37,7 +37,7 @@ MYLINEAGE="~/Vining_Lab_nfs3/GENOMES/hemp/CBDRx/GCF_900626175/busco/busco_eudico
 
 ##### ##### ##### ##### #####
 
-MYREF="../../rice_hifiasm.bp.hap1.p_ctg.fa../../rice_hifiasm.bp.hap1.p_ctg.fa"
+MYREF="../../rice_hifiasm.bp.hap1.p_ctg.fa"
 MYSAMP="rice_hap1"
 
 ##### ##### ##### ##### #####
