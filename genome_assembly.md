@@ -92,10 +92,18 @@ This means that an important step in determining the success of an assembly is e
 - Merquery - trio binning https://github.com/marbl/merqury
 
 
+## Repetetive elements
+
+- LTR_retriever https://github.com/oushujun/LTR_retriever
+- RepeatModeler https://www.repeatmasker.org/RepeatModeler/
+- RepeatMasker http://www.repeatmasker.org/RepeatMasker/
+- REXdb http://repeatexplorer.org/?page_id=918
+
+
 ## Annotation
 
-braker;
-eggnog
+- braker https://github.com/Gaius-Augustus/BRAKER
+- eggnog https://github.com/eggnogdb/eggnog-mapper
 
 
 ## BLAST
