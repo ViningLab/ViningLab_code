@@ -32,7 +32,7 @@
 
 # Lineage
 # Eudicots
-MYLINEAGE="~/Vining_Lab_nfs3/GENOMES/hemp/CBDRx/GCF_900626175/busco/busco_eudicots/busco_downloads/lineages/eudicots_odb10/"
+MYLINEAGE="/nfs3/HORT/Vining_Lab/GENOMES/hemp/CBDRx/GCF_900626175/busco/busco_eudicots/busco_downloads/lineages/eudicots_odb10/"
 
 
 ##### ##### ##### ##### #####
