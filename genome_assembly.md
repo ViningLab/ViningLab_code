@@ -86,7 +86,9 @@ This means that an important step in determining the success of an assembly is e
 - quast https://quast.sourceforge.net/
 - BUSCO https://busco.ezlab.org/
 - minimap2 https://github.com/lh3/minimap2
-- dotplotly, pafr, syri + plotsr
+- dotplots
+-- dotplotly https://github.com/tpoorten/dotPlotly
+-- pafr, syri + plotsr
 
 - RagTag scaffolding https://github.com/malonge/RagTag
 - Merquery - trio binning https://github.com/marbl/merqury
