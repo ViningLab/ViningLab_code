@@ -1,0 +1,141 @@
+---
+title: "Untitled"
+output: html_document
+date: "2022-11-22"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.align = "center")
+```
+
+
+```{r}
+#library(circlize)
+suppressPackageStartupMessages(library(circlize))
+```
+
+
+## Read in data
+
+
+```{r}
+#nucs <- read.csv("~/gits/fasta2nuccomp/S288C_reference_sequence_R64-2-1_20150113.fsa_nuccomp.csv")
+#nucs <- read.csv("../GCF_900626175.2_cs10_genomic_nuccomp.csv")
+nucs <- read.csv("./GCF_900626175.2_cs10_genomic_nuccomp.csv")
+nucs <- nucs[1:10, ]
+nucs[1:3, 1:8]
+nrow(nucs)
+```
+
+
+```{r}
+#cann <- read.table("../cann_motif_CBDRx_blastn_b2g.gff", sep = "\t")
+cann <- read.table("./cann_motif_CBDRx_blastn_b2g.gff", sep = "\t")
+colnames(cann)[c(1, 4, 5)] <- c("name", "start", "end")
+cann[1:3, 1:8]
+```
+
+
+
+
+## Organize data
+
+
+```{r}
+df <- data.frame(name = nucs$Id, start = 1, end = nucs$Length)
+#df <- df[-17,]
+#sub("ref", "", df$name)
+# df$name <- sub("ref\\|", "", df$name)
+# df$name <- sub("\\|", "", df$name)
+df$col <- "#B2222240"
+df$col[4] <- "#9400D3"
+df$col[9] <- "#40E0D040"
+
+#df$gc <- (nucs$G[-17] + nucs$C[-17])/nucs$Length[-17]
+df$gc <- (nucs$G + nucs$g + nucs$C + nucs$c)/nucs$Length
+df$gc <- df$gc - min(df$gc)
+df$gc <- df$gc/max(df$gc)
+hist(df$gc)
+
+df$col2 <- rgb(0, df$gc, 0, 0.4, names = NULL, maxColorValue = 1)
+
+df[1:3, ]
+```
+
+
+```{r}
+
+# png(filename = "myplot.png", width = 20, height = 20,
+#    units = "cm", res = 300 )
+
+#circos.par(start.degree = 0)
+#circos.par(start.degree = 90)
+#circos.par(start.degree = 180)
+
+circos.genomicInitialize(df)
+
+# circos.track(ylim = c(0, 1), 
+#     bg.col = c("#FF000040", "#00FF0040", "#0000FF40"), 
+#     bg.border = NA, track.height = 0.05)
+
+# circos.track(ylim = c(0, 1), 
+#     bg.col = rep(c("#B2222240", "#40E0D040", "#9400D3"), times = nrow(df)), 
+#     bg.border = NA, track.height = 0.15)
+
+circos.track(ylim = c(-10, 4), 
+    bg.col = df$col2, 
+    bg.border = NA, track.height = 0.15)
+
+#my_chrom <- "NC_001147"
+my_chrom <- df$name[2]
+circos.points( 
+  x = seq(1, df$end[df$name == my_chrom], length.out = 100), 
+  y = seq(0, 1, length.out = 100), 
+  sector.index = my_chrom,
+  pch = 20, cex = 0.4
+  )
+
+my_chrom <- df$name[3]
+circos.points( 
+  x = seq(1, df$end[df$name == my_chrom], length.out = 100), 
+  y = seq(0, 20, length.out = 100), 
+  sector.index = my_chrom,
+  pch = 20, cex = 0.4
+  )
+
+
+circos.track(ylim = c(0, 1), 
+    bg.col = NA, 
+    bg.border = "#00000044", track.height = 0.15)
+    
+circos.rect(xleft = cann$start, ybottom = 0.1,
+            xright = cann$end, ytop = 0.8, 
+            sector.index = cann$name[1])
+
+
+# circos.barplot(value = seq(0, 1, length.out = 10),
+#                pos = seq(1, 1e6, length.out = 10) - 0.5,
+#                col = 1:10)
+
+# circos.track(ylim = c(0, 255), 
+#     bg.col = df$col2, 
+#     bg.border = NA, track.height = 0.15)
+
+text(x = 0, y = 0, "My genome")
+
+#axis(side = 1)
+#axis(side = 2)
+
+circos.clear()
+
+# dev.off()
+
+```
+
+
+
+
+
