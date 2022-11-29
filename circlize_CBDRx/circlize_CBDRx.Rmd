@@ -185,7 +185,14 @@ terps <- gff[grep("terpene", gff$attributes), ]
 
 ```{r, fig.width=8, fig.height=8, fig.cap="**Figure 3.** A simple circular plot including tracks and sectors."}
 
+#png(filename = "gdplot.png", width = 18, height = 18, units = "cm", res = 300)
+
+# circos.clear()
+
 circos.par( start.degree = 90 )
+#circos.par(gap.after = c(2, 2, 2, 2, 10))
+circos.par(gap.after = c(rep(2, times = 9), 10))
+
 circos.genomicInitialize( 
   data = myBed,
   axis.labels.cex =  0.4 * par("cex"),
@@ -283,11 +290,57 @@ circos.link("NC_044374.1", 0,
             #border = "black", 
             lwd = 2, lty = 2)
 
+circos.labels(c("NC_044378.1", "NC_044378.1"),
+              x = c(30.1e6, 28.12e6), labels = c("A", "CBDAS"),
+    side = "inside")
+
 # circos.link("NC_044374.1", 0, "NC_044379.1", c(1e3,4e7),
 #             col = "green", border = "black", lwd = 2, lty = 2)
 
+#circos.text( x = 1, y = 200.5, labels = "Hi", sector.index = "NC_044371.1", track.index = 2)
+#circos.text( x = 115e6, y = 200.5, labels = "GC", sector.index = "NC_044370.1", track.index = 2)
+circos.text( x = 115e6, y = 0.5, labels = "Gene", sector.index = "NC_044370.1", track.index = 3)
+circos.text( x = 115e6, y = 0.5, labels = "Line", sector.index = "NC_044370.1", track.index = 4)
+
+#circos.yaxis( side = "right", sector.index =  "NC_044370.1", track.index = 2, labels.cex = 0.4)
+circos.yaxis( side = "left", 
+              at = seq(0, 300, by = 100),
+              sector.index =  "NC_044371.1", track.index = 2, labels.cex = 0.4)
+
+myLeg <- rep("", times = 10)
+myLeg[c(2, 9)] <- c("High GC%", "Low GC%")
+
+legend('bottomleft',
+       #legend = c("T1", "", "", "T2"), 
+       #legend = c("High GC", rep("", times = 8), "Low GC"),
+       legend = myLeg,
+       #fill = myBed$cols, 
+       fill = viridisLite::magma(n=10, alpha = 0.4, begin = 1.0, end = 0.2),
+       #fill = viridisLite::magma(n=10, alpha = 0.4, begin = 0.2, end = 1.0),
+       border = NA,
+       bty = "n", y.intersp = 0.5)
+
+legend('bottomright',
+       legend = c("rRNA", "Terpene"),
+       col = c("#B22222", "#1E90FF"),
+       #fill = c("#B22222", "#1E90FF"),
+       #col = c("#B2222211", "#1E90FF11"),
+       border = NA,
+       pch = c(18, 17),
+       pt.cex = 2,
+       bty = "n",
+       y.intersp = 1.6)
+
+
+title( main = "Industrial hemp: CBDRx\n(GCF_900626175.2)", line = -1 )
+
+
 
 circos.clear()
+
+#dev.off()
+
+
 ```
 
 
