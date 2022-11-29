@@ -150,40 +150,189 @@ circos.clear()
 ```
 
 
+## GFF data
 
-GFF format (https://en.wikipedia.org/wiki/General_feature_format)
+
+Genomic annotations (e.g., genes, transcripts, exons, etc.) are frequently provided in the GFF format (https://en.wikipedia.org/wiki/General_feature_format).
+This can be seen as tabular data with a header region at the top (prefixed with # signs) and nine columns where the first eight are defined and the last column is intended to hold 'other' data in a 'key and value' format where multiple 'key and value' pairs are delimited by a semicolon (';').
+For our purposes a GFF file can be read in with R's standard read functions, with a little modification.
+A GFF file is tab delimited, we specify this by setting `sep = "\t"`.
+The annotations may include content such as `5' UTR`.
+The R read functions will tend to interpret the 'prime' as an unmatched single quote.
+We can manage this by setting `quote = "\""` so only double quotes will be interpreted as quotes.
+
+Our data includes chromosome scale sequences, as well as unplaced contigs and a mitochondrion.
+The chromosomal sequences begin with "NC_04", we can use this to isolate the sequences we're interested in.
+
 
 ```{r}
 gff <- read.table("GCF_900626175.2_cs10_genomic.gff.gz", sep = "\t", quote = "\"")
 colnames(gff) <- c("seqid","source","type","start","end","score","strand","phase","attributes")
 gff[1:3, 1:8]
 
+# Isolate chromosomal sequences.
 gff <- gff[grep("^NC_04", gff$seqid), ]
 
-
+# Isolate 'genes.'
 genes <- gff[grep("gene", gff$type), ]
 nrow(genes)
 
+# Isolate 'rRNA'.
 rrna <- gff[grep("S rRNA", gff$attributes), ]
 nrow(rrna)
+```
 
+
+The 9th column, or the attributes, of GFF data consists of 'key value' pairs delimited by a semicolon.
+We can split this string on the delimiter (';') and use grep to return just the strings with the 'product' key.
+We can then use this to isolate terpenes, or other products (keywords) we may be interested in.
+
+
+```{r}
 my_products <- lapply(strsplit(gff$attributes, split = ";"), function(x){ grep("product=", x, value = TRUE) })
 my_products <- unlist(my_products)
 my_products <- sub("product=", "", my_products)
 
 #sort(table(my_products), decreasing = TRUE)[1:10]
+#
+sort(table(grep("[Tt]erpene", my_products, value = TRUE)), decreasing = TRUE)[1:6]
 
-#sort(table(grep("terpene", my_products, value = TRUE)), decreasing = TRUE)
+terps <- gff[grep("[Tt]erpene", gff$attributes), ]
+nrow(terps)
+```
 
-terps <- gff[grep("terpene", gff$attributes), ]
+
+## Gene abundance tracks
+
+
+Now that we've gathered some information about our assembly, we can use it in our graphic.
+We can use the gene start positions to create histograms.
+The background for the histogram cells can be colored by GC content.
+A track for rRNA and terpenes represented as points can demonstrate where these features are found.
+Another track with rectangles may be useful for larger features.
+Lastly, we can include labels for select features and links among features on different chromosomes.
+
+
+```{r, fig.width=8, fig.height=8, fig.cap="**Figure 3.** A simple circular plot including tracks and sectors."}
+
+#png(filename = "gdplot.png", width = 18, height = 18, units = "cm", res = 300)
+
+# circos.clear()
+
+circos.par( start.degree = 90 )
+
+circos.genomicInitialize( 
+  data = myBed,
+  axis.labels.cex =  0.4 * par("cex"),
+  labels.cex = 0.8 * par("cex") 
+)
+
+circos.trackHist( 
+  sectors = as.factor(genes$seqid),
+  x = genes$start,
+  #border = "#FFFFFF",
+  bg.border = "#FFFFFF",
+  bg.col = myBed$cols,
+  #col = c("#FF0000", "#00FF00"),
+  #col = "#C0C0C0",
+  col = "#808080",
+  border = NA,
+  breaks = seq(1, 1e9, by = 2e6) )
+
+circos.track(ylim = c(0, 1),
+    bg.col = NA,
+    bg.border = "#00000044",
+    track.height = 0.15, bg.lty = 3, bg.lwd = 2)
+
+circos.trackPoints(
+  sectors = as.factor(rrna$seqid),
+  x = rrna$start,
+  y = rep(0.5, times = nrow(rrna)),
+  #y = genes$start,
+  #pch = "|",
+  pch = 18,
+  col = "#B2222211"
+)
+
+circos.trackPoints(
+  sectors = as.factor(terps$seqid),
+  x = terps$start,
+  y = rep(0.2, times = nrow(terps)),
+  #y = genes$start,
+  #pch = "|",
+  pch = 17,
+  col = "#1E90FF11"
+)
+
+circos.track(ylim = c(0, 1),
+    bg.col = NA,
+    bg.border = "#00000044",
+    track.height = 0.10, bg.lty = 3, bg.lwd = 1)
+
+for( i in unique(terps$seqid) ){
+  tmp <- terps[terps$seqid == i, ]
+
+  circos.rect(
+    xleft = tmp$start,
+    ybottom = -0.0,
+    xright = tmp$end,
+    ytop = 0.5,
+    sector.index = i,
+    col = "#1E90FF11",
+    border = "#1E90FF11",
+    lwd = 4
+  )
+}
+
+circos.link("NC_044374.1", 0,
+            "NC_044379.1", c(1e3,4e7),
+            col = "#1E90FF66", 
+            #border = "black", 
+            lwd = 2, lty = 2)
+
+circos.link("NC_044374.1", 0,
+            "NC_044375.1", c(1e3,6e7),
+            col = "#FFD70066", 
+            #border = "black", 
+            lwd = 2, lty = 2)
+
+circos.labels(c("NC_044378.1", "NC_044378.1"),
+              x = c(30.1e6, 28.12e6), labels = c("A", "CBDAS"),
+    side = "inside")
+
+myLeg <- rep("", times = 10)
+myLeg[c(2, 9)] <- c("High GC%", "Low GC%")
+
+legend('bottomleft',
+       legend = myLeg,
+       fill = viridisLite::magma(n=10, alpha = 0.4, begin = 1.0, end = 0.2),
+       border = NA,
+       pt.cex = 2,
+       bty = "n", y.intersp = 0.5)
+
+legend('bottomright',
+       legend = c("rRNA", "Terpene"),
+       col = c("#B22222", "#1E90FF"),
+       border = NA,
+       pch = c(18, 17),
+       pt.cex = 2,
+       bty = "n",
+       y.intersp = 1.6)
+
+
+title( main = "Industrial hemp: CBDRx\n(GCF_900626175.2)", line = -1 )
+
+circos.clear()
+
+#dev.off()
 
 ```
 
 
+## Adding more...
 
 
-
-```{r, fig.width=8, fig.height=8, fig.cap="**Figure 3.** A simple circular plot including tracks and sectors."}
+```{r, fig.width=8, fig.height=8, fig.cap="**Figure 4.** A simple circular plot including tracks and sectors."}
 
 #png(filename = "gdplot.png", width = 18, height = 18, units = "cm", res = 300)
 
@@ -342,7 +491,6 @@ circos.clear()
 
 
 ```
-
 
 
 
