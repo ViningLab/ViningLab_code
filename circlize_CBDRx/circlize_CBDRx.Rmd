@@ -1,15 +1,85 @@
 ---
-title: "Untitled"
-output: html_document
-date: "2022-11-22"
+title: "How to circlize"
+author: "Brian J. Knaus"
+date: "`r format(Sys.time(), '%Y, %B %d')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    code_folding: show
 editor_options: 
   chunk_output_type: console
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.align = "center")
+knitr::opts_chunk$set(fig.height = 4)
+knitr::opts_chunk$set(fig.width = 4)
+st1 <- Sys.time()
 ```
+
+
+## Introduction
+
+
+Circular plots have become a popular way to visualize genomic data.
+This may be because the first genomes that were sequenced were bacterial genomes, which are circular.
+Researchers of eukaryotic genomes have continued this style of graphic.
+This is perhaps because it facilitates the comparison of chromosomes on the outside of the circle with bands that extend through the middle of the plot to indicate regions of synteny.
+Early versions of this style of plot were created with the software 'Circos' (http://circos.ca/), in a system that draws on the organization present in Unix filesystems.
+More recently, this plot style has been facilitated by the R package 'circlize' (https://CRAN.R-project.org/package=circlize).
+This package is accompanied by a book (https://jokergoo.github.io/circlize_book/book/) to describe it's use.
+Here we'll use the **Cannabis sativa** CBDRx assembly (https://www.ncbi.nlm.nih.gov/data-hub/genome/GCF_900626175.2/) as an example of creating circular plots in R.
+
+
+## A simple plot
+
+
+A basic plot can be created with 'BED' format data.
+This format is described online (https://genome.ucsc.edu/FAQ/FAQformat.html#format1, https://uswest.ensembl.org/info/website/upload/bed.html, https://en.wikipedia.org/wiki/BED_(file_format)
+).
+This is tabular data where the first three columns indicate each chromosome name, start, and end coordinates.
+Subsequent columns are optional.
+We begin by summarizing the genomic FASTA sequence obtained from NCBI with a script I've created (https://github.com/knausb/fasta2nuccomp).
+This results in a table of data that we can read in to R and convert to 'BED' format.
+
+
+```{r}
+nucs <- read.csv("./GCF_900626175.2_cs10_genomic_nuccomp.csv")
+nucs <- nucs[1:10, ]
+
+nucs$GC <- rowSums( nucs[, c("C", "c", "G", "g")] )/rowSums( nucs[, c("A", "a", "C", "c", "G", "g", "T", "t")] )
+nucs$GC <- nucs$GC * 100
+
+
+nucs[1:3, 1:8]
+nrow(nucs)
+
+myBed <- data.frame( chrom = nucs$Id, chromStart = 1, chromEnd = nucs$Length, gc = nucs$GC)
+
+myBed$gcs <- myBed$gc - min(myBed$gc)
+myBed$gcs <- myBed$gcs/max(myBed$gcs)
+myBed$gcs <- myBed$gcs * 100
+myBed$gcs <- as.integer(myBed$gcs)
+myBed$gcs[ myBed$gcs == 0 ] <- 1
+myBed$cols <- viridisLite::magma(n=100, alpha = 0.6, begin = 0.2, end = 1.0)[ myBed$gcs ]
+#nSeq <- 10
+#myBed <- data.frame( chrom = nucs$Id[1:nSeq], chromStart = 1, chromEnd = nucs$Length[1:nSeq])
+# apply(myBed , MARGIN = 2, class)
+head(myBed)
+```
+
+Genomic assemblies currently contain sequences that are close to full chromosome assemblies, as well as numerous shorter sequences we refer to as 'unplaced contigs.'
+The hemp genome is expected to contain 10 chromosomes, so we've subset the data to these sequences.
+Note that the BED format does not include a header line.
+In R, it is frequently useful to use a header, so we've created one for our data.frame.
+
+
+We now load the R package 'circlize'.
+This package includes a verbose start up message.
+The book shows us that we can suppress this message once we've read it.
 
 
 ```{r}
@@ -18,17 +88,199 @@ suppressPackageStartupMessages(library(circlize))
 ```
 
 
+We can now create our plot.
+Each plot begins with the function `circos.genomicInitialize()` and ends with `circos.clear()`.
+The function `circos.genomicInitialize()` includes the BED-like data.frame we created and named 'myBed' as well as other parameters to control the appearance of the plot.
+Note that 'circlize' uses the 'base' graphics engines as opposed to other R graphics engines (e.g., ggplot2 or lattice).
+Parameters to help control the appearance of base R graphics can be found in the `?par` manual page.
+Here we create our simple plot and add some text to it's center.
+
+
+```{r, fig.width=6, fig.height=6, fig.cap="**Figure 1.** A simple circular plot."}
+circos.genomicInitialize( 
+  data = myBed,
+  axis.labels.cex =  0.4 * par("cex"),
+  labels.cex = 0.8 * par("cex") 
+)
+
+text(x = 0, y = 0.1, labels = "Industrial hemp: CBDRx")
+text(x = 0, y = 0, labels = expression(paste(italic("Cannabis sativa"), " L.")))
+text(x = 0, y = -0.12, labels = "(NCBI RefSeq: GCF_900626175.2)")
+
+circos.clear()
+```
+
+
+## Tracks and sectors
+
+
+A plot in 'circlize' may include 'tracks' and 'sectors'.
+The **tracks** form concentric circles beginning at the outside of the circle and extend in towards the center of the plot.
+In the context of our genomic plot, each track represents the genome (all 10 chromosomes).
+Each track consists of **sectors** that each represent a plot or panel for each chromosome.
+Within each panel we have an x and y coordinate system for plotting information.
+We can also add `circos.par( start.degree = 90 )` to start thre plot at the top of the plot (12 o'clock).
+We can now add to our first plot by adding two tracks that include 10 sectors.
+
+
+```{r, fig.width=6, fig.height=6, fig.cap="**Figure 2.** A simple circular plot including tracks and sectors."}
+
+circos.par( start.degree = 90 )
+circos.genomicInitialize( 
+  data = myBed,
+  axis.labels.cex =  0.4 * par("cex"),
+  labels.cex = 0.8 * par("cex") 
+)
+
+text(x = 0, y = 0.1, labels = "Industrial hemp: CBDRx")
+text(x = 0, y = 0, labels = expression(paste(italic("Cannabis sativa"), " L.")))
+text(x = 0, y = -0.12, labels = "(GCF_900626175.2)")
+
+circos.track(ylim = c(0, 1), 
+    bg.col = NA, 
+    bg.border = "#00000044", 
+    track.height = 0.1)
+
+circos.track(ylim = c(0, 1), 
+    bg.col = NA, 
+    bg.border = "#00000044", 
+    track.height = 0.15, bg.lty = 3, bg.lwd = 2)
+
+circos.clear()
+```
+
+
+
+GFF format (https://en.wikipedia.org/wiki/General_feature_format)
+
+```{r}
+gff <- read.table("GCF_900626175.2_cs10_genomic.gff.gz", sep = "\t", quote = "\"")
+colnames(gff) <- c("seqid","source","type","start","end","score","strand","phase","attributes")
+gff[1:3, 1:8]
+
+gff <- gff[grep("^NC_04", gff$seqid), ]
+
+
+genes <- gff[grep("gene", gff$type), ]
+nrow(genes)
+
+rrna <- gff[grep("S rRNA", gff$attributes), ]
+nrow(rrna)
+
+my_products <- lapply(strsplit(gff$attributes, split = ";"), function(x){ grep("product=", x, value = TRUE) })
+my_products <- unlist(my_products)
+my_products <- sub("product=", "", my_products)
+
+#sort(table(my_products), decreasing = TRUE)[1:10]
+
+#sort(table(grep("terpene", my_products, value = TRUE)), decreasing = TRUE)
+
+terps <- gff[grep("terpene", gff$attributes), ]
+
+```
+
+
+
+
+
+```{r, fig.width=8, fig.height=8, fig.cap="**Figure 3.** A simple circular plot including tracks and sectors."}
+
+circos.par( start.degree = 90 )
+circos.genomicInitialize( 
+  data = myBed,
+  axis.labels.cex =  0.4 * par("cex"),
+  labels.cex = 0.8 * par("cex") 
+)
+
+text(x = 0, y = 0.1, labels = "Industrial hemp: CBDRx")
+text(x = 0, y = 0, labels = expression(paste(italic("Cannabis sativa"), " L.")))
+text(x = 0, y = -0.12, labels = "(GCF_900626175.2)")
+
+# circos.track(ylim = c(0, 1), 
+#     bg.col = NA, 
+#     bg.border = "#00000044", 
+#     track.height = 0.1)
+
+circos.trackHist( 
+  sectors = as.factor(genes$seqid),
+  x = genes$start,
+  #border = "#FFFFFF",
+  bg.border = "#FFFFFF",
+  bg.col = myBed$cols,
+  #col = c("#FF0000", "#00FF00"),
+  col = "#C0C0C0",
+  breaks = seq(1, 1e9, by = 2e6) )
+
+
+circos.track(ylim = c(0, 1),
+    bg.col = NA,
+    bg.border = "#00000044",
+    track.height = 0.15, bg.lty = 3, bg.lwd = 2)
+
+circos.trackPoints(
+  sectors = as.factor(rrna$seqid),
+  x = rrna$start,
+  y = rep(0.5, times = nrow(rrna)),
+  #y = genes$start,
+  #pch = "|",
+  pch = 18,
+  col = "#B2222211"
+)
+
+circos.trackPoints(
+  sectors = as.factor(terps$seqid),
+  x = terps$start,
+  y = rep(0.2, times = nrow(terps)),
+  #y = genes$start,
+  #pch = "|",
+  pch = 17,
+  col = "#1E90FF11"
+)
+
+# circos.track(ylim = c(0, 1),
+#     bg.col = NA,
+#     bg.border = "#00000044",
+#     track.height = 0.10, bg.lty = 3, bg.lwd = 1)
+# 
+# circos.trackLines(
+#   sectors = as.factor(terps$seqid),
+#   x = terps$start,
+#   y = terps$end,
+#   #y = rep(0.2, times = nrow(terps)),
+#   #y = genes$start,
+#   #pch = "|",
+# #  pch = 17,
+#   col = "#1E90FF11"
+# )
+
+# circos.rect(
+#   xleft = terps$start,
+#   ybottom = -0.5,
+#   xright = terps$end,
+#   ytop = 0.5,
+#   sector.index = as.factor(terps$seqid),
+#   #y = rep(0.2, times = nrow(terps)),
+#   #y = genes$start,
+#   #pch = "|",
+# #  pch = 17,
+#   col = "#1E90FF11"
+# )
+
+
+circos.clear()
+```
+
+
+
+
+
 ## Read in data
 
 
-```{r}
-#nucs <- read.csv("~/gits/fasta2nuccomp/S288C_reference_sequence_R64-2-1_20150113.fsa_nuccomp.csv")
-#nucs <- read.csv("../GCF_900626175.2_cs10_genomic_nuccomp.csv")
-nucs <- read.csv("./GCF_900626175.2_cs10_genomic_nuccomp.csv")
-nucs <- nucs[1:10, ]
-nucs[1:3, 1:8]
-nrow(nucs)
-```
+
+
+
+
 
 
 ```{r}
@@ -40,12 +292,24 @@ cann[1:3, 1:8]
 
 
 
+```{r}
+nSeq <- 10
+myBed <- data.frame( chrom = nucs$Id[1:nSeq], chromStart = 1, chromEnd = nucs$Length[1:nSeq])
+apply(myBed , MARGIN = 2, class)
+```
+
+
+
+
+
+
 
 ## Organize data
 
 
 ```{r}
 df <- data.frame(name = nucs$Id, start = 1, end = nucs$Length)
+
 #df <- df[-17,]
 #sub("ref", "", df$name)
 # df$name <- sub("ref\\|", "", df$name)
@@ -66,7 +330,9 @@ df[1:3, ]
 ```
 
 
-```{r}
+## Plot graphic
+
+```{r, fig.width=8, fig.height=8}
 
 # png(filename = "myplot.png", width = 20, height = 20,
 #    units = "cm", res = 300 )
@@ -75,7 +341,7 @@ df[1:3, ]
 #circos.par(start.degree = 90)
 #circos.par(start.degree = 180)
 
-circos.genomicInitialize(df)
+circos.genomicInitialize( data = df )
 
 # circos.track(ylim = c(0, 1), 
 #     bg.col = c("#FF000040", "#00FF0040", "#0000FF40"), 
@@ -137,5 +403,9 @@ circos.clear()
 
 
 
+```{r}
+st99 <- Sys.time()
+st99 - st1
+```
 
 
