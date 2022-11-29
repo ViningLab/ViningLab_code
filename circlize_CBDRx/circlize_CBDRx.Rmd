@@ -64,7 +64,7 @@ myBed$gcs <- myBed$gcs/max(myBed$gcs)
 myBed$gcs <- myBed$gcs * 100
 myBed$gcs <- as.integer(myBed$gcs)
 myBed$gcs[ myBed$gcs == 0 ] <- 1
-myBed$cols <- viridisLite::magma(n=100, alpha = 0.6, begin = 0.2, end = 1.0)[ myBed$gcs ]
+myBed$cols <- viridisLite::magma(n=100, alpha = 0.4, begin = 0.2, end = 1.0)[ myBed$gcs ]
 #nSeq <- 10
 #myBed <- data.frame( chrom = nucs$Id[1:nSeq], chromStart = 1, chromEnd = nucs$Length[1:nSeq])
 # apply(myBed , MARGIN = 2, class)
@@ -192,9 +192,9 @@ circos.genomicInitialize(
   labels.cex = 0.8 * par("cex") 
 )
 
-text(x = 0, y = 0.1, labels = "Industrial hemp: CBDRx")
-text(x = 0, y = 0, labels = expression(paste(italic("Cannabis sativa"), " L.")))
-text(x = 0, y = -0.12, labels = "(GCF_900626175.2)")
+# text(x = 0, y = 0.1, labels = "Industrial hemp: CBDRx")
+# text(x = 0, y = 0, labels = expression(paste(italic("Cannabis sativa"), " L.")))
+# text(x = 0, y = -0.12, labels = "(GCF_900626175.2)")
 
 # circos.track(ylim = c(0, 1), 
 #     bg.col = NA, 
@@ -208,7 +208,9 @@ circos.trackHist(
   bg.border = "#FFFFFF",
   bg.col = myBed$cols,
   #col = c("#FF0000", "#00FF00"),
-  col = "#C0C0C0",
+  #col = "#C0C0C0",
+  col = "#808080",
+  border = NA,
   breaks = seq(1, 1e9, by = 2e6) )
 
 
@@ -237,11 +239,11 @@ circos.trackPoints(
   col = "#1E90FF11"
 )
 
-# circos.track(ylim = c(0, 1),
-#     bg.col = NA,
-#     bg.border = "#00000044",
-#     track.height = 0.10, bg.lty = 3, bg.lwd = 1)
-# 
+circos.track(ylim = c(0, 1),
+    bg.col = NA,
+    bg.border = "#00000044",
+    track.height = 0.10, bg.lty = 3, bg.lwd = 1)
+
 # circos.trackLines(
 #   sectors = as.factor(terps$seqid),
 #   x = terps$start,
@@ -253,18 +255,36 @@ circos.trackPoints(
 #   col = "#1E90FF11"
 # )
 
-# circos.rect(
-#   xleft = terps$start,
-#   ybottom = -0.5,
-#   xright = terps$end,
-#   ytop = 0.5,
-#   sector.index = as.factor(terps$seqid),
-#   #y = rep(0.2, times = nrow(terps)),
-#   #y = genes$start,
-#   #pch = "|",
-# #  pch = 17,
-#   col = "#1E90FF11"
-# )
+
+for( i in unique(terps$seqid) ){
+  tmp <- terps[terps$seqid == i, ]
+
+  circos.rect(
+    xleft = tmp$start,
+    ybottom = -0.0,
+    xright = tmp$end,
+    ytop = 0.5,
+    sector.index = i,
+    col = "#1E90FF11",
+    border = "#1E90FF11",
+    lwd = 4
+  )
+}
+
+circos.link("NC_044374.1", 0,
+            "NC_044379.1", c(1e3,4e7),
+            col = "#1E90FF66", 
+            #border = "black", 
+            lwd = 2, lty = 2)
+
+circos.link("NC_044374.1", 0,
+            "NC_044375.1", c(1e3,6e7),
+            col = "#FFD70066", 
+            #border = "black", 
+            lwd = 2, lty = 2)
+
+# circos.link("NC_044374.1", 0, "NC_044379.1", c(1e3,4e7),
+#             col = "green", border = "black", lwd = 2, lty = 2)
 
 
 circos.clear()
