@@ -2,8 +2,8 @@
 ## Links
 
 [conda user's guide](https://docs.conda.io/projects/conda/en/latest/user-guide/index.html)    
-
-[CQLS conda tutorial](https://software.cqls.oregonstate.edu/tips/posts/conda-tutorial/)    
+[CQLS conda tutorial (2019-10-09)](https://software.cqls.oregonstate.edu/tips/posts/conda-tutorial/)    
+[CQLS: system miniconda 3 (2022-06-06)](https://software.cqls.oregonstate.edu/tips/posts/using-the-system-miniconda-3-install/)
 
 
 ## A conda session
