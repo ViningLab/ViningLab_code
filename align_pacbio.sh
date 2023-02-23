@@ -1,5 +1,8 @@
 #! /bin/env bash
 
+# This script is intended to be submitted with qsub.
+# qsub align_pacbio.sh
+
 # Lines begining with '#' are comments and are not exectuted.
 # Lines begining with '#$' are interpreted by the SGE system.
 
