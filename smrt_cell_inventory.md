@@ -12,5 +12,5 @@
 - Read count: 1,276,466
 - Nucleotide count: 25,143,128,702
 - Maximum length: 48,461
-- Minimum lenght: 86
+- Minimum length: 86
 
