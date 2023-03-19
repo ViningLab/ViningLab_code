@@ -12,7 +12,7 @@
 # #$ -l mem_free=10G
 #$ -V
 # #$ -h
-#$ -t 1-2:1
+# $ -t 1-2:1
 
 i=$(expr $SGE_TASK_ID - 1)
 
