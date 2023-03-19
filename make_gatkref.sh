@@ -24,6 +24,7 @@ echo
 # https://gatk.broadinstitute.org/hc/en-us/articles/360035531652-FASTA-Reference-genome-format
 
 # All files will be created in the same directory as the reference.
+# ln -s ../rice_hifiasm.bp.hap1.p_ctg.fasta rice_hifiasm.bp.hap1.p_ctg.fasta
 #REF="ERBxHO40_23_hirisehap1.fa"
 REF="../GCF_000146045.2_R64_genomic.fna"
 
