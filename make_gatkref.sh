@@ -5,7 +5,7 @@
 
 #$ -cwd
 #$ -S /bin/bash
-#$ -N align
+#$ -N mkdict
 #$ -e mkdicterr
 #$ -o mkdictout
 #$ -q !gbs
