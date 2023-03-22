@@ -73,7 +73,7 @@ SAMT="/local/cluster/bin/samtools"
 # -b output to bam
 # -o outfile name
 
-CMD="$MM2 -R \"$RG\" -ax map-hifi -t $NTHREADS --eqx $FA1 $FQ1 | $SAMT sort -o $OUTFILE -O BAM -T /data/ -@ $NTHREADS"
+CMD="$MM2 -R \"$RG\" -ax map-hifi -t $NTHREADS --eqx $REF $READS | $SAMT sort -o $OUTFILE -O BAM -T /data/ -@ $NTHREADS"
 
 date
 
