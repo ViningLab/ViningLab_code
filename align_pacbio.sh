@@ -8,17 +8,23 @@
 
 #$ -cwd
 #$ -S /bin/bash
-#$ -N align
-#$ -e align0err
-#$ -o align0out
+#$ -N mm2
+#$ -e mm2err
+#$ -o mm2out
 # $ -q !gbs
 # $ -q hoser@hoser
 # $ -l mem_free=10G
 #$ -V
 # $ -h
 # $ -t 1-2:1
+#$ -pe thread 4
 
-i=$(expr $SGE_TASK_ID - 1)
+# i=$(expr $SGE_TASK_ID - 1)
+
+# The variable 'NTHREADS' specifies how many threads (cores) the softwares (below) uses.
+# The user (i.e., you) must coordinate this with the queuing system with the line '#$ -pe thread' (above).
+NTHREADS=4
+
 
 echo "PATH:"
 echo $PATH
@@ -30,14 +36,19 @@ echo
 # Reference sequence
 REF="~/Vining_Lab_nfs4/GENOMES/hemp/public_databases/NCBI/CBDRx/GCF_900626175/GCF_900626175.2_cs10_genomic.fna"
 
+# Multiple input files:
+# https://github.com/lh3/minimap2/issues/191
+
 # Sequence library
 READS="~/Vining_Lab_nfs4/Users/knausb/PacBioRice/m64013e_210227_222017.hifi_reads.fastq.gz"
 
 # Replace "SAMPLE_NAME" with your sample information.
+
 # RG="@RG\\tID:SAMPLE_NAME\\tSM:SAMPLE_NAME"
 
 SAMPLE_NAME="hemp3"
 RG="@RG\\tID:$SAMPLE_NAME\\tSM:$SAMPLE_NAME"
+OUTFILE="$SAMPLE_NAME.bam"
 
 
 ##### ##### ##### ##### #####
@@ -53,10 +64,6 @@ SAMT="/local/cluster/bin/samtools"
 ##### ##### ##### ##### #####
 # Align reads
 
-
-# minimap2 -R "@RG\\tID:SAMPLE_NAME\\tSM:SAMPLE_NAME" -a -x asm5 $CASTLE_REF $PACBIO_READS -o aligned_reads.sam
-# minimap2 -R "@RG\\tID:SAMPLE_NAME\\tSM:SAMPLE_NAME" -c -ax map-hifi ref.fa pacbio-ccs.fq.gz > aln.sam
-
 # minimap2 options
 # -a	Generate CIGAR and output alignments in the SAM format. Minimap2 outputs in PAF by default.
 # -R STR	SAM read group line in a format like @RG\\tID:foo\\tSM:bar [].
@@ -66,8 +73,8 @@ SAMT="/local/cluster/bin/samtools"
 # -b output to bam
 # -o outfile name
 
-# CMD="$MM2 -R \"$RG\" -c -ax map-hifi $REF $READS | $SAMT view -b -o aligned_reads.bam"
-CMD="$MM2 -R \"$RG\" -c -ax map-hifi $REF $READS | $SAMT view -b -o $SAMPLE_NAME.bam"
+CMD="$MM2 -R \"$RG\" -ax map-hifi -t $NTHREADS --eqx $FA1 $FQ1 | samtools sort -o $OUTFILE -O BAM -T /data/ -@ $NTHREADS"
+
 
 date
 
