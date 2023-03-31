@@ -1,0 +1,941 @@
+---
+title: "WGCNA tutorial"
+author: "Insert authors here"
+date: "`r format(Sys.time(), '%Y, %B %d')`"
+output:
+  html_document:
+    toc: true
+    code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.align = "center")
+```
+
+# Background
+
+Tutorial for the WGCNA CRAN package (https://CRAN.R-project.org/package=WGCNA) adapted from 'Tutorials for the WGCNA package' (https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/index.html).
+
+
+# Simulation of expression and trait data
+
+
+```{r}
+library(WGCNA)
+```
+
+
+```{r}
+# Here are input parameters of the simulation model
+# number of samples or microarrays in the training data
+no.obs=50
+# now we specify the true measures of eigengene significance
+# recall that ESturquoise=cor(y,MEturquoise)
+ESturquoise=0;   ESbrown= -.6;
+ESgreen=.6;ESyellow=0
+# Note that we don’t specify the eigengene significance of the blue module
+# since it is highly correlated with the turquoise module.
+ESvector=c(ESturquoise,ESbrown,ESgreen,ESyellow)
+# number of genes 
+nGenes1=3000
+# proportion of genes in the turquoise, blue, brown, green, and yellow module #respectively.
+simulateProportions1=c(0.2,0.15, 0.08, 0.06, 0.04)
+# Note that the proportions don’t add up to 1. The remaining genes will be colored grey,
+# ie the grey genes are non-module genes.
+# set the seed of the random number generator. As a homework exercise change this seed.
+set.seed(1)
+#Step 1: simulate a module eigengene network.
+# Training Data Set I
+MEgreen=rnorm(no.obs)
+scaledy=MEgreen*ESgreen+sqrt(1-ESgreen^2)*rnorm(no.obs)
+y=ifelse( scaledy>median(scaledy),2,1)
+MEturquoise= ESturquoise*scaledy+sqrt(1-ESturquoise^2)*rnorm(no.obs)
+# we simulate a strong dependence between MEblue and MEturquoise
+MEblue= .6*MEturquoise+ sqrt(1-.6^2) *rnorm(no.obs)
+MEbrown= ESbrown*scaledy+sqrt(1-ESbrown^2)*rnorm(no.obs)
+MEyellow= ESyellow*scaledy+sqrt(1-ESyellow^2)*rnorm(no.obs)
+ModuleEigengeneNetwork1=data.frame(y,MEturquoise,MEblue,MEbrown,MEgreen, MEyellow)
+```
+
+
+```{r}
+ModuleEigengeneNetwork1[1:3, ]
+nrow(ModuleEigengeneNetwork1)
+```
+
+
+Simulate data.
+
+
+```{r chunk 1.3}
+dat1=simulateDatExpr5Modules(MEturquoise=ModuleEigengeneNetwork1$MEturquoise,
+          MEblue=ModuleEigengeneNetwork1$MEblue,
+          MEbrown=ModuleEigengeneNetwork1$MEbrown,
+          MEyellow=ModuleEigengeneNetwork1$MEyellow,
+          MEgreen=ModuleEigengeneNetwork1$MEgreen, 
+          nGenes=nGenes1, 
+          simulateProportions=simulateProportions1)
+
+class(dat1)
+str(dat1)
+
+dat1$datME[1:3, ]
+dat1$datExpr[1:5, 1:3]
+```
+
+
+```{r chunk_1.4}
+datExpr = dat1$datExpr
+truemodule = dat1$truemodule
+datME = dat1$datME
+# attach(ModuleEigengeneNetwork1)
+```
+
+
+```{r chunk_1.5}
+table(truemodule)
+dim(datExpr)
+```
+
+`r ncol(datExpr)` genes (rows) and `r nrow(datExpr)` samples (columns).
+'Arrays' are samples (columns).
+
+
+```{r chunk_1.6}
+datExpr=data.frame(datExpr)
+ArrayName=paste("Sample",1:dim(datExpr)[[1]], sep="" )   
+# The following code is useful for outputting the simulated data 
+GeneName=paste("Gene",1:dim(datExpr)[[2]], sep="" )   
+dimnames(datExpr)[[1]]=ArrayName
+dimnames(datExpr)[[2]]=GeneName
+```
+
+
+
+# Loading of expression data, an alternative to data simulation, provided to illustrate data loading of real data
+
+
+```{r chunk_2.1}
+# Load WGCNA package
+library(WGCNA)
+```
+
+
+```{r chunk_2.2, eval=FALSE}
+datGeneSummary=read.csv("GeneSummaryTutorial.csv")
+datTraits=read.csv("TraitsTutorial.csv")
+datMicroarrays=read.csv("MicroarrayDataTutorial.csv")
+```
+
+
+```{r chunk_2.3, eval=FALSE}
+#=====================================================================================
+#
+#  Code chunk 3
+#
+#=====================================================================================
+
+# This vector contains the microarray sample names
+ArrayName= names(data.frame(datMicroarrays[,-1]))
+ # This vector contains the gene names
+GeneName= datMicroarrays$GeneName
+# We transpose the data so that the rows correspond to samples and the columns correspond to genes
+# Since the first column contains the gene names, we exclude it.
+datExpr=data.frame(t(datMicroarrays[,-1]))
+names(datExpr)=datMicroarrays[,1]
+dimnames(datExpr)[[1]]=names(data.frame(datMicroarrays[,-1]))
+#Also, since we simulated the data, we know the true module color:
+truemodule= datGeneSummary$truemodule
+rm(datMicroarrays)
+collectGarbage()
+
+
+#=====================================================================================
+#
+#  Code chunk 4
+#
+#=====================================================================================
+
+
+# First, make sure that the array names in the file datTraits line up with those in the microarray data 
+table( dimnames(datExpr)[[1]]==datTraits$ArrayName)
+# Next, define the microarray sample trait 
+y=datTraits$y
+```
+
+
+
+
+# Basic data preprocessing illustrates rudimentary techniques for handling missing data and removing outliers
+
+```{r chunk_3.1}
+# Load WGCNA package
+library(WGCNA)
+# The following setting is important, do not omit.
+#options(stringsAsFactors = FALSE);
+# Load the previously saved data
+# load("Simulated-dataSimulation.RData");
+# attach(ModuleEigengeneNetwork1)
+```
+
+
+```{r chunk_3.2}
+datExpr[1:3, 1:6]
+
+meanExpressionByArray=apply( datExpr,1,mean, na.rm=T)  
+NumberMissingByArray=apply( is.na(data.frame(datExpr)),1, sum)
+```
+
+
+```{r chunk_3.3}
+# sizeGrWindow(9, 5)
+barplot(meanExpressionByArray,
+        xlab = "Sample", ylab = "Mean expression",
+        main ="Mean expression across samples",
+        names.arg = c(1:50), cex.names = 0.7)
+```
+
+
+```{r chunk_3.4}
+# Keep only arrays containing less than 500 missing entries
+KeepArray= NumberMissingByArray<500
+table(KeepArray)
+datExpr=datExpr[KeepArray,]
+y=y[KeepArray]
+#ArrayName[KeepArray]
+```
+
+
+```{r chunk_3.5}
+NumberMissingByGene =apply( is.na(data.frame(datExpr)),2, sum)
+# One could do a barplot(NumberMissingByGene), but the barplot is empty in this case.
+# It may be better to look at the numbers of missing samples using the summary method:
+summary(NumberMissingByGene)
+# Calculate the variances of the probes and the number of present entries
+variancedatExpr=as.vector(apply(as.matrix(datExpr),2,var, na.rm=T))
+no.presentdatExpr=as.vector(apply(!is.na(as.matrix(datExpr)),2, sum) )
+# Another way of summarizing the number of pressent entries
+table(no.presentdatExpr)
+# Keep only genes whose variance is non-zero and have at least 4 present entries
+KeepGenes= variancedatExpr>0 & no.presentdatExpr>=4
+table(KeepGenes)
+datExpr=datExpr[, KeepGenes]
+#GeneName=GeneName[KeepGenes]
+```
+
+
+```{r chunk_3.6}
+# sizeGrWindow(9, 5)
+plotClusterTreeSamples(datExpr=datExpr, y=y)
+```
+
+
+```{r}
+datExpr[1:3, 1:5]
+```
+
+
+# Standard gene screening illustrates gene selection based on Pearson correlation and shows that the results are not satisfactory
+
+
+```{r chunk_4.1}
+# Load WGCNA package
+library(WGCNA)
+```
+
+
+```{r chunk_4.2}
+GS1= as.numeric(cor(y, datExpr, use="p"))
+# Network terminology: GS1 will be referred to as signed gene significance measure
+p.Standard=corPvalueFisher(GS1, nSamples =length(y) )
+# since the q-value function has problems with missing data, we use the following trick
+p.Standard2=p.Standard
+p.Standard2[is.na(p.Standard)]=1
+q.Standard=qvalue(p.Standard2)$qvalues
+# Form a data frame to hold the results
+StandardGeneScreeningResults=data.frame(GeneName,PearsonCorrelation=GS1, p.Standard, q.Standard)
+```
+
+
+```{r chunk_4.3}
+NoiseGeneIndicator=is.element( truemodule, c("turquoise", "blue", "yellow", "grey"))+.0
+SignalGeneIndicator=1-NoiseGeneIndicator
+```
+
+
+```{r chunk_4.4}
+table(q.Standard<.20)
+```
+
+
+```{r chunk_4.5}
+mean(NoiseGeneIndicator[q.Standard<=0.20]) 
+
+
+#=====================================================================================
+#
+#  Code chunk 6
+#
+#=====================================================================================
+
+
+# save.image(file = "Simulated-StandardScreening.RData")
+```
+
+
+
+
+# Construction of a weighted gene co-expression network and network modules illustrated step-by-step; includes a discussion of alternate clustering techniques
+
+
+```{r chunk_5.1}
+# Load WGCNA package
+library(WGCNA)
+# Load additional necessary packages
+library(cluster)
+```
+
+
+```{r chunk_5.2}
+# here we define the adjacency matrix using soft thresholding with beta=6
+ADJ1=abs(cor(datExpr,use="p"))^6
+# When you have relatively few genes (<5000) use the following code
+k=as.vector(apply(ADJ1,2,sum, na.rm=T))
+# When you have a lot of genes use the following code
+k=softConnectivity(datE=datExpr,power=6) 
+# Plot a histogram of k and a scale free topology plot
+#sizeGrWindow(10,5)
+par(mfrow=c(1,2))
+hist(k)
+scaleFreePlot(k, main="Check scale free topology\n")
+```
+
+
+```{r chunk_5.3}
+datExpr=datExpr[, rank(-k,ties.method="first" )<=3600]
+```
+
+
+```{r chunk_5.4}
+# Turn adjacency into a measure of dissimilarity
+dissADJ=1-ADJ1
+```
+
+
+```{r chunk_5.5}
+dissTOM=TOMdist(ADJ1)
+# collectGarbage()
+```
+
+
+```{r chunk_5.6}
+pam4=pam(as.dist(dissADJ), 4)
+pam5=pam(as.dist(dissADJ), 5)
+pam6=pam(as.dist(dissADJ), 6)
+# Cross-tabulte the detected and the true (simulated) module membership:
+table(pam4$clustering, truemodule)
+table(pam5$clustering, truemodule)
+table(pam6$clustering, truemodule)
+```
+
+
+```{r chunk_5.7}
+pamTOM4=pam(as.dist(dissTOM), 4)
+pamTOM5=pam(as.dist(dissTOM), 5)
+pamTOM6=pam(as.dist(dissTOM), 6)
+# Cross-tabulte the detected and the true (simulated) module membership:
+table(pamTOM4$clustering, truemodule)
+table(pamTOM5$clustering, truemodule)
+table(pamTOM6$clustering, truemodule)
+```
+
+
+```{r chunk_5.8}
+hierADJ=hclust(as.dist(dissADJ), method="average" )
+# Plot the resulting clustering tree together with the true color assignment
+#sizeGrWindow(10,5);
+plotDendroAndColors(hierADJ, colors = data.frame(truemodule), dendroLabels = FALSE, hang = 0.03, 
+                    main = "Gene hierarchical clustering dendrogram and simulated module colors" )
+```
+
+
+```{r chunk_5.9}
+colorStaticADJ=as.character(cutreeStaticColor(hierADJ, cutHeight=.99, minSize=20))
+# Plot the dendrogram with module colors
+# sizeGrWindow(10,5);
+plotDendroAndColors(hierADJ, colors = data.frame(truemodule, colorStaticADJ),
+                    dendroLabels = FALSE, abHeight = 0.99,
+                    main = "Gene dendrogram and module colors")
+```
+
+
+```{r chunk_5.10}
+branch.number=cutreeDynamic(hierADJ,method="tree")
+# This function transforms the branch numbers into colors
+colorDynamicADJ=labels2colors(branch.number )
+```
+
+
+```{r chunk_5.11}
+colorDynamicHybridADJ=labels2colors(cutreeDynamic(hierADJ,distM= dissADJ, 
+                              cutHeight = 0.998, deepSplit=2, pamRespectsDendro = FALSE))
+
+# Plot results of all module detection methods together:
+# sizeGrWindow(10,5)
+plotDendroAndColors(dendro = hierADJ, 
+                    colors=data.frame(truemodule, colorStaticADJ, 
+                                     colorDynamicADJ, colorDynamicHybridADJ), 
+                    dendroLabels = FALSE, marAll = c(0.2, 8, 2.7, 0.2),
+                    main = "Gene dendrogram and module colors")
+```
+
+
+```{r chunk_5.12}
+# Calculate the dendrogram
+hierTOM = hclust(as.dist(dissTOM),method="average");
+# The reader should vary the height cut-off parameter h1 
+# (related to the y-axis of dendrogram) in the following
+colorStaticTOM = as.character(cutreeStaticColor(hierTOM, cutHeight=.99, minSize=20))
+colorDynamicTOM = labels2colors (cutreeDynamic(hierTOM,method="tree"))
+colorDynamicHybridTOM = labels2colors(cutreeDynamic(hierTOM, distM= dissTOM , cutHeight = 0.998,
+                       deepSplit=2, pamRespectsDendro = FALSE))
+# Now we plot the results
+# sizeGrWindow(10,5)
+plotDendroAndColors(hierTOM, 
+               colors=data.frame(truemodule, colorStaticTOM, 
+                                 colorDynamicTOM, colorDynamicHybridTOM), 
+               dendroLabels = FALSE, marAll = c(1, 8, 3, 1),
+               main = "Gene dendrogram and module colors, TOM dissimilarity")
+```
+
+
+```{r chunk_5.13}
+tabStaticADJ=table(colorStaticADJ,truemodule)
+tabStaticTOM=table(colorStaticTOM,truemodule)
+tabDynamicADJ=table(colorDynamicADJ, truemodule)
+tabDynamicTOM=table(colorDynamicTOM,truemodule)
+tabDynamicHybridADJ =table(colorDynamicHybridADJ,truemodule)
+tabDynamicHybridTOM =table(colorDynamicHybridTOM,truemodule)
+```
+
+
+```{r chunk_5.14}
+randIndex(tabStaticADJ,adjust=F)
+randIndex(tabStaticTOM,adjust=F)
+randIndex(tabDynamicADJ,adjust=F)
+randIndex(tabDynamicTOM,adjust=F)
+randIndex(tabDynamicHybridADJ ,adjust=F)
+randIndex(tabDynamicHybridTOM ,adjust=F)
+```
+
+
+```{r chunk_5.15}
+colorh1= colorDynamicHybridTOM
+# remove the dissimilarities, adjacency matrices etc to free up space
+#rm(ADJ1); rm(dissADJ);              
+# collectGarbage()
+# save.image("Simulated-NetworkConstruction.RData")
+
+```
+
+
+# Relating modules and module eigengenes to external data illustrates methods for relating modules to external microarray sample traits
+
+
+```{r chunk_6.1}
+# Load WGCNA package
+library(WGCNA)
+```
+
+
+```{r chunk_6.2}
+datME=moduleEigengenes(datExpr,colorh1)$eigengenes
+signif(cor(datME, use="p"), 2)
+```
+
+
+```{r chunk_6.3}
+dissimME=(1-t(cor(datME, method="p")))/2
+hclustdatME=hclust(as.dist(dissimME), method="average" )
+# Plot the eigengene dendrogram
+par(mfrow=c(1,1))
+plot(hclustdatME, main="Clustering tree based of the module eigengenes")
+```
+
+
+```{r chunk_6.4}
+# sizeGrWindow(8,9)
+plotMEpairs(datME,y=y)
+```
+
+
+```{r chunk_6.5}
+signif(cor(datME, ModuleEigengeneNetwork1[,-1]),2)
+```
+
+
+```{r chunk_6.6}
+# sizeGrWindow(8,9)
+par(mfrow=c(3,1), mar=c(1, 2, 4, 1))
+which.module="turquoise"; 
+plotMat(t(scale(datExpr[,colorh1==which.module ]) ),nrgcols=30,rlabels=T,
+         clabels=T,rcols=which.module,
+         title=which.module )
+# for the second (blue) module we use
+which.module="blue";  
+plotMat(t(scale(datExpr[,colorh1==which.module ]) ),nrgcols=30,rlabels=T,
+         clabels=T,rcols=which.module,
+         title=which.module )
+which.module="brown"; 
+plotMat(t(scale(datExpr[,colorh1==which.module ]) ),nrgcols=30,rlabels=T,
+         clabels=T,rcols=which.module,
+         title=which.module )
+```
+
+
+```{r chunk_6.7}
+# sizeGrWindow(8,7);
+which.module="green"
+ME=datME[, paste("ME",which.module, sep="")]
+par(mfrow=c(2,1), mar=c(0.3, 5.5, 3, 2))
+plotMat(t(scale(datExpr[,colorh1==which.module ]) ),
+         nrgcols=30,rlabels=F,rcols=which.module,
+         main=which.module, cex.main=2)
+par(mar=c(5, 4.2, 0, 0.7))
+barplot(ME, col=which.module, main="", cex.main=2,
+        ylab="eigengene expression",xlab="array sample")
+```
+
+
+```{r chunk_6.8}
+signif(cor(y,datME, use="p"),2)
+```
+
+
+```{r chunk_6.9}
+cor.test(y, datME$MEbrown)
+```
+
+
+```{r chunk_6.10}
+p.values = corPvalueStudent(cor(y,datME, use="p"), nSamples = length(y))
+```
+
+
+```{r chunk_6.11}
+GS1=as.numeric(cor(y,datExpr, use="p"))
+GeneSignificance=abs(GS1)
+# Next module significance is defined as average gene significance.
+ModuleSignificance=tapply(GeneSignificance, colorh1, mean, na.rm=T)
+```
+
+
+```{r chunk_6.12}
+# sizeGrWindow(8,7)
+par(mfrow = c(1,1))
+plotModuleSignificance(GeneSignificance,colorh1)
+```
+
+
+```{r chunk_6.13}
+# collectGarbage()
+# save.image("Simulated-RelatingToExt.RData")
+```
+
+
+# Module membership, intramodular connectivity, and screening for intramodular hub genes illustrates using the intramodular connectivity to define measures of module membership and to screen for genes based on network information
+
+
+```{r chunk_7.1}
+# Load WGCNA package
+library(WGCNA)
+library(cluster)
+# Load the previously saved data
+# load("Simulated-RelatingToExt.RData");
+```
+
+
+```{r chunk_7.2}
+ADJ1=abs(cor(datExpr,use="p"))^6
+Alldegrees1=intramodularConnectivity(ADJ1, colorh1)
+head(Alldegrees1)
+```
+
+
+```{r chunk_7.3}
+colorlevels=unique(colorh1)
+# sizeGrWindow(9,6)
+par(mfrow=c(2,as.integer(0.5+length(colorlevels)/2)))
+par(mar = c(4,5,3,1))
+for (i in c(1:length(colorlevels))) 
+{
+  whichmodule=colorlevels[[i]]; 
+  restrict1 = (colorh1==whichmodule);
+  verboseScatterplot(Alldegrees1$kWithin[restrict1], 
+                     GeneSignificance[restrict1], col=colorh1[restrict1],
+                     main=whichmodule, 
+                     xlab = "Connectivity", ylab = "Gene Significance", abline = TRUE)
+}
+```
+
+
+```{r chunk_7.4}
+datKME=signedKME(datExpr, datME, outputColumnName="MM.")
+# Display the first few rows of the data frame
+head(datKME)
+```
+
+
+```{r chunk_7.5}
+FilterGenes= abs(GS1)> .2 & abs(datKME$MM.brown)>.8
+table(FilterGenes)
+```
+
+
+```{r chunk_7.6}
+dimnames(data.frame(datExpr))[[2]][FilterGenes]
+```
+
+
+```{r chunk_7.7}
+# sizeGrWindow(8,6)
+par(mfrow=c(2,2))
+# We choose 4 modules to plot: turquoise, blue, brown, green. 
+# For simplicity we write the code out explicitly for each module.
+which.color="turquoise"; 
+restrictGenes=colorh1==which.color 
+verboseScatterplot(Alldegrees1$kWithin[ restrictGenes], 
+                   (datKME[restrictGenes, paste("MM.", which.color, sep="")])^6,
+                   col=which.color, 
+                   xlab="Intramodular Connectivity", 
+                   ylab="(Module Membership)^6")
+
+which.color="blue"; 
+restrictGenes=colorh1==which.color
+verboseScatterplot(Alldegrees1$kWithin[ restrictGenes],
+                   (datKME[restrictGenes, paste("MM.", which.color, sep="")])^6,
+                   col=which.color,
+                   xlab="Intramodular Connectivity",
+                   ylab="(Module Membership)^6")
+
+which.color="brown"; 
+restrictGenes=colorh1==which.color
+verboseScatterplot(Alldegrees1$kWithin[ restrictGenes],
+                   (datKME[restrictGenes, paste("MM.", which.color, sep="")])^6,
+                   col=which.color,
+                   xlab="Intramodular Connectivity",
+                   ylab="(Module Membership)^6")
+
+which.color="green";
+restrictGenes=colorh1==which.color 
+verboseScatterplot(Alldegrees1$kWithin[ restrictGenes], 
+                   (datKME[restrictGenes, paste("MM.", which.color, sep="")])^6,
+                   col=which.color, 
+                   xlab="Intramodular Connectivity", 
+                   ylab="(Module Membership)^6")
+```
+
+
+```{r chunk_7.8}
+NS1=networkScreening(y=y, datME=datME, datExpr=datExpr,
+         oddPower=3, blockSize=1000, minimumSampleSize=4,
+         addMEy=TRUE, removeDiag=FALSE, weightESy=0.5)
+```
+
+
+```{r chunk_7.9}
+# network screening analysis
+mean(NoiseGeneIndicator[rank(NS1$p.Weighted,ties.method="first")<=100])
+# standard analysis based on the correlation p-values (or Student T test)
+mean(NoiseGeneIndicator[rank(NS1$p.Standard,ties.method="first")<=100])
+```
+
+
+```{r chunk_7.10}
+topNumbers=c(10,20,50,100)
+for (i in c(1:length(topNumbers)) ) 
+{
+  print(paste("Proportion of noise genes in the top", topNumbers[i], "list"))
+  WGCNApropNoise=mean(NoiseGeneIndicator[rank(NS1$p.Weighted,ties.method="first")<=topNumbers[i]])
+  StandardpropNoise=mean(NoiseGeneIndicator[rank(NS1$p.Standard,ties.method="first")<=topNumbers[i]])
+  print(paste("WGCNA, proportion of noise=", WGCNApropNoise, 
+        ", Standard, prop. noise=", StandardpropNoise))
+  if (WGCNApropNoise< StandardpropNoise) print("WGCNA wins")
+  if (WGCNApropNoise==StandardpropNoise) print("both methods tie")
+  if (WGCNApropNoise>StandardpropNoise) print("standard screening wins")
+}
+```
+
+
+```{r chunk_7.11}
+# rm(dissTOM); collectGarbage()
+```
+
+
+```{r chunk_7.12}
+#Form a data frame containing standard and network screening results
+CorPrediction1=data.frame(GS1,NS1$cor.Weighted)
+cor.Weighted=NS1$cor.Weighted
+# Plot the comparison
+# sizeGrWindow(8, 6)
+verboseScatterplot(cor.Weighted, GS1,
+         main="Network-based weighted correlation versus Pearson correlation\n",
+         col=truemodule, cex.main = 1.2)
+abline(0,1)
+```
+
+
+```{r chunk_7.13}
+set.seed(2)
+nSamples2=2000
+MEgreen=rnorm(nSamples2)
+scaledy2=MEgreen*ESgreen+sqrt(1-ESgreen^2)*rnorm(nSamples2)
+y2=ifelse( scaledy2>median(scaledy2),2,1)
+MEturquoise= ESturquoise*scaledy2+sqrt(1-ESturquoise^2)*rnorm(nSamples2)
+# we simulate a strong dependence between MEblue and MEturquoise
+MEblue= .6*MEturquoise+ sqrt(1-.6^2) *rnorm(nSamples2)
+MEbrown= ESbrown*scaledy2+sqrt(1-ESbrown^2)*rnorm(nSamples2)
+MEyellow= ESyellow*scaledy2+sqrt(1-ESyellow^2)*rnorm(nSamples2)
+# Put together a data frame of eigengenes
+ModuleEigengeneNetwork2=data.frame(y=y2,MEturquoise,MEblue,MEbrown,MEgreen, MEyellow)
+# Simulate the expression data
+dat2=simulateDatExpr5Modules(MEturquoise=ModuleEigengeneNetwork2$MEturquoise,
+   MEblue=ModuleEigengeneNetwork2$MEblue,MEbrown=ModuleEigengeneNetwork2$MEbrown,
+   MEyellow=ModuleEigengeneNetwork2$MEyellow,
+   MEgreen=ModuleEigengeneNetwork2$MEgreen,simulateProportions=simulateProportions1, 
+   nGenes=nGenes1)
+# recall that this is the signed gene significance in the training data
+GS1= as.numeric(cor(y, datExpr, use="p"))
+# the following is the signed gene significance in the test data
+GS2=as.numeric( cor(ModuleEigengeneNetwork2$y, dat2$datExpr, use="p"))
+```
+
+
+```{r chunk_7.14}
+# sizeGrWindow(8,6)
+par(mfrow=c(1,1))
+verboseScatterplot(GS1,GS2,
+       main="Trait-based gene significance in test set vs. training set\n",
+       xlab = "Training set gene significance",
+       ylab = "Test set gene significance",
+       col=truemodule, cex.main = 1.4)
+```
+
+
+```{r chunk_7.15}
+EvaluationGeneScreening1 = corPredictionSuccess(
+           corPrediction = CorPrediction1, 
+           corTestSet=GS2,
+           topNumber=seq(from=20, to=500, length=30) )
+par(mfrow=c(2,2))
+listcomp = EvaluationGeneScreening1$meancorTestSetOverall
+matplot(x = listcomp$topNumber,
+        y = listcomp[,-1], 
+        main="Predicting positive and negative correlations",
+        ylab="mean cor, test data", 
+        xlab="top number of genes in the training data")
+listcomp= EvaluationGeneScreening1$meancorTestSetPositive
+matplot(x = listcomp$topNumber,
+        y = listcomp[,-1], 
+        main="Predicting positive correlations",
+        ylab="mean cor, test data", 
+        xlab="top number of genes in the training data")
+listcomp= EvaluationGeneScreening1$meancorTestSetNegative
+matplot(x = listcomp$topNumber,
+        y = listcomp[,-1], 
+        main = "Predicting negative correlations",
+        ylab = "mean cor, test data", 
+        xlab = "top number of genes in the training data")
+```
+
+
+```{r chunk_7.16}
+relativeCorPredictionSuccess(corPredictionNew = NS1$cor.Weighted,
+                             corPredictionStandard = GS1, 
+                             corTestSet=GS2,
+                             topNumber=c(10,20,50,100,200,500) )
+```
+
+
+```{r chunk_7.17}
+# Create a data frame holding the results of gene screening
+GeneResultsNetworkScreening=data.frame(GeneName=row.names(NS1), NS1)
+# Write the data frame into a file
+# write.table(GeneResultsNetworkScreening, file="GeneResultsNetworkScreening.csv", row.names=F,sep=",")
+# Output of eigengene information:
+datMEy = data.frame(y, datME)
+eigengeneSignificance = cor(datMEy, y);
+eigengeneSignificance[1,1] = (1+max(eigengeneSignificance[-1, 1]))/2
+eigengeneSignificance.pvalue = corPvalueStudent(eigengeneSignificance, nSamples = length(y))
+namesME=names(datMEy)
+# Form a summary data frame
+out1=data.frame(t(data.frame(eigengeneSignificance,
+eigengeneSignificance.pvalue, namesME, t(datMEy))))
+# Set appropriate row names
+dimnames(out1)[[1]][1]="EigengeneSignificance"
+dimnames(out1)[[1]][2]="EigengeneSignificancePvalue"
+dimnames(out1)[[1]][3]="ModuleEigengeneName"
+dimnames(out1)[[1]][-c(1:3)]=dimnames(datExpr)[[1]]
+# Write the data frame into a file
+# write.table(out1, file="MEResultsNetworkScreening.csv", row.names=TRUE, col.names = TRUE, sep=",")
+# Display the first few rows:
+head(out1)
+```
+
+
+```{r chunk_7.18}
+# Write out gene information
+GeneName=dimnames(datExpr)[[2]]
+GeneSummary=data.frame(GeneName, truemodule, SignalGeneIndicator,  NS1)
+# write.table(GeneSummary, file="GeneSummaryTutorial.csv", row.names=F,sep=",")
+# here we output the module eigengenes and trait y without eigengene significances
+datTraits=data.frame(ArrayName, datMEy)
+dimnames(datTraits)[[2]][2:length(namesME)]=paste("Trait",  
+                                             dimnames(datTraits)[[2]][2:length(namesME)], 
+                                             sep=".")
+# write.table(datTraits, file="TraitsTutorial.csv", row.names=F,sep=",")
+rm(datTraits)
+# here we output the simulated gene expression data
+MicroarrayData=data.frame(GeneName, t(datExpr))
+names(MicroarrayData)[-1]=ArrayName
+# write.table(MicroarrayData, file="MicroarrayDataTutorial.csv", row.names=F,sep=",")
+rm(MicroarrayData)
+```
+
+
+```{r chunk_7.19}
+# Perform network screening
+NS1GS=networkScreeningGS(datExpr=datExpr, datME = datME, GS=GS1)
+# Organize its results for easier plotting
+GSprediction1=data.frame(GS1,NS1GS$GS.Weighted)
+GS.Weighted=NS1GS$GS.Weighted
+# Plot a comparison between standard gene significance and network-weighted gene significance
+# sizeGrWindow(8, 6)
+par(mfrow=c(1,1))
+verboseScatterplot(GS1, GS.Weighted, 
+                   main="Weighted gene significance vs. the standard GS\n",
+                   col=truemodule)
+abline(0,1)
+```
+
+
+```{r chunk_7.20}
+EvaluationGeneScreeningGS = corPredictionSuccess(corPrediction=GSprediction1, corTestSet=GS2,
+                                    topNumber=seq(from=20, to=500, length=30) )
+# sizeGrWindow(8, 6)
+par(mfrow=c(2,2))
+listcomp= EvaluationGeneScreeningGS$meancorTestSetOverall
+matplot(x=listcomp$topNumber,
+        y=listcomp[,-1],
+        main="Predicting positive and negative correlations",
+        ylab="mean cor, test data",
+        xlab="top number of genes in the training data")
+listcomp= EvaluationGeneScreeningGS$meancorTestSetPositive
+matplot(x=listcomp$topNumber, 
+        y=listcomp[,-1], 
+        main="Predicting positive correlations",
+        ylab="mean cor, test data",
+        xlab="top number of genes in the training data")
+listcomp= EvaluationGeneScreeningGS$meancorTestSetNegative
+matplot(x=listcomp$topNumber,
+        y=listcomp[,-1],
+        main="Predicting negative correlations",
+        ylab="mean cor, test data",
+        xlab="top number of genes in the training data")
+```
+
+
+```{r chunk_7.21}
+# collectGarbage()
+# save.image("Simulated-Screening.RData")
+```
+
+
+
+# Visualization of gene networks
+    
+    
+```{r chunk_8.1}
+# Load WGCNA package
+library(WGCNA)
+library(cluster)
+# Load the previously saved data
+# load("Simulated-RelatingToExt.RData"); 
+# load("Simulated-Screening.RData")
+```
+
+
+```{r chunk_8.2}
+cmd1=cmdscale(as.dist(dissTOM),2)
+# sizeGrWindow(7, 6)
+par(mfrow=c(1,1))
+plot(cmd1, col=as.character(colorh1),  main="MDS plot",
+     xlab="Scaling Dimension 1", ylab="Scaling Dimension 2")
+```
+
+
+```{r chunk_8.3}
+power=6
+color1=colorDynamicTOM
+restGenes= (color1 != "grey")
+diss1=1-TOMsimilarityFromExpr( datExpr[, restGenes], power = 6 )
+hier1=hclust(as.dist(diss1), method="average" )
+diag(diss1) = NA;
+# sizeGrWindow(7,7)
+TOMplot(diss1^4, hier1, as.character(color1[restGenes]),
+        main = "TOM heatmap plot, module genes" )
+```
+
+
+```{r chunk_8.4}
+power=6
+color1=colorDynamicTOM
+restGenes= (color1 != "grey")
+diss1=1-adjacency( datExpr[, restGenes], power = 6 )
+hier1=hclust(as.dist(diss1), method="average" )
+diag(diss1) = NA;
+# sizeGrWindow(7,7)
+TOMplot(diss1^4, hier1, as.character(color1[restGenes]),
+        main = "Adjacency heatmap plot, module genes" )
+```
+
+
+```{r chunk_8.5}
+# sizeGrWindow(7,7)
+topList=rank(NS1$p.Weighted,ties.method="first")<=30
+gene.names= names(datExpr)[topList]
+# The following shows the correlations between the top genes
+plotNetworkHeatmap(datExpr, plotGenes = gene.names,
+                   networkType="signed", useTOM=FALSE,
+                   power=1, main="signed correlations")
+```
+
+
+```{r chunk_8.6}
+# sizeGrWindow(7,7)
+# The following shows the correlations between the top genes
+plotNetworkHeatmap(datExpr, plotGenes = gene.names,
+                   networkType="unsigned", useTOM=FALSE,
+                   power=1, main="signed correlations")
+```
+
+
+```{r chunk_8.7}
+# sizeGrWindow(7,7)
+# The following shows the TOM heatmap in a signed network
+plotNetworkHeatmap(datExpr, plotGenes = gene.names,
+                   networkType="signed", useTOM=TRUE,
+                   power=12, main="C. TOM in a signed network")
+# The following shows the TOM heatmap in a unsigned network
+plotNetworkHeatmap(datExpr, plotGenes = gene.names,
+                   networkType="unsigned", useTOM=TRUE,
+                   power=6, main="D. TOM in an unsigned network")
+
+```
+    
+
+
+
