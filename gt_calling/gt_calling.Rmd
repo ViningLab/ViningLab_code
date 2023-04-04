@@ -1,0 +1,93 @@
+---
+title: "gt_calling"
+output: html_document
+date: "2023-04-03"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.align = "center")
+```
+
+
+## The normal distribution
+
+
+https://en.wikipedia.org/wiki/Normal_distribution
+
+
+```{r}
+my_quantiles <- seq(1, 10, by = 0.1)
+my_ds <- dnorm(x = my_quantiles, mean = 5, sd = 1)
+plot( x = my_quantiles, y = my_ds, type = 'l', lwd = 4)
+```
+
+
+## The binomial distribution
+
+https://en.wikipedia.org/wiki/Binomial_distribution
+
+
+```{r}
+my_quantiles <- seq(0, 20, by = 1)
+my_ds <- dbinom(x = my_quantiles, size = max(my_quantiles), prob = 0.01)
+plot( x = my_quantiles, y = my_ds, type = 'h', lwd = 4, col = "#228B22")
+```
+
+
+```{r}
+my_quantiles <- seq(0, 20, by = 1)
+my_ds <- dbinom(x = my_quantiles, size = max(my_quantiles), prob = 0.5)
+plot( x = my_quantiles, y = my_ds, type = 'h', lwd = 4)
+```
+
+
+```{r}
+my_quantiles <- seq(0, 20, by = 1)
+my_ds <- dbinom(x = my_quantiles, size = max(my_quantiles), prob = 0.99)
+plot( x = my_quantiles, y = my_ds, type = 'h', lwd = 4, col = "#B22222")
+```
+
+
+
+
+```{r}
+my_quantiles <- seq(0, 20, by = 1)
+my_ds <- dbinom(x = my_quantiles, size = max(my_quantiles), prob = 0.5)
+plot( x = my_quantiles, y = my_ds, type = 'h', lwd = 4, ylim = c(0, 0.8))
+
+my_ds <- dbinom(x = my_quantiles, size = max(my_quantiles), prob = 0.01)
+points( x = my_quantiles - 0.1, y = my_ds, type = 'h', lwd = 4, col = "#228B22")
+
+my_ds <- dbinom(x = my_quantiles, size = max(my_quantiles), prob = 0.99)
+points( x = my_quantiles + 0.1, y = my_ds, type = 'h', lwd = 4, col = "#B22222")
+
+```
+
+
+
+```{r}
+my_quantiles <- seq(0, 20, by = 1)
+my_ds <- dbinom(x = my_quantiles, size = max(my_quantiles), prob = 0.5)
+plot( x = my_quantiles, y = my_ds, type = 'h', lwd = 4, ylim = c(0, 0.8))
+
+my_ds <- dbinom(x = my_quantiles, size = max(my_quantiles), prob = 0.01)
+points( x = my_quantiles - 0.1, y = my_ds, type = 'h', lwd = 4, col = "#228B22")
+
+my_ds <- dbinom(x = my_quantiles, size = max(my_quantiles), prob = 0.99)
+points( x = my_quantiles + 0.1, y = my_ds, type = 'h', lwd = 4, col = "#B22222")
+
+my_ds <- dbinom(x = my_quantiles, size = max(my_quantiles), prob = 0.25)
+points( x = my_quantiles - 0.2, y = my_ds, type = 'h', lwd = 4, col = "#1E90FF")
+
+my_ds <- dbinom(x = my_quantiles, size = max(my_quantiles), prob = 0.75)
+points( x = my_quantiles + 0.2, y = my_ds, type = 'h', lwd = 4, col = "#1E90FF")
+
+```
+
+
+
+
+
