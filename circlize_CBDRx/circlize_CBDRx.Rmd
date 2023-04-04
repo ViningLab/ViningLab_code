@@ -228,7 +228,8 @@ circos.genomicInitialize(
 )
 
 circos.trackHist( 
-  sectors = as.factor(genes$seqid),
+  sectors = genes$seqid,
+#  sectors = as.factor(genes$seqid),
   x = genes$start,
   #border = "#FFFFFF",
   bg.border = "#FFFFFF",
@@ -261,6 +262,7 @@ circos.trackPoints(
   #y = genes$start,
   #pch = "|",
   pch = 17,
+  cex = 1,
   col = "#1E90FF11"
 )
 
