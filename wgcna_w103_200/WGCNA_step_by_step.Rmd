@@ -15,6 +15,15 @@ knitr::opts_chunk$set(fig.align = "center")
 ```
 
 
+## Background
+
+This document is based on "I. Network analysis of liver expression data from female mice: finding modules related to body weight" at the below link.
+
+https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/index.html
+
+It has been adapted to use data generated in this lab for the example as well as other edits where deemed appropriate.
+
+
 ## Load data
 
 
@@ -172,6 +181,20 @@ TOM = TOMsimilarity(adjacency);
 dissTOM = 1-TOM
 ```
 
+
+The object `dissTOM` is a gene by gene matrix where the values within the matrix describe a relationship among each pair of genes.
+This may require a large amount of time so it may be advantageous to save this result so that future sessions may resume at this point.
+
+
+```{r}
+class(dissTOM)
+# write.table(dissTOM, file = "dissTOM.csv", sep = ",", row.names = FALSE, col.names = FALSE)
+# dissTOM <- read.csv( file = "dissTOM.csv", header = FALSE )
+dissTOM <- read.csv( file = "dissTOM.csv.gz", header = FALSE )
+```
+
+
+
 ### Use distance matrix for `hclust`.
 
 ```{r}
@@ -308,14 +331,19 @@ MEs0 = moduleEigengenes(datExpr, moduleColors)$eigengenes
 MEs = orderMEs(MEs0)
 #moduleTraitCor = cor(MEs, datTraits, use = "p");
 
-#moduleTraitCor = cor(MEs, phenos, use = "p");
-moduleTraitCor = cor(MEs, cbind(phenos, phenos), use = "p");
+#
+moduleTraitCor = cor(MEs, phenos, use = "p");
+#moduleTraitCor = cor(MEs, cbind(phenos, phenos), use = "p");
 
 moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples)
-cbind(moduleTraitCor, 
+tcor <- cbind(moduleTraitCor, 
       moduleTraitPvalue,
       p.adjust(moduleTraitPvalue, method = "BH")
 )
+colnames(tcor) <- c("Correlation", "P-value", "Adjusted p")
+tcor <- tcor[ sort.int(tcor[, "Correlation"], index.return = TRUE)$ix, ]
+tcor
+moduleTraitCor <- moduleTraitCor[ sort.int(moduleTraitCor[, 1], index.return = TRUE)$ix, , drop = FALSE]
 ```
 
 
@@ -326,18 +354,19 @@ textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
 signif(moduleTraitPvalue, 1), ")", sep = "");
 dim(textMatrix) = dim(moduleTraitCor)
 par(mar = c(6, 8.5, 3, 3));
+par(mfrow = c(1, 1))
 # Display the correlation values within a heatmap plot
 labeledHeatmap(Matrix = moduleTraitCor,
   # xLabels = names(datTraits),
-  #xLabels = "CBGA:THCA",
-  xLabels = c("CBGA:THCA", "CBGA:THCA_2"),
+  xLabels = "CBGA:THCA",
+  #xLabels = c("CBGA:THCA", "CBGA:THCA_2"),
   yLabels = names(MEs),
   ySymbols = names(MEs),
   colorLabels = FALSE,
   colors = greenWhiteRed(50),
   textMatrix = textMatrix,
   setStdMargins = FALSE,
-  cex.text = 0.5,
+  cex.text = 1.01,
   zlim = c(-1,1),
   main = paste("Module-trait relationships")
   )
