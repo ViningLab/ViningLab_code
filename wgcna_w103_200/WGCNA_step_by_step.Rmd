@@ -75,7 +75,8 @@ apply(yn1, 2, median)
 
 
 ```{r, fig.cap="**Figure 1.**", fig.width=12}
-barplot(rowSums(datExpr), las = 3)
+# barplot(rowSums(datExpr), las = 3)
+barplot(apply(datExpr, MARGIN = 1, median), las = 3)
 title( main = "Cumulative expression\nper sample" )
 title( ylab = "Expression" )
 ```
@@ -246,12 +247,14 @@ main = "Gene dendrogram and module colors")
 The module 'black' contains our candidate genes.
 
 ```{r}
+
 dynamicColors[ grep("W103_g21007.t1", colnames(datExpr)) ]
 
 datExpr[1:3 , dynamicColors == "black" ]
 
 datExpr[1:3 , dynamicColors == "green" ]
 
+dev.off()
 plot(datExpr[ , dynamicColors == "green" ][, 1], y = phenos)
 cor.test(datExpr[ , dynamicColors == "green" ][, 1], y = phenos)
 
@@ -353,6 +356,11 @@ moduleTraitCor <- moduleTraitCor[ sort.int(moduleTraitCor[, 1], index.return = T
 textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
 signif(moduleTraitPvalue, 1), ")", sep = "");
 dim(textMatrix) = dim(moduleTraitCor)
+
+
+# png(filename = "pheno_eigengene_heatmap.png", 
+#     width = 6.5, height = 5.0, units = 'in',
+#     res = 300)
 par(mar = c(6, 8.5, 3, 3));
 par(mfrow = c(1, 1))
 # Display the correlation values within a heatmap plot
@@ -363,14 +371,17 @@ labeledHeatmap(Matrix = moduleTraitCor,
   yLabels = names(MEs),
   ySymbols = names(MEs),
   colorLabels = FALSE,
-  colors = greenWhiteRed(50),
+#  colors = greenWhiteRed(50),
+#  colors = viridisLite::magma( n = 100, alpha = 1, begin = 0.1, end = 1),
+  colors = c( viridisLite::magma( n = 100, alpha = 1, begin = 0.0, end = 1),
+              viridisLite::cividis( n = 100, alpha = 1, begin = 0.0, end = 1, direction = -1)),
   textMatrix = textMatrix,
   setStdMargins = FALSE,
   cex.text = 1.01,
   zlim = c(-1,1),
   main = paste("Module-trait relationships")
   )
-
+#dev.off()
 ```
 
 
