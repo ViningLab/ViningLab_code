@@ -339,22 +339,32 @@ moduleTraitCor = cor(MEs, phenos, use = "p");
 #moduleTraitCor = cor(MEs, cbind(phenos, phenos), use = "p");
 
 moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples)
+
 tcor <- cbind(moduleTraitCor, 
-      moduleTraitPvalue,
-      p.adjust(moduleTraitPvalue, method = "BH")
+              moduleTraitPvalue,
+              p.adjust(moduleTraitPvalue, method = "BH")
 )
 colnames(tcor) <- c("Correlation", "P-value", "Adjusted p")
-tcor <- tcor[ sort.int(tcor[, "Correlation"], index.return = TRUE)$ix, ]
+tcor <- tcor[ sort.int(tcor[, "Correlation"], index.return = TRUE, decreasing = TRUE)$ix, ]
 tcor
 moduleTraitCor <- moduleTraitCor[ sort.int(moduleTraitCor[, 1], index.return = TRUE)$ix, , drop = FALSE]
 ```
 
 
 ```{r}
+MEs[1:3, ]
+
+```
+
+
+
+
+
+```{r}
 #sizeGrWindow(10,6)
 # Will display correlations and their p-values
-textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
-signif(moduleTraitPvalue, 1), ")", sep = "");
+textMatrix = paste(signif(moduleTraitCor, 2), " (", signif(moduleTraitPvalue, 1), ")", sep = "")
+
 dim(textMatrix) = dim(moduleTraitCor)
 
 
@@ -425,9 +435,28 @@ verboseScatterplot(abs(geneModuleMembership[moduleGenes, column]),
 
 
 
+
+
+
 ```{r}
-names(datExpr)[moduleColors=="brown"]
-names(datExpr)[moduleColors=="black"]
+colnames(datExpr)[moduleColors=="brown"]
+length(colnames(datExpr)[moduleColors=="brown"])
+colnames(datExpr)[moduleColors=="black"]
+
+datExpr[, "W103_g288.t1"]
+
+rownames(datExpr)[ datExpr[, "W103_g288.t1"] > 60 ]
+
+MEs[1:3, ]
+
+plot(datExpr[, "W103_g288.t1"], MEs[, "MEblack"])
+
+cor.test(datExpr[, "W103_g288.t1"], MEs[, "MEblack"])
+
+phenos["Sample8.3"]
+
+hist(phenos)
+abline( v = phenos["Sample8.3"], col = "#B22222", lwd = 4)
 
 ```
 
