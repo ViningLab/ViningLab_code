@@ -15,6 +15,15 @@ knitr::opts_chunk$set(fig.align = "center")
 ```
 
 
+## Background
+
+This document is based on "I. Network analysis of liver expression data from female mice: finding modules related to body weight" at the below link.
+
+https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/index.html
+
+It has been adapted to use data generated in this lab for the example as well as other edits where deemed appropriate.
+
+
 ## Load data
 
 
@@ -66,7 +75,8 @@ apply(yn1, 2, median)
 
 
 ```{r, fig.cap="**Figure 1.**", fig.width=12}
-barplot(rowSums(datExpr), las = 3)
+# barplot(rowSums(datExpr), las = 3)
+barplot(apply(datExpr, MARGIN = 1, median), las = 3)
 title( main = "Cumulative expression\nper sample" )
 title( ylab = "Expression" )
 ```
@@ -172,6 +182,20 @@ TOM = TOMsimilarity(adjacency);
 dissTOM = 1-TOM
 ```
 
+
+The object `dissTOM` is a gene by gene matrix where the values within the matrix describe a relationship among each pair of genes.
+This may require a large amount of time so it may be advantageous to save this result so that future sessions may resume at this point.
+
+
+```{r}
+class(dissTOM)
+# write.table(dissTOM, file = "dissTOM.csv", sep = ",", row.names = FALSE, col.names = FALSE)
+# dissTOM <- read.csv( file = "dissTOM.csv", header = FALSE )
+dissTOM <- read.csv( file = "dissTOM.csv.gz", header = FALSE )
+```
+
+
+
 ### Use distance matrix for `hclust`.
 
 ```{r}
@@ -223,12 +247,14 @@ main = "Gene dendrogram and module colors")
 The module 'black' contains our candidate genes.
 
 ```{r}
+
 dynamicColors[ grep("W103_g21007.t1", colnames(datExpr)) ]
 
 datExpr[1:3 , dynamicColors == "black" ]
 
 datExpr[1:3 , dynamicColors == "green" ]
 
+dev.off()
 plot(datExpr[ , dynamicColors == "green" ][, 1], y = phenos)
 cor.test(datExpr[ , dynamicColors == "green" ][, 1], y = phenos)
 
@@ -308,14 +334,19 @@ MEs0 = moduleEigengenes(datExpr, moduleColors)$eigengenes
 MEs = orderMEs(MEs0)
 #moduleTraitCor = cor(MEs, datTraits, use = "p");
 
-#moduleTraitCor = cor(MEs, phenos, use = "p");
-moduleTraitCor = cor(MEs, cbind(phenos, phenos), use = "p");
+#
+moduleTraitCor = cor(MEs, phenos, use = "p");
+#moduleTraitCor = cor(MEs, cbind(phenos, phenos), use = "p");
 
 moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples)
-cbind(moduleTraitCor, 
+tcor <- cbind(moduleTraitCor, 
       moduleTraitPvalue,
       p.adjust(moduleTraitPvalue, method = "BH")
 )
+colnames(tcor) <- c("Correlation", "P-value", "Adjusted p")
+tcor <- tcor[ sort.int(tcor[, "Correlation"], index.return = TRUE)$ix, ]
+tcor
+moduleTraitCor <- moduleTraitCor[ sort.int(moduleTraitCor[, 1], index.return = TRUE)$ix, , drop = FALSE]
 ```
 
 
@@ -325,23 +356,32 @@ cbind(moduleTraitCor,
 textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
 signif(moduleTraitPvalue, 1), ")", sep = "");
 dim(textMatrix) = dim(moduleTraitCor)
+
+
+# png(filename = "pheno_eigengene_heatmap.png", 
+#     width = 6.5, height = 5.0, units = 'in',
+#     res = 300)
 par(mar = c(6, 8.5, 3, 3));
+par(mfrow = c(1, 1))
 # Display the correlation values within a heatmap plot
 labeledHeatmap(Matrix = moduleTraitCor,
   # xLabels = names(datTraits),
-  #xLabels = "CBGA:THCA",
-  xLabels = c("CBGA:THCA", "CBGA:THCA_2"),
+  xLabels = "CBGA:THCA",
+  #xLabels = c("CBGA:THCA", "CBGA:THCA_2"),
   yLabels = names(MEs),
   ySymbols = names(MEs),
   colorLabels = FALSE,
-  colors = greenWhiteRed(50),
+#  colors = greenWhiteRed(50),
+#  colors = viridisLite::magma( n = 100, alpha = 1, begin = 0.1, end = 1),
+  colors = c( viridisLite::magma( n = 100, alpha = 1, begin = 0.0, end = 1),
+              viridisLite::cividis( n = 100, alpha = 1, begin = 0.0, end = 1, direction = -1)),
   textMatrix = textMatrix,
   setStdMargins = FALSE,
-  cex.text = 0.5,
+  cex.text = 1.01,
   zlim = c(-1,1),
   main = paste("Module-trait relationships")
   )
-
+#dev.off()
 ```
 
 
