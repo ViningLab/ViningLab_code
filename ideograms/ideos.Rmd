@@ -1,0 +1,98 @@
+---
+title: "Ideograms"
+output: html_document
+date: "2023-04-11"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load data
+
+
+```{r}
+nucs <- read.csv("EH23b.softmasked_nuccomp.csv")
+# Subset to a reasonable number of sequences.
+nucs <- nucs[1:10, ]
+
+nucs[1:3, ]
+nucs$chrom_num <- sub(".+chr", "", nucs$Id)
+nucs$chrom_num[nucs$chrom_num == "X"] <- 10
+nucs$chrom_num <- as.numeric(nucs$chrom_num)
+nucs[1:3, ]
+```
+
+
+```{r}
+library(ggplot2)
+
+chrom_wid <- 0.1
+
+#p <- ggplot( data = nucs, mapping = aes( x = chrom_num, y = Length ))
+p <- ggplot( )
+p <- p + theme_bw()
+p <- p + geom_rect( 
+  data = nucs, 
+  aes( xmin = chrom_num - chrom_wid,
+       xmax = chrom_num + chrom_wid,
+       ymin = 1, ymax = Length),
+  fill = "#DCDCDC",
+  color = "#000000"
+)
+
+p
+
+```
+
+
+```{r}
+# Theme
+p <- p + scale_x_continuous( 
+  breaks = nucs$chrom_num,
+  labels = nucs$Id
+)
+p
+
+p <- p + scale_y_continuous(
+  breaks = seq( 0, 120e6, by = 10e6), 
+  labels = seq( 0, 120, by = 10)
+)
+p
+
+p <- p + ggplot2::theme( 
+    panel.grid.minor.x = ggplot2::element_line( linewidth = 0.4, color = "#C0C0C0", linetype = 3 ),
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    axis.title.x=element_blank(),
+    panel.grid.major.y = ggplot2::element_line( linewidth = 0.4, color = "#C0C0C0", linetype = 1 ),
+    panel.grid.minor.y = ggplot2::element_line( linewidth = 0.4, color = "#C0C0C0", linetype = 3 )
+  )
+p
+
+p <- p + ggplot2::ylab("Position (Mbp)")
+p <- p + ggtitle( "EH23b" )
+
+p
+```
+
+
+
+```{r}
+
+my_df <- data.frame( my_xmin = 4.7, my_xmax = 5.3, my_ymin = 2e5, my_ymax = 2e6)
+
+p <- p + geom_rect( 
+  data = my_df, 
+  aes( xmin = my_xmin,
+       xmax = my_xmax,
+       ymin = my_ymin, ymax = my_ymax),
+  fill = "#DCDCDC",
+  color = "#000000"
+)
+p
+```
+
+
+
