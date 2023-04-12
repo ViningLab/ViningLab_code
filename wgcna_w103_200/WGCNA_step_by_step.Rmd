@@ -338,8 +338,14 @@ MEs = orderMEs(MEs0)
 moduleTraitCor = cor(MEs, phenos, use = "p");
 #moduleTraitCor = cor(MEs, cbind(phenos, phenos), use = "p");
 
+colnames(moduleTraitCor) <- c("CBGA:THCA")
+
 moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples)
 
+```
+
+
+```{r}
 tcor <- cbind(moduleTraitCor, 
               moduleTraitPvalue,
               p.adjust(moduleTraitPvalue, method = "BH")
@@ -347,7 +353,7 @@ tcor <- cbind(moduleTraitCor,
 colnames(tcor) <- c("Correlation", "P-value", "Adjusted p")
 tcor <- tcor[ sort.int(tcor[, "Correlation"], index.return = TRUE, decreasing = TRUE)$ix, ]
 tcor
-moduleTraitCor <- moduleTraitCor[ sort.int(moduleTraitCor[, 1], index.return = TRUE)$ix, , drop = FALSE]
+#moduleTraitCor <- moduleTraitCor[ sort.int(moduleTraitCor[, 1], index.return = TRUE)$ix, , drop = FALSE]
 ```
 
 
@@ -363,11 +369,27 @@ MEs[1:3, ]
 ```{r}
 #sizeGrWindow(10,6)
 # Will display correlations and their p-values
-textMatrix = paste(signif(moduleTraitCor, 2), " (", signif(moduleTraitPvalue, 1), ")", sep = "")
+
+#textMatrix = paste(signif(moduleTraitCor, 2), " \n(", signif(moduleTraitPvalue, 1), ")", sep = "")
+textMatrix = paste(signif(moduleTraitCor, 2), " (p=", signif(moduleTraitPvalue, 1), ")", sep = "")
 
 dim(textMatrix) = dim(moduleTraitCor)
+row.names(textMatrix) <- row.names(moduleTraitCor)
+```
 
 
+Sorting data.
+
+```{r}
+my_index <- sort.int(moduleTraitCor, decreasing = TRUE, index.return = TRUE)$ix
+
+moduleTraitCor <- moduleTraitCor[my_index, , drop = FALSE]
+textMatrix <- textMatrix[my_index, , drop = FALSE]
+
+```
+
+
+```{r}
 # png(filename = "pheno_eigengene_heatmap.png", 
 #     width = 6.5, height = 5.0, units = 'in',
 #     res = 300)
@@ -378,12 +400,14 @@ labeledHeatmap(Matrix = moduleTraitCor,
   # xLabels = names(datTraits),
   xLabels = "CBGA:THCA",
   #xLabels = c("CBGA:THCA", "CBGA:THCA_2"),
-  yLabels = names(MEs),
-  ySymbols = names(MEs),
+#  yLabels = names(MEs),
+#  ySymbols = names(MEs),
+  yLabels = row.names(moduleTraitCor),
+  ySymbols = row.names(moduleTraitCor),
   colorLabels = FALSE,
 #  colors = greenWhiteRed(50),
 #  colors = viridisLite::magma( n = 100, alpha = 1, begin = 0.1, end = 1),
-  colors = c( viridisLite::magma( n = 100, alpha = 1, begin = 0.0, end = 1),
+  colors = c( viridisLite::magma( n = 100, alpha = 1, begin = 0.2, end = 1),
               viridisLite::cividis( n = 100, alpha = 1, begin = 0.0, end = 1, direction = -1)),
   textMatrix = textMatrix,
   setStdMargins = FALSE,
