@@ -1,0 +1,42 @@
+---
+title: "BioPython FASTA"
+output: html_document
+date: "2023-04-17"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+https://biopython.org/wiki/SeqIO
+
+
+```{python}
+from Bio import SeqIO
+
+record_dict = SeqIO.to_dict(SeqIO.parse("S288C_reference_sequence_R64-2-1_20150113.fsa", "fasta"))
+my_list = list(record_dict.keys())
+
+my_list[0]
+my_list[0:3]
+
+print(record_dict["ref|NC_001133|"])  # use any record ID
+print(record_dict[my_list[0]])
+print(record_dict[0:3])
+
+
+SeqIO.write(record_dict["ref|NC_001133|"], "example.fasta", "fasta")
+
+
+dict_you_want = {key: record_dict[key] for key in my_list[0:3]}
+dict_you_want
+
+SeqIO.write(dict_you_want, "example.fasta", "fasta")
+
+```
+
+
+
