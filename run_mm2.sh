@@ -1,5 +1,8 @@
 #!/bin/env bash
 
+# Submit this script as follows.
+# qsub run_mm2.sh
+
 #$ -cwd
 #$ -S /bin/bash
 #$ -N mm2
@@ -29,8 +32,10 @@ MM2="~/bin/minmap2/minimap2-2.17_x64-linux/minimap2"
 # -d FILE      dump index to FILE []
 # -t INT       number of threads [3]
 
+# Match threads with the SGE request above (#$ -pe thread)
+NTHREADS=3
 
-CMD="$MM2 -c -x asm5 $FA1 $FA2 -o mm2_CBDRx_ERBxHO40_23_COMBINED-Hap2.paf"
+CMD="$MM2 -c -x asm5 -t $NTHREADS $FA1 $FA2 -o mm2_CBDRx_ERBxHO40_23_COMBINED-Hap2.paf"
 
 date
 
