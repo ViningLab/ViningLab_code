@@ -11,20 +11,35 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
+BioPython SeqIO documentation:
 https://biopython.org/wiki/SeqIO
+
+Python3 tutorial:
+https://docs.python.org/3/tutorial/index.html
 
 
 ## Read FASTA into a dictionary
 
+A python 'dictionary' consists of 'key' and 'value' pairs.
+In the context of a 'SeqIO' object, each 'key' will be the sequence 'id' and the 'value' will be the record for each key.
+
 ```{python}
 from Bio import SeqIO
+# In order to read gzipped FASTA files, import the library and create a 'file handle'.
 import gzip
 f = gzip.open( "S288C_reference_sequence_R64-2-1_20150113.fsa.gz", 'rt' )
+# In order to read uncompressed FASTA, create a 'file handle'.
+# f = open( "S288C_reference_sequence_R64-2-1_20150113.fsa", encoding="utf-8" )
+
+# Read the 'file handle' into memory.
 record_dict = SeqIO.to_dict(SeqIO.parse(f, "fasta"))
+# Once we're done reading the data into memory we can close the file handle.
 f.close()
 
+# We can access elements from the dictionary using a single 'key'.
 print(record_dict["ref|NC_001133|"])  # use any record ID
 
+# We can access elements from the dictionary using a list of single 'key's.
 #
 my_list = list(record_dict.keys())
 #
@@ -34,53 +49,36 @@ print(my_list[0])  # use any record ID
 
 print(record_dict[my_list[0]])  # use any record ID
 
+my_list = ['ref|NC_001134|', 'ref|NC_001136|', 'ref|NC_001137|']
 
-#SeqIO.write(record_dict[my_list[0]], "example.fasta", "fasta")
+my_seqList = [record_dict[my_list[0]], record_dict[my_list[1]], record_dict[my_list[2]]]
 
-
-dict_you_want = {key: record_dict[key] for key in my_list[0:3]}
-dict_you_want
-
-#SeqIO.write(dict_you_want[my_list[0]], "example.fasta", "fasta")
-
-#SeqIO.write(dict_you_want, "example.fasta", "fasta")
-
+# Write the list of SeqIO objects to FASTA file.
+#SeqIO.write(my_seqList, "example.FASTA", "fasta")
 ```
 
-
-## Read FASTA into a dictionary
-
-```{python}
-from Bio import SeqIO
-import gzip
-# f = open( "S288C_reference_sequence_R64-2-1_20150113.fsa", encoding="utf-8" )
-f = gzip.open( "S288C_reference_sequence_R64-2-1_20150113.fsa.gz", 'rt' )
-
-record_dict = SeqIO.to_dict(SeqIO.parse(f, "fasta"))
-
-print(record_dict["ref|NC_001133|"])  # use any record ID
-
-f.close()
-```
 
 ## Read FASTA into a list
 
+
 ```{python}
 from Bio import SeqIO
 import gzip
 f = gzip.open( "S288C_reference_sequence_R64-2-1_20150113.fsa.gz", 'rt' )
 # f = open( "S288C_reference_sequence_R64-2-1_20150113.fsa", encoding="utf-8" )
+records = list(SeqIO.parse(f, "fasta"))
 f.close()
 
-records = list(SeqIO.parse(f, "fasta"))
 print(records[0].id)
-records[0:2]
 
+# Subset to the first two records.
+records = records[0:2]
+records
 
+# Write to file.
 f = gzip.open( "example.FASTA.gz", 'wt' )
 SeqIO.write(records, f, "fasta")
 f.close()
-
 ```
 
 
