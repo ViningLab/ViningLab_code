@@ -14,29 +14,73 @@ knitr::opts_chunk$set(echo = TRUE)
 https://biopython.org/wiki/SeqIO
 
 
+## Read FASTA into a dictionary
+
 ```{python}
 from Bio import SeqIO
-
-record_dict = SeqIO.to_dict(SeqIO.parse("S288C_reference_sequence_R64-2-1_20150113.fsa", "fasta"))
-my_list = list(record_dict.keys())
-
-my_list[0]
-my_list[0:3]
+import gzip
+f = gzip.open( "S288C_reference_sequence_R64-2-1_20150113.fsa.gz", 'rt' )
+record_dict = SeqIO.to_dict(SeqIO.parse(f, "fasta"))
+f.close()
 
 print(record_dict["ref|NC_001133|"])  # use any record ID
-print(record_dict[my_list[0]])
-print(record_dict[0:3])
+
+#
+my_list = list(record_dict.keys())
+#
+my_list[0]
+#my_list[0:3]
+print(my_list[0])  # use any record ID
+
+print(record_dict[my_list[0]])  # use any record ID
 
 
-SeqIO.write(record_dict["ref|NC_001133|"], "example.fasta", "fasta")
+#SeqIO.write(record_dict[my_list[0]], "example.fasta", "fasta")
 
 
 dict_you_want = {key: record_dict[key] for key in my_list[0:3]}
 dict_you_want
 
-SeqIO.write(dict_you_want, "example.fasta", "fasta")
+#SeqIO.write(dict_you_want[my_list[0]], "example.fasta", "fasta")
+
+#SeqIO.write(dict_you_want, "example.fasta", "fasta")
 
 ```
 
+
+## Read FASTA into a dictionary
+
+```{python}
+from Bio import SeqIO
+import gzip
+# f = open( "S288C_reference_sequence_R64-2-1_20150113.fsa", encoding="utf-8" )
+f = gzip.open( "S288C_reference_sequence_R64-2-1_20150113.fsa.gz", 'rt' )
+
+record_dict = SeqIO.to_dict(SeqIO.parse(f, "fasta"))
+
+print(record_dict["ref|NC_001133|"])  # use any record ID
+
+f.close()
+```
+
+## Read FASTA into a list
+
+```{python}
+from Bio import SeqIO
+import gzip
+f = gzip.open( "S288C_reference_sequence_R64-2-1_20150113.fsa.gz", 'rt' )
+# f = open( "S288C_reference_sequence_R64-2-1_20150113.fsa", encoding="utf-8" )
+f.close()
+
+records = list(SeqIO.parse(f, "fasta"))
+print(records[0].id)
+records[0:2]
+
+
+f = gzip.open( "example.FASTA.gz", 'wt' )
+SeqIO.write(records, f, "fasta")
+f.close()
+
+```
 
 
