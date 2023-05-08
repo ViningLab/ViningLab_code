@@ -1,0 +1,118 @@
+---
+title: "VCF variants"
+author: "Brian J. Knaus"
+date: "`r format(Sys.time(), '%Y, %B %d')`"
+output:
+  html_document:
+    toc: true
+    code_folding: show
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.align = "center")
+knitr::opts_chunk$set(fig.height = 4)
+knitr::opts_chunk$set(fig.width = 4)
+#library(reticulate)
+#use_python("/usr/bin/python3")
+#use_python("/usr/bin/env python3")
+st1 <- Sys.time()
+```
+
+
+## Links
+
+https://knausb.github.io/vcfR_documentation/
+
+http://samtools.github.io/hts-specs/
+
+
+## VCF data
+
+
+```{r}
+library(vcfR)
+```
+
+
+```{r, results='hide'}
+vcf <- read.vcfR("cohort_h1tg000002l.vcf.gz")
+#vcf <- read.vcfR("pbrice_h1tg000015l.vcf.gz")
+```
+
+
+```{r}
+vcf
+queryMETA(vcf)
+queryMETA(vcf, element = "AD")
+vcf@fix[1:3, 1:7]
+vcf@gt[1:4, 1:3]
+```
+
+
+
+```{r}
+gt <- extract.gt(vcf)
+gt[1:4, ]
+dp <- extract.gt(vcf, element = "DP", as.numeric = TRUE)
+dp[1:3, ]
+```
+
+
+
+```{r}
+library(ggplot2)
+library(reshape2)
+dpf <- melt(dp, varnames=c('Index', 'Sample'), value.name = 'Depth', na.rm=TRUE)
+dpf <- dpf[ dpf$Depth > 0, ]
+
+p <- ggplot(dpf, aes(x=Sample, y=Depth)) + 
+  geom_violin(fill="#C0C0C0", adjust=1.0, scale = "count", trim=TRUE)
+p <- p + theme_bw()
+
+p <- p + theme(axis.title.x = element_blank(), 
+               axis.text.x = element_text(angle = 60, hjust = 1, size=12))
+p <- p + scale_y_continuous(trans=scales::log2_trans(), 
+                            breaks=c(1, 10, 100, 800),
+                            minor_breaks=c(1:10, 2:10*10, 2:8*100))
+p <- p + theme( axis.title.y = element_text( size = 12) )
+p <- p + theme( panel.grid.major.y=element_line(color = "#A9A9A9", size=0.6) )
+p <- p + theme( panel.grid.minor.y=element_line(color = "#C0C0C0", size=0.2) )
+p
+```
+
+
+https://knausb.github.io/vcfR_documentation/determining_ploidy_1.html
+
+
+```{r}
+vcf@gt[1:4, 1:3]
+ad <- extract.gt(vcf, element = "AD", as.numeric = FALSE)
+ad[1:3, ]
+
+hets <- is_het(gt)
+is.na( ad[ !hets ] ) <- TRUE
+
+allele1 <- masplit(ad, record = 1)
+allele2 <- masplit(ad, record = 2)
+
+allele1[1:4, ]
+allele2[1:4, ]
+
+ad1 <- allele1 / (allele1 + allele2)
+ad2 <- allele2 / (allele1 + allele2)
+
+```
+
+
+```{r}
+hist(ad2[,1], breaks = seq(0,1,by=0.02), col = "#1f78b4", xaxt="n")
+hist(ad1[,1], breaks = seq(0,1,by=0.02), col = "#a6cee3", add = TRUE)
+axis(side=1, at=c(0,0.25,0.333,0.5,0.666,0.75,1), labels=c(0,"1/4","1/3","1/2","1/3","3/4",1))
+```
+
+
+
