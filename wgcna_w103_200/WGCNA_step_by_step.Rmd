@@ -205,6 +205,12 @@ geneTree = hclust(as.dist(dissTOM), method = "average");
 #sizeGrWindow(12,9)
 plot(geneTree, xlab="", sub="", main = "Gene clustering on TOM-based dissimilarity",
      labels = FALSE, hang = 0.04)
+
+# plot(geneTree, xlab="", sub="", main = "Gene clustering on TOM-based dissimilarity",
+#      labels = FALSE, hang = 0.04, ylim = c(0.8, 1))
+
+# geneTree2 <- ape::as.phylo(geneTree)
+
 ```
 
 
@@ -238,8 +244,18 @@ table(dynamicColors)
 plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut",
                     dendroLabels = FALSE, hang = 0.03,
                     addGuide = TRUE, guideHang = 0.05,
-main = "Gene dendrogram and module colors")
+                    main = "Gene dendrogram and module colors")
 ```
+
+
+```{r}
+class(geneTree)
+plot( geneTree )
+#plot( geneTree, xlim = c(10, 40) )
+```
+
+
+
 
 
 ## Modules of interest
