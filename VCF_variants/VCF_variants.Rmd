@@ -56,7 +56,7 @@ vcf@gt[1:4, 1:3]
 
 ```{r}
 gt <- extract.gt(vcf)
-gt[1:3, ]
+gt[1:4, ]
 dp <- extract.gt(vcf, element = "DP", as.numeric = TRUE)
 dp[1:3, ]
 ```
@@ -68,6 +68,7 @@ library(ggplot2)
 library(reshape2)
 dpf <- melt(dp, varnames=c('Index', 'Sample'), value.name = 'Depth', na.rm=TRUE)
 dpf <- dpf[ dpf$Depth > 0, ]
+
 p <- ggplot(dpf, aes(x=Sample, y=Depth)) + 
   geom_violin(fill="#C0C0C0", adjust=1.0, scale = "count", trim=TRUE)
 p <- p + theme_bw()
@@ -84,9 +85,34 @@ p
 ```
 
 
+https://knausb.github.io/vcfR_documentation/determining_ploidy_1.html
 
 
+```{r}
+vcf@gt[1:4, 1:3]
+ad <- extract.gt(vcf, element = "AD", as.numeric = FALSE)
+ad[1:3, ]
 
+hets <- is_het(gt)
+is.na( ad[ !hets ] ) <- TRUE
+
+allele1 <- masplit(ad, record = 1)
+allele2 <- masplit(ad, record = 2)
+
+allele1[1:4, ]
+allele2[1:4, ]
+
+ad1 <- allele1 / (allele1 + allele2)
+ad2 <- allele2 / (allele1 + allele2)
+
+```
+
+
+```{r}
+hist(ad2[,1], breaks = seq(0,1,by=0.02), col = "#1f78b4", xaxt="n")
+hist(ad1[,1], breaks = seq(0,1,by=0.02), col = "#a6cee3", add = TRUE)
+axis(side=1, at=c(0,0.25,0.333,0.5,0.666,0.75,1), labels=c(0,"1/4","1/3","1/2","1/3","3/4",1))
+```
 
 
 
