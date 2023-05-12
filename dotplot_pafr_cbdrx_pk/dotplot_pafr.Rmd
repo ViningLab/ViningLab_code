@@ -17,7 +17,8 @@ https://cran.r-project.org/web/packages/pafr/index.html
 
 ```{r}
 library(pafr)
-my_paf <- read_paf("CBDRx_Purple_Kush.paf")
+#my_paf <- read_paf("CBDRx_Purple_Kush.paf")
+my_paf <- read_paf("CBDRx_Purple_Kush.paf.gz")
 my_paf
 ```
 
