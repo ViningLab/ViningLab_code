@@ -204,7 +204,9 @@ geneTree = hclust(as.dist(dissTOM), method = "average");
 # Plot the resulting clustering tree (dendrogram)
 #sizeGrWindow(12,9)
 plot(geneTree, xlab="", sub="", main = "Gene clustering on TOM-based dissimilarity",
-     labels = FALSE, hang = 0.04)
+     labels = FALSE, hang = 0.04, ylim = c(0.7, 0.8))
+
+axis( side = 1 )
 
 # plot(geneTree, xlab="", sub="", main = "Gene clustering on TOM-based dissimilarity",
 #      labels = FALSE, hang = 0.04, ylim = c(0.8, 1))
@@ -212,6 +214,16 @@ plot(geneTree, xlab="", sub="", main = "Gene clustering on TOM-based dissimilari
 # geneTree2 <- ape::as.phylo(geneTree)
 
 ```
+
+
+```{r}
+my_dendro <- as.dendrogram(geneTree)
+plot(my_dendro, xlim = c(75, 120), xlab = geneTree$labels)
+
+axis( side = 1 )
+```
+
+
 
 
 ###  Use tree to create 'modules' (i.e., clusters or groups).
@@ -245,7 +257,13 @@ plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut",
                     dendroLabels = FALSE, hang = 0.03,
                     addGuide = TRUE, guideHang = 0.05,
                     main = "Gene dendrogram and module colors")
+par(mfrow = c(1, 1))
 ```
+
+
+
+
+
 
 
 ```{r}
