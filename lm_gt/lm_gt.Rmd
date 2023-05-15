@@ -126,9 +126,9 @@ par( mfrow = c(1, 1) )
 
 ```{r}
 # my_loc1 <- "4:68382150"
-# my_loc2 <- "7:290913"
+my_loc2 <- "7:290913"
 my_loc1 <- "4:20005812"
-my_loc2 <- "4:21024688"
+#my_loc2 <- "4:21024688"
 
 my_data <- data.frame(
   varin = pheno$Varin_Total,
@@ -136,6 +136,7 @@ my_data <- data.frame(
   loc1 = my_gt[my_loc1, ],
   loc2 = my_gt[my_loc2, ]
 )
+head(my_data)
 lm1 <- lm(varin ~ loc1, data = my_data)
 summary(lm1)
 
