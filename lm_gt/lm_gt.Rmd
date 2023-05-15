@@ -139,8 +139,18 @@ my_data <- data.frame(
 lm1 <- lm(varin ~ loc1, data = my_data)
 summary(lm1)
 
+af <- anova(lm1)
+afss <- af$`Sum Sq`
+print(cbind(af,PctExp=afss/sum(afss)*100))
+
+
 lm2 <- lm(varin ~ loc2, data = my_data)
 summary(lm2)
+
+af <- anova(lm2)
+afss <- af$`Sum Sq`
+print(cbind(af,PctExp=afss/sum(afss)*100))
+
 
 my_df <- data.frame(
   names = c("hom00", "het01", "hom11"),
@@ -202,6 +212,10 @@ par( mfrow = c(1, 1) )
 lm3 <- lm(varin ~ loc1 + loc2, data = my_data)
 summary(lm3)
 
+af <- anova(lm3)
+afss <- af$`Sum Sq`
+print(cbind(af,PctExp=afss/sum(afss)*100))
+
 my_df$loc1_mean <- c(
 coefficients(lm3)[1],
 1 * coefficients(lm3)[2] + coefficients(lm3)[1],
@@ -244,6 +258,10 @@ Interaction term
 ```{r}
 lm4 <- lm(varin ~ loc1 + loc2 + loc1:loc2, data = my_data)
 summary(lm4)
+
+af <- anova(lm4)
+afss <- af$`Sum Sq`
+print(cbind(af,PctExp=afss/sum(afss)*100))
 ```
 
 
