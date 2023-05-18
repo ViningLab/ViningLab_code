@@ -39,6 +39,79 @@ y = \beta_0 + \beta_1 locus_A + \beta_2 locus_B + \beta_3 locus_A:locus_B + \eps
 \end{equation}
 
 
+## GAPIT Blink results
+
+```{r}
+blink <- read.csv("gapit_blink_nlog10>7.csv")
+blink$`-log10(p)` <- -log10(blink$P.value)
+blink <- blink[ sort.int(blink$`-log10(p)`, decreasing = TRUE, index.return = TRUE)$ix, ]
+#blink[1:3, ]
+
+library(kableExtra)
+#color.me <- which(mtcars$cyl >6)
+#color.me <- c(1, 3)
+color.me <- seq(1, nrow(blink), by = 2)
+
+my_caption <- "**Table X.** Top results from GAPIT's Blink model, sorted by -log10(p-value)."
+
+blink %>% 
+  kable(booktabs = TRUE, row.names = FALSE, caption = my_caption) %>%
+  kable_styling() %>%
+  row_spec(color.me, bold = FALSE, 
+#           color = "white",
+           color = "#000000",
+#           background = "F5F5F5")
+           background = "#DCDCDC")
+#           background = "#C0C0C0")
+
+```
+
+
+## Plink epistasis results
+
+https://www.cog-genomics.org/plink/1.9/epistasis
+
+Command.
+
+```
+my_cmd <- "~/bin/plink/plink --file varin_Blink --epistasis --epi1 1.0 --epi2 0.01 --out varin_Blink"
+system(my_cmd)
+```
+
+Output.
+
+```{r}
+plink_tbl <- read.table("varin_Blink.epi.qt", header = TRUE, sep = "")
+plink_tbl$`-log10(p)` <- -log10(plink_tbl$P)
+#plink_tbl <- plink_tbl[sort.int(plink_tbl$`-log10(p)`, decreasing = TRUE, index.return = TRUE)$ix, ]
+
+my_caption <- "**Table X.** Results from plink's epistasis test, unsorted examples from the top of the output file."
+color.me <- seq(1, nrow(plink_tbl), by = 2)
+#color.me <- seq(1, 12, by = 2)
+
+my_digits <- rep(3, times = ncol(plink_tbl))
+#my_digits[7] <- 7
+
+#plink_tbl[plink_tbl$SNP1 == "4:68382150" & plink_tbl$SNP2 == "4:36256098", ]
+plink_tbl[plink_tbl$SNP2 == "4:68382150" & plink_tbl$SNP1 == "4:36256098", ]
+
+
+#plink_tbl[1:12, ] %>% 
+plink_tbl %>% 
+  kable(digits = my_digits, booktabs = TRUE, row.names = FALSE, caption = my_caption) %>%
+  kable_styling() %>%
+  row_spec(color.me, bold = FALSE,
+#           color = "white",
+           color = "#000000",
+           background = "#DCDCDC") %>%
+#           background = "#C0C0C0") %>%
+  scroll_box(width = "100%", height = "500px")
+
+```
+
+
+
+
 ## Phenotypic data
 
 ```{r}
@@ -74,7 +147,7 @@ row.names(pheno) <- pheno$Taxa
 pheno <- pheno[colnames(vcf@gt)[-1], ]
 all( colnames(vcf@gt)[-1] == pheno$Taxa )
 row.names(pheno) <- 1:nrow(pheno)
-pheno[1:3, ]
+#pheno[1:3, ]
 ```
 
 
@@ -89,6 +162,10 @@ abline( v = 22.5, lty = 3, col = "#B22222")
 
 ```{r}
 vcf
+my_gta <- extract.gt(vcf, return.alleles = TRUE)
+row.names(my_gta) <- sub("_", ":", row.names(my_gta))
+my_gta[1:3, 1:6]
+
 my_gt <- extract.gt(vcf)
 my_gt[ my_gt == "0/0" ] <- 0
 my_gt[ my_gt == "0/1" ] <- 1
@@ -106,19 +183,313 @@ my_gt[1:3, 1:6]
 
 
 ```{r, fig.width=10, fig.height=4}
-par( mfrow = c(1, 3) )
+# par( mfrow = c(1, 3) )
+# 
+# plot( x = jitter(my_gt["4:36256098", ], factor = 0.4), y = pheno$Varin_Total, xlab = "4:36256098")
+# abline( h = 22.5, lty = 3, col = "#B22222")
+# 
+# plot( x = jitter(my_gt["4:20005812", ], factor = 0.4), y = pheno$Varin_Total, xlab = "4:20005812")
+# abline( h = 22.5, lty = 3, col = "#B22222")
+# 
+# plot( x = jitter(my_gt["7:290913", ], factor = 0.4), y = pheno$Varin_Total, xlab = "7:290913")
+# abline( h = 22.5, lty = 3, col = "#B22222")
+# 
+# par( mfrow = c(1, 1) )
+```
 
-plot( x = jitter(my_gt["4:36256098", ], factor = 0.4), y = pheno$Varin_Total, xlab = "4:36256098")
-abline( h = 22.5, lty = 3, col = "#B22222")
 
-plot( x = jitter(my_gt["4:20005812", ], factor = 0.4), y = pheno$Varin_Total, xlab = "4:20005812")
-abline( h = 22.5, lty = 3, col = "#B22222")
+```{r}
+getFIX(vcf)[ c(9, 4, 1, 11), ]
+```
 
-plot( x = jitter(my_gt["7:290913", ], factor = 0.4), y = pheno$Varin_Total, xlab = "7:290913")
+
+### Single locus
+
+
+```{r, fig.width=10, fig.height=4}
+
+my_pal <- c("#1b9e77", "#d95f02", "#7570b3")
+my_pal <- paste(my_pal, "88", sep = "")
+
+palette(my_pal)
+
+par( mfrow = c(1, 2) )
+
+my_var <- "4:20005812"
+my_gts <- my_gta[my_var, ]
+my_gts <- as.factor(my_gts)
+plot( x = jitter(my_gt[my_var, ], factor = 0.4), 
+      y = pheno$Varin_Total, 
+      xlab = my_var, xaxt = "n", 
+      #type = "n", 
+      pch = 20, col = as.numeric(my_gts))
+axis( side = 1, at = 0:2, labels = unique(my_gts))
 abline( h = 22.5, lty = 3, col = "#B22222")
+# text( x = jitter(my_gt[my_var, ], factor = 0.4), 
+#       y = pheno$Varin_Total, labels = my_gts, 
+#       col = as.numeric(my_gts))
+
+
+my_var <- "4:36256098"
+my_gts <- my_gta[my_var, ]
+my_gts <- as.factor(my_gts)
+
+plot( x = jitter(my_gt[my_var, ], factor = 0.4), 
+      y = pheno$Varin_Total, 
+      xlab = my_var, xaxt = "n",
+      #type = "n",       
+      pch = 20, col = as.numeric(my_gts))
+axis( side = 1, at = 0:2, labels = unique(my_gts))
+abline( h = 22.5, lty = 3, col = "#B22222")
+# text( x = jitter(my_gt[my_var, ], factor = 0.4), 
+#       y = pheno$Varin_Total, labels = my_gts, 
+#       col = as.numeric(my_gts))
+
+#my_var <- "4:20005812"
+my_var <- "4:68382150"
+my_gts <- my_gta[my_var, ]
+my_gts <- as.factor(my_gts)
+plot( x = jitter(my_gt[my_var, ], factor = 0.4), 
+      y = pheno$Varin_Total, 
+      xlab = my_var, xaxt = "n", 
+      #type = "n",       
+      pch = 20, col = as.numeric(my_gts))
+axis( side = 1, at = 0:2, labels = unique(my_gts))
+abline( h = 22.5, lty = 3, col = "#B22222")
+# text( x = jitter(my_gt[my_var, ], factor = 0.4), 
+#       y = pheno$Varin_Total, labels = my_gts, 
+#       col = as.numeric(my_gts))
+
+
+
+my_var <- "7:290913"
+my_gts <- my_gta[my_var, ]
+#unique(my_gts)
+my_gts <- factor(my_gts, levels = c("G/G", "G/A", "A/A"))
+
+plot( x = jitter(my_gt[my_var, ], factor = 0.4), 
+      y = pheno$Varin_Total, 
+      xlab = my_var, xaxt = "n", 
+      #type = "n",
+      pch = 20, col = as.numeric(my_gts))
+axis( side = 1, at = 0:2, labels = levels(my_gts))
+abline( h = 22.5, lty = 3, col = "#B22222")
+# text( x = jitter(my_gt[my_var, ], factor = 0.4), 
+#       y = pheno$Varin_Total, labels = my_gts, 
+#       col = as.numeric(my_gts))
 
 par( mfrow = c(1, 1) )
+
+#title( main = "Single locus", outer = TRUE, line = -1 )
 ```
+
+
+### Locus by Locus
+
+
+```{r}
+getFIX(vcf)[ c(9, 4, 1, 11), ]
+```
+
+
+```{r, fig.width=10, fig.height=4}
+par( mfrow = c(1, 2) )
+
+my_pal <- c("#1b9e77", "#d95f02", "#7570b3")
+my_pal <- paste(my_pal, "88", sep = "")
+
+palette(my_pal)
+
+my_var <- "4:68382150"
+#my_var <- "4:36256098"
+my_gts <- my_gta[my_var, ]
+my_gts <- as.factor(my_gts)
+
+#my_var <- "4:68382150" 	
+my_var2 <- "4:36256098"
+my_gts2 <- my_gta[my_var2, ]
+my_gts2 <- as.factor(my_gts2)
+
+plot( x = jitter(my_gt[my_var, ], factor = 0.4), 
+      y = pheno$Varin_Total, 
+      xlab = paste("Positional: ", my_var, ", glyph: ", my_var2, sep = ""),
+      ylab = "Varin_Total",
+      xaxt = "n",
+#      type = "n",
+      pch = 20, col = as.numeric(my_gts2)
+      )
+axis( side = 1, at = 0:2, labels = unique(my_gts))
+abline( h = 22.5, lty = 3, col = "#B22222")
+# text( x = jitter(my_gt[my_var, ], factor = 0.4), 
+#       y = pheno$Varin_Total, labels = my_gts2, 
+#       col = as.numeric(my_gts2)
+#       )
+legend("topleft", legend = levels(my_gts2), fill = 1:3, bty = "n")
+
+
+#####
+
+#my_var <- "7:290913"
+#my_var <- "4:68382150" 	
+my_var <- "4:36256098"
+my_gts <- my_gta[my_var, ]
+my_gts <- as.factor(my_gts)
+
+my_var2 <- "4:68382150"
+#my_var2 <- "4:36256098"
+my_gts2 <- my_gta[my_var2, ]
+my_gts2 <- factor(my_gts2, levels = c("T/T", "T/C", "C/C"))
+
+plot( x = jitter(my_gt[my_var, ], factor = 0.4), 
+      y = pheno$Varin_Total, 
+      xlab = paste("Positional: ", my_var, ", glyph: ", my_var2, sep = ""),
+      ylab = "Varin_Total",
+      xaxt = "n",
+      #type = "n"
+      pch = 20, col = as.numeric(my_gts2)
+      )
+axis( side = 1, at = 0:2, labels = unique(my_gts))
+abline( h = 22.5, lty = 3, col = "#B22222")
+# text( x = jitter(my_gt[my_var, ], factor = 0.4), 
+#       y = pheno$Varin_Total, labels = my_gts2, 
+#       col = as.numeric(my_gts2)
+# )
+legend("topleft", legend = levels(my_gts2), fill = 1:3, bty = "n")
+
+#####
+#####
+
+my_var <- "4:20005812"
+#my_var <- "7:290913"
+#my_var <- "4:68382150" 	
+#my_var <- "4:36256098"
+my_gts <- my_gta[my_var, ]
+my_gts <- factor(my_gts, levels = c("G/G", "G/A", "A/A"))
+
+my_var2 <- "4:68382150" 	
+#my_var2 <- "4:36256098"
+my_gts2 <- my_gta[my_var2, ]
+my_gts2 <- factor(my_gts2, levels = c("T/T", "T/C", "C/C"))
+
+plot( x = jitter(my_gt[my_var, ], factor = 0.4), 
+      y = pheno$Varin_Total, 
+      xlab = paste("Positional: ", my_var, ", glyph: ", my_var2, sep = ""),
+      ylab = "Varin_Total",
+      xaxt = "n",
+      #type = "n"
+      pch = 20, col = as.numeric(my_gts2)
+      )
+axis( side = 1, at = 0:2, labels = unique(my_gts))
+abline( h = 22.5, lty = 3, col = "#B22222")
+# text( x = jitter(my_gt[my_var, ], factor = 0.4), 
+#       y = pheno$Varin_Total, labels = my_gts2, 
+#       col = as.numeric(my_gts2)
+# )
+legend("topleft", legend = levels(my_gts2), fill = 1:3, bty = "n")
+
+my_var <- "4:68382150" 	
+#my_var <- "4:36256098"
+my_gts <- my_gta[my_var, ]
+my_gts <- factor(my_gts, levels = c("T/T", "T/C", "C/C"))
+
+my_var2 <- "4:20005812"
+#my_var <- "4:68382150" 	
+#my_var2 <- "4:36256098"
+#my_var2 <- "7:290913"
+my_gts2 <- my_gta[my_var2, ]
+my_gts2 <- factor(my_gts2, levels = c("G/G", "G/A", "A/A"))
+
+plot( x = jitter(my_gt[my_var, ], factor = 0.4), 
+      y = pheno$Varin_Total, 
+      xlab = paste("Positional: ", my_var, ", glyph: ", my_var2, sep = ""),
+      ylab = "Varin_Total",
+      xaxt = "n",
+      #type = "n"
+      pch = 20, col = as.numeric(my_gts2)
+      )
+axis( side = 1, at = 0:2, labels = unique(my_gts))
+abline( h = 22.5, lty = 3, col = "#B22222")
+# text( x = jitter(my_gt[my_var, ], factor = 0.4), 
+#       y = pheno$Varin_Total, labels = my_gts2, 
+#       col = as.numeric(my_gts2)
+#       )
+legend("topleft", legend = levels(my_gts2), fill = 1:3, bty = "n")
+
+#####
+
+
+
+#####
+
+my_var <- "4:68382150" 	
+#my_var <- "4:36256098"
+my_gts <- my_gta[my_var, ]
+my_gts <- factor(my_gts, levels = c("T/T", "T/C", "C/C"))
+
+#my_var <- "4:68382150" 	
+#my_var2 <- "4:36256098"
+my_var2 <- "7:290913"
+my_gts2 <- my_gta[my_var2, ]
+my_gts2 <- factor(my_gts2, levels = c("G/G", "G/A", "A/A"))
+
+plot( x = jitter(my_gt[my_var, ], factor = 0.4), 
+      y = pheno$Varin_Total, 
+      xlab = paste("Positional: ", my_var, ", glyph: ", my_var2, sep = ""),
+      ylab = "Varin_Total",
+      xaxt = "n",
+      #type = "n"
+      pch = 20, col = as.numeric(my_gts2)
+      )
+axis( side = 1, at = 0:2, labels = unique(my_gts))
+abline( h = 22.5, lty = 3, col = "#B22222")
+# text( x = jitter(my_gt[my_var, ], factor = 0.4), 
+#       y = pheno$Varin_Total, labels = my_gts2, 
+#       col = as.numeric(my_gts2)
+#       )
+legend("topleft", legend = levels(my_gts2), fill = 1:3, bty = "n")
+
+#####
+
+#my_var <- "4:68382150" 	
+#my_var <- "4:36256098"
+my_var <- "7:290913"
+my_gts <- my_gta[my_var, ]
+my_gts <- factor(my_gts, levels = c("G/G", "G/A", "A/A"))
+#dput(unique(my_gts))
+
+
+#
+my_var2 <- "4:68382150" 	
+#my_var2 <- "4:36256098"
+#my_var2 <- "7:290913"
+my_gts2 <- my_gta[my_var2, ]
+my_gts2 <- factor(my_gts2, levels = c("T/T", "T/C", "C/C"))
+
+plot( x = jitter(my_gt[my_var, ], factor = 0.4), 
+      y = pheno$Varin_Total, 
+      xlab = paste("Positional: ", my_var, ", glyph: ", my_var2, sep = ""),
+      ylab = "Varin_Total",
+      xaxt = "n",
+#      type = "n"
+      pch = 20, col = as.numeric(my_gts2)
+      )
+axis( side = 1, at = 0:2, labels = levels(my_gts))
+abline( h = 22.5, lty = 3, col = "#B22222")
+# text( x = jitter(my_gt[my_var, ], factor = 0.4), 
+#       y = pheno$Varin_Total, labels = my_gts2, 
+#       col = as.numeric(my_gts2)
+#       )
+legend("topleft", legend = levels(my_gts2), fill = 1:3, bty = "n")
+
+par( mfrow = c(1, 1) )
+
+#title( main = "Two locus", outer = TRUE, line = -1 )
+```
+
+
+
+
+
 
 
 ## Single locus models
@@ -127,8 +498,10 @@ par( mfrow = c(1, 1) )
 ```{r}
 # my_loc1 <- "4:68382150"
 # my_loc2 <- "7:290913"
-my_loc1 <- "4:20005812"
-my_loc2 <- "4:21024688"
+# my_loc1 <- "4:20005812"
+# my_loc2 <- "4:21024688"
+my_loc1 <- "4:68382150"
+my_loc2 <- "4:36256098"
 
 my_data <- data.frame(
   varin = pheno$Varin_Total,
@@ -139,6 +512,7 @@ my_data <- data.frame(
 lm1 <- lm(varin ~ loc1, data = my_data)
 summary(lm1)
 
+# https://stats.stackexchange.com/a/79407
 af <- anova(lm1)
 afss <- af$`Sum Sq`
 print(cbind(af,PctExp=afss/sum(afss)*100))
@@ -196,6 +570,8 @@ par( mfrow = c(1, 2) )
 plot( x = jitter(my_data$loc1, factor = 0.4), y = my_data$varin, xlab = my_loc1)
 abline( h = 22.5, lty = 3, col = "#B22222")
 abline(lm1)
+# points(my_data$loc1, predict(lm1), pch = 20, col = "#B22222")
+# table(predict(lm1))
 
 plot( x = jitter(my_data$loc2, factor = 0.4), y = my_data$varin, xlab = my_loc2)
 abline( h = 22.5, lty = 3, col = "#B22222")
@@ -248,6 +624,9 @@ abline( h = 22.5, lty = 3, col = "#B22222")
 
 abline( a = coefficients(lm3)[1], b = coefficients(lm3)[2] + coefficients(lm3)[3])
 
+# points(my_data$loc1, predict(lm3), pch = 20, col = "#B22222")
+# table(predict(lm3), my_data$loc1)
+
 #par( mfrow = c(1, 1) )
 ```
 
@@ -256,6 +635,10 @@ Interaction term
 
 
 ```{r}
+#my_data[1:3, ]
+my_loc1
+my_loc2
+
 lm4 <- lm(varin ~ loc1 + loc2 + loc1:loc2, data = my_data)
 summary(lm4)
 
@@ -275,15 +658,153 @@ points( x = jitter(my_data$loc2, factor = 0.4) + 0.2,
         y = my_data$varin, pch = 17, col = "#228B22")
 
 abline( h = 22.5, lty = 3, col = "#B22222")
+
+
+points( x = jitter(my_data$loc2, factor = 0.4) + 0.4, 
+        y = predict(lm4), pch = 17, col = "#B22222")
+
+
+
 #abline( a = coefficients(lm3)[1], b = coefficients(lm3)[2])
 #abline( a = coefficients(lm3)[1], b = coefficients(lm3)[3])
 
-abline( a = coefficients(lm4)[1], b = coefficients(lm4)[2] + coefficients(lm4)[3] + coefficients(lm4)[4])
+#abline( a = coefficients(lm4)[1], b = coefficients(lm4)[2] + coefficients(lm4)[3] + coefficients(lm4)[4])
+
+my_x <- seq(0, 3, by = 0.1)
+
+my_y <- coefficients(lm4)[1] + my_x * coefficients(lm4)[2] + my_x * coefficients(lm4)[3] + my_x * coefficients(lm4)[4]
+
+#points(x = my_x, y = my_y, type = "b")
+
+
 
 #par( mfrow = c(1, 1) )
 ```
 
 
+## Dominance
+
+http://faculty.washington.edu/kenrice/sisg/sisg-sea11-04.pdf
+
+
+```{r}
+my_data[1:3, ]
+my_data$loc1aA <- 0
+my_data$loc1aA[ my_data$loc1 == 1 ] <- 1
+my_data$loc1aa <- 0
+my_data$loc1aa[ my_data$loc1 == 2 ] <- 1
+my_data[1:3, ]
+
+lm5 <- lm( varin ~ loc1aA + loc1aa, data = my_data)
+summary(lm5)
+#coefficients(lm5)
+
+af <- anova(lm5)
+afss <- af$`Sum Sq`
+print(cbind(af,PctExp=afss/sum(afss)*100))
+
+plot( x = jitter(my_data$loc1, factor = 0.4), y = my_data$varin,
+      xlab = my_loc1, xlim = c(0, 2.4), pch = 18, col = "#1E90FF")
+
+points(x = 0:2, coefficients(lm5), pch = 17, cex = 2, col = "#B22222", font=3)
+
+```
+
+
+
+```{r}
+
+my_data[1:3, ]
+my_data$loc2aA <- 0
+my_data$loc2aA[ my_data$loc2 == 1 ] <- 1
+my_data$loc2aa <- 0
+my_data$loc2aa[ my_data$loc2 == 2 ] <- 1
+my_data[1:3, ]
+
+lm6 <- lm( varin ~ loc1aA + loc1aa + loc2aA + loc2aa + loc1aA:loc2aA + loc1aa:loc2aa, data = my_data)
+summary(lm6)
+#
+coefficients(lm6)
+
+
+af <- anova(lm6)
+afss <- af$`Sum Sq`
+print(cbind(af,PctExp=afss/sum(afss)*100))
+
+plot( x = jitter(my_data$loc1, factor = 0.4), y = my_data$varin,
+      xlab = my_loc1, xlim = c(0, 2.4), pch = 18, col = "#1E90FF")
+
+#points(x = c(0, 1, 2, 1, 2, 1.5, 1.5), coefficients(lm6), pch = 17, cex = 2, col = "#B22222", font=3)
+
+points( x = jitter(my_data$loc2, factor = 0.4) + 0.4, 
+        y = predict(lm6), pch = 17, col = "#B22222")
+```
+
+
+
+
+## GFF
+
+
+```{r}
+my_gff <- read.table("/media/knausb/E737-9B48/releases/scaffolded/EH23b/EH23b.primary_high_confidence.gff3.gz", header = FALSE, sep = "\t", quote = "\"")
+#my_gff <- my_gff[my_gff[, 3] == "gene" ,]
+#my_gff <- my_gff[my_gff[, 3] == "mRNA" ,]
+#my_gff <- my_gff[ grep("desc=[[:alpha:]]", my_gff[, 9]) ,]
+my_gff <- my_gff[my_gff[, 1] == "EH23b.chr4" ,]
+
+my_parse <- function(x){
+  my_ann <- grep("eggnog_free_text_desc=", x, value = TRUE)
+  if( length(my_ann) == 0 ){
+    my_ann <- NA
+  }
+  return(my_ann)
+}
+
+my_gff[ , 10] <- unlist(lapply(strsplit(my_gff[, 9], split = ";"), my_parse))
+my_gff <- my_gff[!is.na(my_gff[ , 10]), ]
+
+my_gff[1:3, 1:8]
+
+buff <- 5e5
+my_gff <- my_gff[my_gff[, 4] >=  68382150 - buff,]
+my_gff <- my_gff[my_gff[, 5] <=  68382150 + buff,]
+nrow(my_gff)
+my_gff[, 1:8]
+my_gff[, 10]
+
+```
+
+
+## Repetetive elements
+
+
+```{r}
+my_gff <- read.table("/media/knausb/E737-9B48/releases/scaffolded/EDTAOutput/EH23b.unmasked.fasta.mod.EDTA.TEanno.gff3", header = FALSE, sep = "\t", quote = "\"")
+my_gff <- my_gff[my_gff[, 1] == "EH23b.chr4" ,]
+
+my_gff[1:3, 1:8]
+my_gff[1:3, 9]
+
+my_parse <- function(x){
+  my_ann <- grep("ID=", x, value = TRUE)
+  if( length(my_ann) == 0 ){
+    my_ann <- NA
+  }
+  return(my_ann)
+}
+
+my_gff[ , 10] <- unlist(lapply(strsplit(my_gff[, 9], split = ";"), my_parse))
+my_gff <- my_gff[!is.na(my_gff[ , 10]), ]
+
+buff <- 1e4
+my_gff <- my_gff[my_gff[, 4] >=  68382150 - buff,]
+my_gff <- my_gff[my_gff[, 5] <=  68382150 + buff,]
+nrow(my_gff)
+# my_gff[, 1:8]
+# my_gff[, 10]
+table(my_gff[, 3])
+```
 
 
 ```{r}
