@@ -487,7 +487,47 @@ par( mfrow = c(1, 1) )
 ```
 
 
+### Violin plot
 
+
+```{r}
+library(ggplot2)
+
+my_var1 <- "4:68382150"
+my_var2 <- "7:290913"
+#pheno$Varin_Total
+
+my_df <- data.frame(
+  Varin = pheno$Varin_Total, 
+#  var1 = my_gt[my_var1, ],
+#  var2 = my_gt[my_var2, ]
+  var1 = my_gta[my_var1, ],
+  var2 = my_gta[my_var2, ]
+)
+#my_df$var1 <- as.factor(my_df$var1)
+#my_df$var2 <- as.factor(my_df$var2)
+my_df$var1 <- factor(my_df$var1, levels = c("T/T", "T/C", "C/C"))
+my_df$var2 <- factor(my_df$var2, levels = c("G/G", "G/A", "A/A"))
+
+#names(my_df)[2] <- my_loc1
+#names(my_df)[3] <- my_loc2
+my_df[1:3, ]
+
+my_pal <- c("#1b9e77", "#d95f02", "#7570b3")
+
+p <- ggplot( data = my_df, aes( x = var1, y = Varin, fill = var2) )
+# p + geom_boxplot()
+p <-p + geom_violin( adjust = 10.2)
+p <- p + theme_bw()
+p <- p + scale_fill_manual( values = my_pal )
+
+p <- p + geom_dotplot(binaxis='y',
+                      stackdir='center',
+                      position=position_dodge(0.9),
+                      binwidth = 0.7, dotsize = 1.4, col = "#000000")
+p
+
+```
 
 
 
