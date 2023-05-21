@@ -1,6 +1,8 @@
 ---
 title: "Dotplot"
-output: html_document
+output: 
+  html_document:
+    toc: true
 date: "2023-05-09"
 editor_options: 
   chunk_output_type: console
@@ -12,6 +14,73 @@ knitr::opts_chunk$set(fig.align = "center")
 ```
 
 
+## Simple dotplot
+
+```{r}
+qstart <- 1:100
+tstart <- 1:100
+
+plot(qstart, tstart)
+title( main = "Identity" )
+abline( a = 0, b = 1, lty = 3, col = "#1E90FF" )
+cbind(qstart, tstart)[1:7, ]
+
+tstart2 <- tstart
+tstart2 <- max(tstart2) - tstart2
+plot(qstart, tstart2)
+abline( a = 0, b = 1, lty = 3, col = "#1E90FF" )
+title( main = "Inverted sequence" )
+cbind(qstart, tstart2)[1:7, ]
+
+
+tstart2 <- tstart
+tstart2[20:60] <- tstart2[60:20]
+plot(qstart, tstart2)
+abline( a = 0, b = 1, lty = 3, col = "#1E90FF" )
+title( main = "Inversion (within sequence)" )
+
+
+tstart2 <- tstart
+tstart2[40:length(tstart2)] <- tstart2[40:length(tstart2)] + 20
+plot(qstart, tstart2)
+abline( a = 0, b = 1, lty = 3, col = "#1E90FF" )
+title( main = "Insertion (within sequence)" )
+abline( a = 40, b = 0, lty = 3, col = "#B22222" )
+abline( a = 60, b = 0, lty = 3, col = "#B22222" )
+
+
+tstart2 <- tstart
+tstart2[20:60] <- tstart2[20:60] + 20
+plot(qstart, tstart2)
+abline( a = 0, b = 1, lty = 3, col = "#1E90FF" )
+title( main = "Insertion (within sequence)" )
+abline( a = 60, b = 0, lty = 3, col = "#B22222" )
+abline( a = 80, b = 0, lty = 3, col = "#B22222" )
+
+
+tstart2 <- tstart
+tstart2[40:length(tstart2)] <- tstart2[40:length(tstart2)] + 20
+plot(qstart, tstart2)
+abline( a = 0, b = 1, lty = 3, col = "#1E90FF" )
+title( main = "Insertion with extra alignment" )
+#abline( a = 40, b = 0, lty = 3, col = "#B22222" )
+#abline( a = 60, b = 0, lty = 3, col = "#B22222" )
+points( x = 80:90, y = 10:20)
+
+
+tstart2 <- tstart
+#tstart2[20:60] <- tstart2[60:20]
+tstart2[20:80] <- sample(tstart2[20:80])
+plot(qstart, tstart2)
+abline( a = 0, b = 1, lty = 3, col = "#1E90FF" )
+title( main = "Spaghetti plate in the middle" )
+
+```
+
+
+## pafr
+
+
 https://cran.r-project.org/web/packages/pafr/index.html
 
 
@@ -20,6 +89,7 @@ library(pafr)
 #my_paf <- read_paf("CBDRx_Purple_Kush.paf")
 my_paf <- read_paf("CBDRx_Purple_Kush.paf.gz")
 my_paf
+as.data.frame(my_paf)[1:3, 1:23]
 ```
 
 
@@ -98,9 +168,62 @@ p
 
 # ggsave(filename = "CBDRx_chrom3_PK_dotplot.tiff", 
 #        device = "tiff", 
-#        width = 3.25, height = 3.25, units = "in", dpi = 300)
+#        width = 3.25, height = 3.25, units = "in", dpi = 300, 
+#        compression = "lzw")
 
 ```
 
+
+
+```{r}
+
+#p + geom_segment()
+
+as.data.frame(chrom3a)[1:3, 1:12]
+
+chrom3b <- chrom3a[chrom3a$qname == "CM010794.2", ]
+
+p <- dotplot(chrom3b, 
+             #order_by = "provided", 
+             label_seqs = TRUE, 
+             xlab = "Purple Kush", 
+             ylab = "CBDRx")
+p <- p + theme_bw()
+p <- p + theme( axis.text.x = element_text(angle = 60, hjust = 1) )
+p
+
+
+# p + geom_segment(data = chrom3a, 
+#          aes_string(x = "qstart", xend = "qend", y = "tstart", yend = "tend"),
+#          size=1.2, colour="#B22222")
+
+line_size <- 1.2
+alignment_colour <- "#1E90FF"
+p + geom_segment(data = chrom3b[chrom3b$strand == "+", ], 
+         aes(x = qstart, xend = qend, y = tstart, yend = tend),
+         #size=1.2,
+         linewidth=line_size,
+         colour=alignment_colour) +
+  geom_segment(data = chrom3b[chrom3b$strand=="-",],
+        aes(x = qend, xend = qstart, y = tstart, yend = tend),
+        size = line_size,
+        colour = alignment_colour) 
+
+
+pointdata <- data.frame(
+  xname = c(0, 20e6, 20e6, 0),
+  ypos = c(0, 0, 20e6, 20e6),
+  ptyname = c(1, 1, 1, 1)
+)
+
+p + geom_point(data = pointdata, 
+               mapping = aes(x = xname, y = ypos, shape = factor(ptyname)),
+               color = "#B22222", size = 4)
+
+p + geom_point(data = pointdata, 
+               mapping = aes(x = xname, y = ypos, shape = factor(ptyname)),
+               color = "#B22222", size = 4) + theme(legend.position="none")
+
+```
 
 
