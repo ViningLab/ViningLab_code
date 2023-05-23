@@ -70,6 +70,7 @@ points( x = 80:90, y = 10:20)
 
 tstart2 <- tstart
 #tstart2[20:60] <- tstart2[60:20]
+set.seed(9)
 tstart2[20:80] <- sample(tstart2[20:80])
 plot(qstart, tstart2)
 abline( a = 0, b = 1, lty = 3, col = "#1E90FF" )
