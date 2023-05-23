@@ -166,6 +166,17 @@ p <- p + theme_bw()
 p <- p + theme( axis.text.x = element_text(angle = 60, hjust = 1) )
 p
 
+
+pointdata <- data.frame(
+  xname = c(0, 20e6, 20e6, 0, 100e6),
+  ypos = c(0, 0, 20e6, 20e6, 20e6),
+  ptyname = c(1, 1, 1, 1, 1)
+)
+
+p + geom_point(data = pointdata, 
+               mapping = aes(x = xname, y = ypos, shape = factor(ptyname)),
+               color = "#B22222", size = 4)
+
 # ggsave(filename = "CBDRx_chrom3_PK_dotplot.tiff", 
 #        device = "tiff", 
 #        width = 3.25, height = 3.25, units = "in", dpi = 300, 
@@ -225,5 +236,13 @@ p + geom_point(data = pointdata,
                color = "#B22222", size = 4) + theme(legend.position="none")
 
 ```
+
+
+```{r}
+chrom3b
+my_df <- as.data.frame(chrom3b)
+my_df[ my_df$qstart > 70e6 & my_df$tstart < 10e6, 1:12]
+```
+
 
 
