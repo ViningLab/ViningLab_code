@@ -3,7 +3,7 @@ title: "Scale independence"
 output: 
   html_document:
     toc: true
-    code_folding: show
+    code_folding: hide
 date: "2023-03-31"
 editor_options: 
   chunk_output_type: console
@@ -12,17 +12,31 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.align = "center")
+knitr::opts_chunk$set(results = "hide")
 ```
 
 
-## Load data
+
+
+## Introduction
+
+
+An example data set was creqated by selecting the first 200 genes from the full data set and then added 5 candidate loci selected to ensure that this example data set included loci that had significant relationships with the phenotype.
+This data was loaded into R and analyzed following the tutorial provided at the WGCNA author's website
+
+https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/index.html
+
+and specifically the content in the below document.
+
+https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-02-networkConstr-auto.pdf
 
 
 ```{r}
 t1 <- Sys.time()
 expData <- read.table(file = "W103first200.tsv", header = TRUE, sep  ="\t")
 expData[1:3, 1:8]
-#nrow(expData)
+#
+nrow(expData)
 #ncol(expData) - 4
 
 datExpr <- expData[, -c(1:4)]
@@ -44,7 +58,7 @@ library(WGCNA)
 ```
 
 
-```{r}
+```{r, fig.cap="**Figure 1.** Scale free topology and mean connectivity as a function of soft threshold. Values for soft threshold were chosen following the code in the tutorial."}
 # Choose a set of soft-thresholding powers
 powers = c(c(1:10), seq(from = 12, to=20, by=2))
 # Call the network topology analysis function
@@ -72,7 +86,16 @@ par(mfrow = c(1,1))
 ```
 
 
-```{r}
+The plots in Figure 1 illustrate the reuse of code provided in the WGCNA author's tutorial but implemented on our example data set of 205 genes.
+Values for scale free topology are insensitive to values of soft threshold from 1 to 7.
+Values for scale free topology are are similarly insensitive to values of soft threshold from 8 to 20, however the scale free topology was a lower value than for soft threshold values from 1 to 7.
+Mean connectivity decreases dramatically for soft threshold values between 1 and 6, after soft threshold reaches a value of about 8 the mean connectivity has approached zero and appears insensitive to increasing values of soft threshold. 
+This is similar to the tutorial where a soft threshold of 6 was eventually chosen.
+
+
+
+
+```{r, fig.cap="**Figure 2.** Scale free topology and mean connectivity as a function of soft threshold. Values for soft threshold were selected based on those in the tutorial but extended to include values up to 100."}
 # Choose a set of soft-thresholding powers
 # powers = c(c(1:10), seq(from = 12, to=20, by=2))
 powers = c(c(1:10), seq(from = 12, to=100, by=2))
@@ -100,6 +123,11 @@ main = paste("Mean connectivity"))
 text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 par(mfrow = c(1,1))
 ```
+
+
+The panels in Figure 2 extend the plots from Figure 1 to include soft threshold values of up to 100.
+The scale free topology and mean connectivity appear insensitive to changes in soft threshold above a value of about 10.
+This appears consistent with Figure 1 as well as the example from the tutorial.
 
 
 
