@@ -7,6 +7,7 @@ output:
 date: "2023-03-31"
 editor_options: 
   chunk_output_type: console
+bibliography: references.bib 
 ---
 
 ```{r setup, include=FALSE}
@@ -166,6 +167,45 @@ par(mfrow = c(1,1))
 
 
 ```{r}
+library(ggplot2)
+library(ggpubr)
+
+my_df <- data.frame(
+  soft_thresh = sft$fitIndices[,1],
+  scale_free_top = -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+  mean_conn = sft$fitIndices[,5]
+)
+
+p <- ggplot( data = my_df, mapping = aes( x = soft_thresh, y = scale_free_top) )
+p <- p + geom_text( label = my_df$soft_thresh, size = 6, color = "#B22222", fontface = "bold")
+p <- p + theme_bw()
+p <- p + xlab("Soft Threshold")
+p <- p + ylab(expression(paste("Scale Free Topology Model Fit (signed ", R^2, ")")))
+p <- p + geom_hline( yintercept = 0.9 , 
+                     color = "red", 
+                     #size = 1.2, 
+                     linewidth = 1.2, 
+                     linetype="dashed")
+p1 <- p
+
+
+p <- ggplot( data = my_df, mapping = aes( x = soft_thresh, y = mean_conn) )
+p <- p + geom_text( label = my_df$soft_thresh, size = 6, color = "#B22222", fontface = "bold")
+p <- p + theme_bw()
+p <- p + xlab("Soft Threshold")
+p <- p + ylab("Mean connectivity")
+p2 <- p
+```
+
+
+```{r, fig.height=4}
+ggarrange( p1, p2, ncol = 2, labels = c("A", "B"))
+```
+
+
+
+
+```{r}
 # Choose a set of soft-thresholding powers
 # powers = c(c(1:10), seq(from = 12, to=20, by=2))
 powers = c(c(1:10), seq(from = 12, to=100, by=2))
@@ -295,6 +335,15 @@ table(dynamicMods)
 # Convert numeric lables into colors
 dynamicColors = labels2colors(dynamicMods)
 table(dynamicColors)
+
+p <- ggplot( data = data.frame( table(dynamicColors) ), mapping = aes( x = Freq ))
+p <- p + geom_histogram( binwidth = 5, color="black", fill="#C0C0C0" )
+p <- p + theme_bw()
+p <- p + xlab('Genes per Module')
+p <- p + ylab('Number of Modules')
+p
+
+
 # Plot the dendrogram and colors underneath
 # sizeGrWindow(8,6)
 plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut",
@@ -371,6 +420,19 @@ mergedColors = merge$colors
 # Eigengenes of the new merged modules:
 mergedMEs = merge$newMEs
 ```
+
+
+```{r, fig.height=4, fig.width=4}
+# merge$colors
+p <- ggplot( data = data.frame( table(merge$colors) ), mapping = aes( x = Freq ))
+p <- p + geom_histogram( binwidth = 5, color="black", fill="#C0C0C0" )
+p <- p + theme_bw()
+p <- p + xlab('Genes per Module')
+p <- p + ylab('Number of Modules')
+p
+```
+
+
 
 
 ```{r}
@@ -578,4 +640,32 @@ ncol(my_module)
 t99 <- Sys.time()
 t99 - t1
 ```
+
+
+## Methods
+
+
+In order to group the genes into modules, or clusters, of genes with similar expression patterns we used weighted gene co-expression network analysis (WGCNA; @wgcna) implemented in the R environment [@R-base].
+Default WGCNA parameters were used except where specified.
+Expression data as fragments per kilobase of transcript per million read pairs (FPKM) output by StringTie [@pertea2016transcript] were used as input.
+The ratio of CBGA to THCA for each sample was input into R and used as a phenotype.
+A soft power was selected by plotting scale free topology and mean connectivity as a function of soft power.
+This soft power was used to calculate an adjacency matrix.
+The adjacency matrix was used to create a topological overlap matrix (TOM).
+The TOM was used for hierarchical clustering using UPGMA.
+The tree resulting from UPGMA and the TOM matrix were used to infer modules (groups of genes) using 'WGCNA::cutreeDynamic()' with the default cutHeight setting, the deepSplit parameter set to 2, and the minimum module size set to 20.
+These modules and the expression data were used to calculate eigengenes, synthetic genes that summarize many genes, using 'WGCNA::moduleEigengenes()' and a softPower set to the value determined above.
+These eigengenes were clustered using UPGMA to determine a threshold for merging modules that may have been similar.
+This threshold was used to with 'WGCNA::mergeCloseModules()', the expression data, and the modules, to update the set of modules so that similar modules were merged together.
+Associations among the eigengenes and the phenotype, the CBGA:THCA ratio, were calculated with 'WGCNA::cor()'.
+The p-values from the correlation test were adjusted for multiple comparisons using the Benjamini & Hochberg method.
+
+
+
+
+
+
+
+## Bibliography
+
 
