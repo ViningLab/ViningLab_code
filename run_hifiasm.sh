@@ -23,6 +23,7 @@ HIFIASM="/local/cluster/bin/hifiasm"
 # Usage: hifiasm [options] <in_1.fq> <in_2.fq> <...>
 # -o STR       prefix of output files [hifiasm.asm]
 # -t INT       number of threads [1]
+# --primary    output a primary assembly and an alternate assembly
 #    --n-hap      INT
 #                 number of haplotypes [2]
 
