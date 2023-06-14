@@ -24,8 +24,7 @@ HIFIASM="/local/cluster/bin/hifiasm"
 # -o STR       prefix of output files [hifiasm.asm]
 # -t INT       number of threads [1]
 # --primary    output a primary assembly and an alternate assembly
-#    --n-hap      INT
-#                 number of haplotypes [2]
+# --n-hap      INT number of haplotypes [2]
 
 CMD="$HIFIASM -o rice_hifiasm -t 16 ../m64013e_210227_222017.hifi_reads.fastq.gz"
 
