@@ -1,5 +1,8 @@
 #! /bin/env bash
 
+# Submit this script as follows.
+# qsub run_hifiasm.sh
+
 #$ -cwd
 #$ -S /bin/bash
 #$ -N asm
@@ -26,7 +29,7 @@ HIFIASM="/local/cluster/bin/hifiasm"
 # --primary    output a primary assembly and an alternate assembly
 # --n-hap      INT number of haplotypes [2]
 
-CMD="$HIFIASM -o rice_hifiasm -t 16 ../m64013e_210227_222017.hifi_reads.fastq.gz"
+CMD="$HIFIASM -o rice_hifiasm -t 16 --n-hap 2 ../m64013e_210227_222017.hifi_reads.fastq.gz"
 
 date
 
