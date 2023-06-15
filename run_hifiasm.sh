@@ -29,7 +29,11 @@ HIFIASM="/local/cluster/bin/hifiasm"
 # --primary    output a primary assembly and an alternate assembly
 # --n-hap      INT number of haplotypes [2]
 
-CMD="$HIFIASM -o rice_hifiasm -t 16 --n-hap 2 ../m64013e_210227_222017.hifi_reads.fastq.gz"
+# CMD="$HIFIASM -o rice_hifiasm -t 16 --n-hap 2 ../m64013e_210227_222017.hifi_reads.fastq.gz"
+
+FQ1="../m64013e_210227_222017.hifi_reads.fastq.gz"
+CMD="$HIFIASM -o rice_hifiasm -t 16 --n-hap 2 $FQ1"
+
 
 date
 
