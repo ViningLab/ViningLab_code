@@ -1,5 +1,8 @@
 #!/bin/env bash
 
+# This script should be submitted to the queue as follows.
+# qsub make_blastdb.sh
+
 #$ -cwd
 #$ -S /bin/bash
 #$ -N blstdb
