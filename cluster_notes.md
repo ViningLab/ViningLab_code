@@ -9,6 +9,41 @@ https://shell.cqls.oregonstate.edu/access/
 In the "Comments:" section ask to be added to the "vining_lab" unix group so you will be able to use the Vining Lab filespace.
 Also ask to be added to the 'hoser' queue for the SGE system so you can have access to the server named 'hoser.'
 
+## Primary group for a user
+
+Each user may be a member of several unix groups, but each user will have one primary group.
+A user can query their group membership as follows.
+
+```
+$ groups
+vining_lab grunwald_lab sagar_lab oncore
+```
+
+Note that this user belongs to 4 groups and the first group, 'vining_lab', is their primary group.
+This becomes important when the user wants to share materials they created.
+The files and directories created by the user will have a single group associated with them.
+This can be seen as follows.
+
+```
+$ ls -l
+total 972
+-rw-r--r--   1 knausb vining_lab    727 Oct 31  2016 20161031_du.txt
+-rw-r--r--   1 knausb vining_lab   2462 Jun 28  2016 b2ferr
+-rw-r--r--   1 knausb vining_lab   2027 Jun 28  2016 b2fout
+drwxr-xr-x  55 knausb vining_lab   4096 Oct 30  2022 bin/
+...
+```
+
+Here, the username of the owner is 'knausb' and the group is 'vining_lab'.
+The 'group' permissions here will only be relevant to the file or directory's single group.
+The 'group' for files and directories created by a user will be assigned to a user's primary group.
+The owner can change the group that a file or directory belongs to as follows.
+
+```
+chgrp sagar_lab file1
+```
+
+This will now allow the owner to share 'file1' with the members of 'sagar_lab' but this will also prevent sharing with members of 'vining_lab'.
 
 
 ## Is a software installed?

@@ -33,8 +33,8 @@ OUTF="cann_motif_CBDRx_blastn.csv"
 QUERY="cann_motif_probes.fa"
 
 #BLAST="~/bin/ncbi-blast-2.2.26+/bin/blastn"
-BLAST="~/bin/ncbi-blast-2.12.0+/bin/blastn"
-
+#BLAST="~/bin/ncbi-blast-2.12.0+/bin/blastn"
+BLAST="/local/cluster/ncbi-blast+/bin/blastn"
 
 CMD="$BLAST -query $QUERY \
             -task megablast \
