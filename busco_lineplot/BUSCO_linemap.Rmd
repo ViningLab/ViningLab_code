@@ -37,7 +37,7 @@ dm4 <- read.table("DM4_full_table.tsv", header = FALSE, sep = "\t", fill = TRUE)
 names(dm4) <- c("Busco_id", "Status", "Sequence", "Gene_Start", "Gene_End", "Strand", "Score", "Length")
 dm4[1:3, ]
 
-dm4 <- dm6 |> dplyr::filter( Status == "Complete")
+dm4 <- dm4 |> dplyr::filter( Status == "Complete")
 table(dm4$Status)
 
 ```
@@ -49,8 +49,44 @@ table(dm4$Status)
 ```{r}
 casr <- read.table("castle-russet_full_table.tsv", header = FALSE, sep = "\t", fill = TRUE)
 names(casr) <- c("Busco_id", "Status", "Sequence", "Gene_Start", "Gene_End", "Strand", "Score", "Length")
+table(casr$Status)
+
 casr[1:3, ]
 ```
+
+
+
+## chr3
+
+
+```{r}
+
+table(dm6$Sequence)
+chr3 <- dm6[ dm6$Sequence == "chr03", ]
+
+row.names(chr3) <- chr3$Busco_id
+chr3[1:3, ]
+chr3[c("265at71240", "383at71240"), ]
+
+
+table(dm4$Sequence)
+tmp <- dm4[ dm4$Sequence == "ST4.03ch03", ]
+row.names(tmp) <- tmp$Busco_id
+tmp[1:3, ]
+
+
+tmp[ chr3$Busco_id[1:4], ]
+
+chr3 <- cbind(chr3, tmp[ chr3$Busco_id, "Gene_Start"])
+colnames(chr3)[ncol(chr3)] <- "dm4"
+chr3[1:3, ]
+
+
+```
+
+
+
+
 
 
 ## Line map
@@ -69,12 +105,19 @@ casr[1:3, ]
 
 
 ```{r}
+
+busc <- chr3[, c(1, 4, 9)]
+names(busc)[2] <- "dm6"
+
+
 library(tidyr)
 library(dplyr)
-busc[1:3, 1:7]
+busc[1:3, ]
+
 col_no <- 21
 #rm(data_long)
-vars <- colnames(busc)[1:col_no]
+#vars <- colnames(busc)[1:col_no]
+vars <- colnames(busc)
 
 #data_long <- busc[, 1:col_no] %>% 
 #  pivot_longer( cols = 2:col_no )
@@ -88,7 +131,7 @@ data_long
 
 
 library(ggplot2)
-p <- ggplot(data_long, aes(x = Sample, y = POS, color = BUSCO, group = BUSCO)) + 
+p <- ggplot(data_long, aes(x = Sample, y = POS, color = Busco_id, group = Busco_id)) + 
   geom_point( size = 1.2 ) +
   geom_line( linewidth = 0.8 )
 p <- p + scale_color_manual( values = rep(viridisLite::magma( n = 8, alpha = 0.8 ), times = 1e6) )
