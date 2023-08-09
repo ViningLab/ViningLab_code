@@ -19,6 +19,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
+t1 <- Sys.time()
 dm6 <- read.table("DM6_full_table.tsv", header = FALSE, sep = "\t", fill = TRUE)
 names(dm6) <- c("Busco_id", "Status", "Sequence", "Gene_Start", "Gene_End", "Strand", "Score", "Length")
 dm6[1:3, ]
@@ -82,6 +83,47 @@ colnames(chr3)[ncol(chr3)] <- "dm4"
 chr3[1:3, ]
 
 
+table(casr$Sequence)
+tmp <- casr[ casr$Sequence == "chr03_0", ]
+tmp <- tmp[ !duplicated(tmp$Busco_id), ]
+#tmp <- tmp |> dplyr::filter( Status == "Complete")
+row.names(tmp) <- tmp$Busco_id
+#tmp[1:3, ]
+#nrow(tmp)
+chr3 <- cbind(chr3, tmp[ chr3$Busco_id, "Gene_Start"])
+colnames(chr3)[ncol(chr3)] <- "chr03_0"
+chr3[1:3, ]
+
+tmp <- casr[ casr$Sequence == "chr03_1", ]
+#tmp <- tmp |> dplyr::filter( Status == "Complete")
+tmp <- tmp[ !duplicated(tmp$Busco_id), ]
+row.names(tmp) <- tmp$Busco_id
+chr3 <- cbind(chr3, tmp[ chr3$Busco_id, "Gene_Start"])
+colnames(chr3)[ncol(chr3)] <- "chr03_1"
+
+tmp <- casr[ casr$Sequence == "chr03_2", ]
+#tmp <- tmp |> dplyr::filter( Status == "Complete")
+tmp <- tmp[ !duplicated(tmp$Busco_id), ]
+row.names(tmp) <- tmp$Busco_id
+chr3 <- cbind(chr3, tmp[ chr3$Busco_id, "Gene_Start"])
+colnames(chr3)[ncol(chr3)] <- "chr03_2"
+
+tmp <- casr[ casr$Sequence == "chr03_3", ]
+#tmp <- tmp |> dplyr::filter( Status == "Complete")
+tmp <- tmp[ !duplicated(tmp$Busco_id), ]
+row.names(tmp) <- tmp$Busco_id
+chr3 <- cbind(chr3, tmp[ chr3$Busco_id, "Gene_Start"])
+colnames(chr3)[ncol(chr3)] <- "chr03_3"
+
+tmp <- casr[ casr$Sequence == "chr03_4", ]
+#tmp <- tmp |> dplyr::filter( Status == "Complete")
+tmp <- tmp[ !duplicated(tmp$Busco_id), ]
+row.names(tmp) <- tmp$Busco_id
+chr3 <- cbind(chr3, tmp[ chr3$Busco_id, "Gene_Start"])
+colnames(chr3)[ncol(chr3)] <- "chr03_4"
+
+chr3[1:3, ]
+
 ```
 
 
@@ -106,15 +148,14 @@ chr3[1:3, ]
 
 ```{r}
 
-busc <- chr3[, c(1, 4, 9)]
+busc <- chr3[, c(1, 4, 9:ncol(chr3))]
 names(busc)[2] <- "dm6"
-
+busc[1:3, ]
 
 library(tidyr)
 library(dplyr)
-busc[1:3, ]
 
-col_no <- 21
+#col_no <- 21
 #rm(data_long)
 #vars <- colnames(busc)[1:col_no]
 vars <- colnames(busc)
@@ -127,8 +168,8 @@ data_long <- busc %>%
   pivot_longer( cols = vars[-1] )
 
 names(data_long)[2:3] <- c("Sample", "POS")
+data_long$Sample <- factor(data_long$Sample , levels = unique(data_long$Sample))
 data_long
-
 
 library(ggplot2)
 p <- ggplot(data_long, aes(x = Sample, y = POS, color = Busco_id, group = Busco_id)) + 
@@ -153,6 +194,62 @@ p
 ```
 
 
+## Process assembly as unknown
 
 
+```{r}
+dm6[1:3, ]
+casr[1:3, ]
+casr$Sequence[casr$Sequence == ""] <- "Unplaced"
+table(casr$Sequence)
+
+seq_list <- vector(mode = "list", length = length(unique(casr$Sequence)))
+names(seq_list) <- unique(casr$Sequence)
+
+for(i in 1:length(seq_list)){
+  seq_list[[i]] <- casr[ casr$Sequence == names(seq_list)[i], ]
+  seq_list[[i]] <- seq_list[[i]][ !duplicated(seq_list[[i]]$Busco_id), ]
+  row.names( seq_list[[i]] ) <- seq_list[[i]]$Busco_id
+}
+
+
+busc_df <- matrix(nrow = length(seq_list) + 1, ncol = length(unique(dm6$Sequence)))
+colnames(busc_df) <- unique(dm6$Sequence)
+row.names(busc_df) <- c( "DM6", names(seq_list))
+busc_df[1, ] <- table(dm6$Sequence)
+busc_df[1:3, ]
+
+# Loop over unknown sequences.
+for(i in 2:nrow(busc_df)){
+  tmp <- seq_list[[i - 1]]
+  for(j in 1:ncol(busc_df)){
+    # Loop over seed sequences.
+    #tmp[c("171360at71240", "171360at71241"), ]
+    tmp2 <- tmp[ dm6$Busco_id[ dm6$Sequence == colnames(busc_df)[j] ][1:10], ]
+    tmp2 <- tmp2[ !is.na(tmp2$Busco_id), ]
+    busc_df[i, j] <- nrow(tmp2)
+  }
+}
+```
+
+
+```{r, fig.width=10, fig.height=10}
+vcfR::heatmap.bp(busc_df[-1, ])
+```
+
+
+```{r}
+busc_df[ busc_df[, 1] > 0, ]
+busc_df[ busc_df[, 2] > 0, ]
+busc_df[ busc_df[, 3] > 0, ]
+busc_df[ busc_df[, 4] > 0, ]
+```
+
+
+
+
+```{r}
+t99 <- Sys.time()
+t99 - t1
+```
 
