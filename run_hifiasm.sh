@@ -1,7 +1,9 @@
 #! /bin/env bash
 
-# Submit this script as follows.
+# Submit this script on a SGE system as follows.
 # qsub run_hifiasm.sh
+
+# https://hifiasm.readthedocs.io/en/latest/
 
 #$ -cwd
 #$ -S /bin/bash
@@ -25,6 +27,8 @@ HIFIASM="/local/cluster/bin/hifiasm"
 
 # Usage: hifiasm [options] <in_1.fq> <in_2.fq> <...>
 # -o STR       prefix of output files [hifiasm.asm]
+# --hg-size    INT(k, m or g) estimated haploid genome size used for inferring read coverage [auto]
+
 # -t INT       number of threads [1]
 # --primary    output a primary assembly and an alternate assembly
 # --n-hap      INT number of haplotypes [2]
