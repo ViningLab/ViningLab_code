@@ -203,14 +203,16 @@ casr[1:3, ]
 casr$Sequence[casr$Sequence == ""] <- "Unplaced"
 table(casr$Sequence)
 
+# Create a list where each element is one 'Sequence'.
 seq_list <- vector(mode = "list", length = length(unique(casr$Sequence)))
 names(seq_list) <- unique(casr$Sequence)
-
 for(i in 1:length(seq_list)){
   seq_list[[i]] <- casr[ casr$Sequence == names(seq_list)[i], ]
   seq_list[[i]] <- seq_list[[i]][ !duplicated(seq_list[[i]]$Busco_id), ]
   row.names( seq_list[[i]] ) <- seq_list[[i]]$Busco_id
 }
+
+barplot( sort( unlist(lapply(seq_list, nrow)), decreasing = TRUE )[1:24], las = 3 )
 
 
 busc_df <- matrix(nrow = length(seq_list) + 1, ncol = length(unique(dm6$Sequence)))
@@ -220,16 +222,36 @@ busc_df[1, ] <- table(dm6$Sequence)
 busc_df[1:3, ]
 
 # Loop over unknown sequences.
-for(i in 2:nrow(busc_df)){
-  tmp <- seq_list[[i - 1]]
+for(i in 1:length(seq_list)){
+  tmp <- seq_list[[i]]
   for(j in 1:ncol(busc_df)){
     # Loop over seed sequences.
     #tmp[c("171360at71240", "171360at71241"), ]
-    tmp2 <- tmp[ dm6$Busco_id[ dm6$Sequence == colnames(busc_df)[j] ][1:10], ]
+    chrom_BUSCOs <- dm6$Busco_id[ dm6$Sequence == colnames(busc_df)[j] ]
+    tmp2 <- tmp[ chrom_BUSCOs, ]
     tmp2 <- tmp2[ !is.na(tmp2$Busco_id), ]
-    busc_df[i, j] <- nrow(tmp2)
+    busc_df[ names(seq_list)[i], j] <- nrow(tmp2)
   }
 }
+
+
+
+
+# # Loop over unknown sequences.
+# for(i in 2:nrow(busc_df)){
+#   tmp <- seq_list[[i - 1]]
+#   for(j in 1:ncol(busc_df)){
+#     # Loop over seed sequences.
+#     #tmp[c("171360at71240", "171360at71241"), ]
+#     tmp2 <- tmp[ dm6$Busco_id[ dm6$Sequence == colnames(busc_df)[j] ][1:10], ]
+#     tmp2 <- tmp2[ !is.na(tmp2$Busco_id), ]
+#     busc_df[i, j] <- nrow(tmp2)
+#   }
+# }
+
+
+
+
 ```
 
 
@@ -243,8 +265,23 @@ busc_df[ busc_df[, 1] > 0, ]
 busc_df[ busc_df[, 2] > 0, ]
 busc_df[ busc_df[, 3] > 0, ]
 busc_df[ busc_df[, 4] > 0, ]
+
+busc_df2 <- sweep(busc_df[-1, ], MARGIN = 2, STATS = busc_df[1, ], FUN = "/")
+busc_df2[ busc_df2[, 1] > 0.1, ]
+
+busc_df[1:6, ]
+busc_df2[1:6, ]
 ```
 
+
+```{r}
+busc_df[ busc_df[, 3] > 0, ]
+table(table(casr$Busco_id[ casr$Sequence == "chr01_1" ]))
+
+sort(table(intersect( dm6$Busco_id[ dm6$Sequence == "chr01" ], 
+           casr$Busco_id[ casr$Sequence == "chr01_1" ] )), decreasing = TRUE)[1:10]
+
+```
 
 
 

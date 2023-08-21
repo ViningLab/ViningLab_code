@@ -1,0 +1,19 @@
+---
+title: "Genemapper table"
+output: html_document
+date: "2023-08-18"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+gmtable <- read.table("Essex_project23_Plate17Table.txt", header = TRUE, sep = "\t")
+nrow(gmtable)
+```
+
+
