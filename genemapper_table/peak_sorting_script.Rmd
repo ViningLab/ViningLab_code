@@ -1,6 +1,10 @@
 ---
-title: "Untitled"
-output: html_document
+title: "GeneMapper output conversion"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    code_folding: hide
 editor_options: 
   chunk_output_type: console
 ---
@@ -13,11 +17,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
-setwd("C:/Users/smithai3/Desktop/New folder/")
+#if( Sys.info()['sysname'] == "Linux" ){}
+if( Sys.info()['sysname'] == "Windows" ){
+  setwd("C:/Users/smithai3/Desktop/New folder/")  
+}
+
+my_infile <- "Essex_project23_Plate17Table.txt"
+my_data <- read.table(my_infile, sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "")
+
 #my_data <- read.table("SX_Project23_Plate18 Genotypes Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 #my_data <- read.table("SX_Project23_Plate18 Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 #my_data <- read.table("D:/Essex_project23_Plate17 Genotypes Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "")
-my_data <- read.table("EssexProject_23 Genotypes Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "")
+#my_data <- read.table("EssexProject_23 Genotypes Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "")
 #my_data <- read.table("SX_ProjectPlate6 Genotypes Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "")
 #my_data <- read.table("Plate 7 Genotypes Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "")
 #my_data <- read.table("Plate 8 Genotypes Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "")
@@ -91,11 +102,13 @@ for(j in 1:length(marker_list)){
   marker_list[[j]] <- my_df
 }
 
-lapply(marker_list, function(x){ x[1:3, 1:3] })
+lapply(marker_list[1:3], function(x){ x[1:3, 1:3] })
 length(marker_list)
 ```
 
-Write to file.
+
+## Write to file.
+
 
 ```{r}
 j <- 1
@@ -114,6 +127,9 @@ out_df[1:3, ]
 
 table(sub(":.+", "", names(out_df)))
 
+my_outfile <- "plate18.csv"
+#write.table(x = out_df, file = my_outfile, sep = ",", row.names = TRUE, col.names = TRUE)
+
 #write.table(x = out_df, file = "plate18.csv", sep = ",", row.names = TRUE, col.names = TRUE)
 #write.table(x = out_df, file = "plate17.csv", sep = ",", row.names = TRUE, col.names = TRUE)
 #write.table(x = out_df, file = "plate_parental.csv", sep = ",", row.names = TRUE, col.names = TRUE)
@@ -126,7 +142,7 @@ table(sub(":.+", "", names(out_df)))
 #write.table(x = out_df, file = "plate12.csv", sep = ",", row.names = TRUE, col.names = TRUE)
 #write.table(x = out_df, file = "plate13.csv", sep = ",", row.names = TRUE, col.names = TRUE)
 #write.table(x = out_df, file = "plate14.csv", sep = ",", row.names = TRUE, col.names = TRUE)
-write.table(x = out_df, file = "plate5.csv", sep = ",", row.names = TRUE, col.names = TRUE)
+#write.table(x = out_df, file = "plate5.csv", sep = ",", row.names = TRUE, col.names = TRUE)
 ```
 
 
