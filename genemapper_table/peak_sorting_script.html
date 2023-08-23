@@ -443,6 +443,7 @@ display: none;
 <div id="TOC">
 <ul>
 <li><a href="#data-input" id="toc-data-input">Data input</a></li>
+<li><a href="#explore-data" id="toc-explore-data">Explore data</a></li>
 <li><a href="#organize-data" id="toc-organize-data">Organize
 data</a></li>
 <li><a href="#write-to-file." id="toc-write-to-file.">Write to
@@ -452,15 +453,37 @@ file.</a></li>
 
 <div id="data-input" class="section level2">
 <h2>Data input</h2>
+<p>Determine where you are in the filesystem.</p>
+<pre class="r"><code>getwd()</code></pre>
+<pre><code>## [1] &quot;/Users/brianknaus/gits/ViningLab_code/genemapper_table&quot;</code></pre>
+<pre class="r"><code>#setwd(&quot;my_new_working_directory&quot;)</code></pre>
+<blockquote>
+<p>In RStudio you can use: Session &gt; Set Working Directory &gt; …</p>
+</blockquote>
 <pre class="r"><code>#if( Sys.info()[&#39;sysname&#39;] == &quot;Linux&quot; ){}
 if( Sys.info()[&#39;sysname&#39;] == &quot;Windows&quot; ){
   setwd(&quot;C:/Users/smithai3/Desktop/New folder/&quot;)  
 }
 
+# my_infile &lt;- &quot;not_a_real_file_just_a_test.txt&quot;
 my_infile &lt;- &quot;Essex_project23_Plate17Table.txt&quot;
 my_data &lt;- read.table(my_infile, sep = &quot;\t&quot;, header = TRUE, stringsAsFactors = FALSE, quote = &quot;&quot;)
-
-#my_data &lt;- read.table(&quot;SX_Project23_Plate18 Genotypes Table.txt&quot;, sep = &quot;\t&quot;, header = TRUE, stringsAsFactors = FALSE)
+my_data[1:3, 1:6]</code></pre>
+<pre><code>##               Sample.File Sample.Name                    Panel Marker Dye
+## 1 Plate17-S10_B02_007.fsa Plate17-S10 MicrosatelliteMint Panel   10.1   G
+## 2 Plate17-S11_C02_006.fsa Plate17-S11 MicrosatelliteMint Panel   10.1   G
+## 3 Plate17-S12_D02_005.fsa Plate17-S12 MicrosatelliteMint Panel   10.1   G
+##   Allele.1
+## 1      218
+## 2      218
+## 3      218</code></pre>
+<p>The following is an example of an error generated when R can’t find
+the file you’re trying to read in.</p>
+<pre><code>Error in file(file, &quot;rt&quot;) : cannot open the connection
+In addition: Warning message:
+In file(file, &quot;rt&quot;) :
+  cannot open file &#39;not_a_real_file_just_a_test.txt&#39;: No such file or directory</code></pre>
+<pre class="r"><code>#my_data &lt;- read.table(&quot;SX_Project23_Plate18 Genotypes Table.txt&quot;, sep = &quot;\t&quot;, header = TRUE, stringsAsFactors = FALSE)
 #my_data &lt;- read.table(&quot;SX_Project23_Plate18 Table.txt&quot;, sep = &quot;\t&quot;, header = TRUE, stringsAsFactors = FALSE)
 #my_data &lt;- read.table(&quot;D:/Essex_project23_Plate17 Genotypes Table.txt&quot;, sep = &quot;\t&quot;, header = TRUE, stringsAsFactors = FALSE, quote = &quot;&quot;)
 #my_data &lt;- read.table(&quot;EssexProject_23 Genotypes Table.txt&quot;, sep = &quot;\t&quot;, header = TRUE, stringsAsFactors = FALSE, quote = &quot;&quot;)
@@ -472,8 +495,11 @@ my_data &lt;- read.table(my_infile, sep = &quot;\t&quot;, header = TRUE, strings
 #my_data &lt;- read.table(&quot;Plate 11 Genotypes Table.txt&quot;, sep = &quot;\t&quot;, header = TRUE, stringsAsFactors = FALSE, quote = &quot;&quot;)
 #my_data &lt;- read.table(&quot;Plate12 Genotypes Table.txt&quot;, sep = &quot;\t&quot;, header = TRUE, stringsAsFactors = FALSE, quote = &quot;&quot;)
 #my_data &lt;- read.table(&quot;Plate13 Genotypes Table.txt&quot;, sep = &quot;\t&quot;, header = TRUE, stringsAsFactors = FALSE, quote = &quot;&quot;)
-#my_data &lt;- read.table(&quot;Plate14 Genotypes Table.txt&quot;, sep = &quot;\t&quot;, header = TRUE, stringsAsFactors = FALSE, quote = &quot;&quot;)
-my_data[1:3, 1:6]</code></pre>
+#my_data &lt;- read.table(&quot;Plate14 Genotypes Table.txt&quot;, sep = &quot;\t&quot;, header = TRUE, stringsAsFactors = FALSE, quote = &quot;&quot;)</code></pre>
+</div>
+<div id="explore-data" class="section level2">
+<h2>Explore data</h2>
+<pre class="r"><code>my_data[1:3, 1:6]</code></pre>
 <pre><code>##               Sample.File Sample.Name                    Panel Marker Dye
 ## 1 Plate17-S10_B02_007.fsa Plate17-S10 MicrosatelliteMint Panel   10.1   G
 ## 2 Plate17-S11_C02_006.fsa Plate17-S11 MicrosatelliteMint Panel   10.1   G
@@ -597,59 +623,11 @@ names(marker_list)</code></pre>
   names(tmp) &lt;- sub(&quot;Allele_&quot;, paste(names(marker_list)[j], &quot;:&quot;, sep = &quot;&quot;), names(tmp))
   out_df &lt;- cbind(out_df, tmp)
 }
-out_df[1:3, ]</code></pre>
-<pre><code>##             10.1:218 10.1:221 10.1:223 10.1:227 10.1:230 10.1:233 10.1:242
-## Plate17-S10      218        0        0      227        0      233        0
-## Plate17-S11      218        0        0        0      230      233      242
-## Plate17-S12      218        0        0      227      230      233        0
-##             10.1:245 10.2:190 10.2:200 10.2:202 10.2:205 10.2:208 10.2:211
-## Plate17-S10      245        0      200        0        0      208      211
-## Plate17-S11        0        0      200        0        0      208        0
-## Plate17-S12      245      190      200      202        0      208        0
-##             10.2:217 10.2:219 12.1:199 12.1:202 12.1:204 12.1:210 12.3:108
-## Plate17-S10        0      219        0      202      204        0      108
-## Plate17-S11        0      219      199      202        0        0      108
-## Plate17-S12        0      219      199      202        0        0      108
-##             12.3:111 12.3:114 12.3:117 12.3:120 12.3:123 12.3:129 12.3:133
-## Plate17-S10        0      114        0      120        0      129        0
-## Plate17-S11        0      114      117        0        0      129        0
-## Plate17-S12        0      114      117        0        0      129        0
-##             12.3:136 12.3:138 12.3:141 12.3:149 2.1:89 2.1:91 2.1:94 2.1:97
-## Plate17-S10        0        0        0        0      0     91      0     97
-## Plate17-S11        0      138      141        0     89      0      0     97
-## Plate17-S12        0      138      141        0      0     91      0     97
-##             2.1:100 2.1:103 2.1:106 2.1:109 2.1:114 2.3:90 2.3:103 2.3:105
-## Plate17-S10       0     103     106     109     114     90     103       0
-## Plate17-S11       0       0     106     109       0      0       0     105
-## Plate17-S12       0     103       0     109     114     90     103       0
-##             2.3:108 2.3:112 2.3:116 2.3:118 3.3:276 3.3:285 3.3:288 3.3:292
-## Plate17-S10     108     112       0     118       0       0       0     292
-## Plate17-S11     108     112       0       0       0       0       0     292
-## Plate17-S12     108     112       0       0       0       0       0     292
-##             3.3:295 3.3:297 3.3:300 3.3:304 3.3:307 3.3:321 3.3:324 3.3:331
-## Plate17-S10       0       0     300       0       0       0     324     331
-## Plate17-S11     295       0     300     304     307       0     324       0
-## Plate17-S12       0       0     300       0       0       0     324       0
-##             3.3:337 C107211_870a:254 C107211_870a:286 C107211_870a:289
-## Plate17-S10       0                0              286                0
-## Plate17-S11       0              254                0                0
-## Plate17-S12       0              254                0                0
-##             C107211_870a:294 C107211_870a:299 C107211_870a:304 C107211_870a:309
-## Plate17-S10                0              299              304                0
-## Plate17-S11                0              299              304                0
-## Plate17-S12              294              299              304                0
-##             C37_1739:172 C37_1739:177 C37_1739:184 C37_1739:189 C37_1739:192
-## Plate17-S10            0          177          184          189            0
-## Plate17-S11            0            0            0          189          192
-## Plate17-S12            0            0            0          189          192
-##             C37_1739:196 SSR_5388:103 SSR_5388:106 SSR_5388:108 SSR_5388:115
-## Plate17-S10          196          103            0            0          115
-## Plate17-S11            0          103            0            0          115
-## Plate17-S12            0          103            0            0          115
-##             SSR_5388:118 SSR_5388:120
-## Plate17-S10          118          120
-## Plate17-S11          118          120
-## Plate17-S12          118            0</code></pre>
+out_df[1:3, 1:6]</code></pre>
+<pre><code>##             10.1:218 10.1:221 10.1:223 10.1:227 10.1:230 10.1:233
+## Plate17-S10      218        0        0      227        0      233
+## Plate17-S11      218        0        0        0      230      233
+## Plate17-S12      218        0        0      227      230      233</code></pre>
 <pre class="r"><code>table(sub(&quot;:.+&quot;, &quot;&quot;, names(out_df)))</code></pre>
 <pre><code>## 
 ##         10.1         10.2         12.1         12.3          2.1          2.3 

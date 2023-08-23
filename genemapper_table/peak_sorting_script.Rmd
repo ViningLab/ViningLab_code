@@ -9,22 +9,54 @@ editor_options:
   chunk_output_type: console
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
 ## Data input
+
+
+Determine where you are in the filesystem.
+
+
+```{r}
+getwd()
+#setwd("my_new_working_directory")
+#setwd("C:/Users/smithai3/Desktop/New folder/")
+```
+
+
+> In RStudio you can use: Session > Set Working Directory > ...
 
 
 ```{r}
 #if( Sys.info()['sysname'] == "Linux" ){}
-if( Sys.info()['sysname'] == "Windows" ){
-  setwd("C:/Users/smithai3/Desktop/New folder/")  
-}
+#if( Sys.info()['sysname'] == "Windows" ){
 
+#}
+
+# my_infile <- "not_a_real_file_just_a_test.txt"
 my_infile <- "Essex_project23_Plate17Table.txt"
 my_data <- read.table(my_infile, sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "")
+my_data[1:3, 1:6]
+```
 
+
+The following is an example of an error generated when R can't find the file you're trying to read in.
+
+
+```
+Error in file(file, "rt") : cannot open the connection
+In addition: Warning message:
+In file(file, "rt") :
+  cannot open file 'not_a_real_file_just_a_test.txt': No such file or directory
+```
+
+
+
+```{r}
 #my_data <- read.table("SX_Project23_Plate18 Genotypes Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 #my_data <- read.table("SX_Project23_Plate18 Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 #my_data <- read.table("D:/Essex_project23_Plate17 Genotypes Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "")
@@ -38,6 +70,13 @@ my_data <- read.table(my_infile, sep = "\t", header = TRUE, stringsAsFactors = F
 #my_data <- read.table("Plate12 Genotypes Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "")
 #my_data <- read.table("Plate13 Genotypes Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "")
 #my_data <- read.table("Plate14 Genotypes Table.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE, quote = "")
+```
+
+
+## Explore data
+
+
+```{r}
 my_data[1:3, 1:6]
 nrow(my_data)
 
@@ -47,9 +86,6 @@ my_data[1:3, 6:19]
 table(my_data$Marker)
 unique(my_data$Marker)
 
-marker_list <- vector( mode = "list", length = length(unique(my_data$Marker)) )
-names(marker_list) <- unique(my_data$Marker)
-length(marker_list)
 ```
 
 
@@ -57,7 +93,11 @@ length(marker_list)
 
 
 ```{r}
-grep("^Allele", colnames(my_data), value =T)
+grep("^Allele", colnames(my_data), value = TRUE)
+
+marker_list <- vector( mode = "list", length = length(unique(my_data$Marker)) )
+names(marker_list) <- unique(my_data$Marker)
+length(marker_list)
 
 for(j in 1:length(marker_list)){
   my_marker <- my_data[ my_data$Marker == names(marker_list)[j], ]
@@ -123,7 +163,7 @@ for(j in 2:length(marker_list)){
   names(tmp) <- sub("Allele_", paste(names(marker_list)[j], ":", sep = ""), names(tmp))
   out_df <- cbind(out_df, tmp)
 }
-out_df[1:3, ]
+out_df[1:3, 1:6]
 
 table(sub(":.+", "", names(out_df)))
 
