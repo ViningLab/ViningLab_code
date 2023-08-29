@@ -225,7 +225,8 @@ add_unknown <- function(known_list, unknown_df){
 read_busco <- function(x){
   busc <- read.table(x, header = FALSE, sep = "\t", fill = TRUE)
   names(busc) <- c("Busco_id", "Status", "Sequence", "Gene_Start",
-                   "Gene_End", "Strand", "Score", "Length")  
+                   "Gene_End", "Strand", "Score", "Length")
+  busc$Sequence[busc$Sequence == ""] <- "Unplaced"
   return(busc)
 }
 
