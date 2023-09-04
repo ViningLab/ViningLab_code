@@ -94,9 +94,7 @@ topDiffGenes
 
 
 ```{r}
-
 #length(geneList)
-
 set.seed(99)
 thingyList <- runif(n = 100, min = 0, max = 1)
 # Add some significant values.
@@ -112,7 +110,6 @@ thingyList
 class(thingyList)
 hist(thingyList)
 
-
 sampleGOdata <- new("topGOdata", 
                     description = "Simple session", ontology = "BP",
                     #allGenes = geneList,
@@ -121,9 +118,10 @@ sampleGOdata <- new("topGOdata",
                     nodeSize = 10,
                     annot = annFUN.db, affyLib = affyLib)
 sampleGOdata
-
-
 ```
 
 
+```{r}
+?readMappings()
+```
 
