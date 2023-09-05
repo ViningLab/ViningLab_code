@@ -50,6 +50,7 @@ busc[1:3, ]
 ```
 
 
+
 ```{r}
 p <- busco_bar(busc, max_copy = NULL)
 #p <- busco_bar(busc, max_copy = 3)
