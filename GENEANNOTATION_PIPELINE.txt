@@ -1,0 +1,370 @@
+#####################################
+#### GENOME ANNOTATION PIPELINE #####
+#####################################
+## Sam Talbot
+## 9/25/23
+## Vining Lab
+#####################################
+
+##################
+STEP 1)RepeatMasking with EDTA
+
+## Before running, ensure that the conda environment works and EDTA can complete successfully!
+# Try EDTA.pl with a small GenomeAssembly.fa
+## Example: cat GenomeAssembly.fa | head -n 100000 > TestSubset_GenomeAssembly.fa
+########
+
+1A. Headers of GenomeAssembly.fa should be >= 12 characters, check that your fasta file is in agreement
+
+1B. Load conda environment
+	- Enter bash, activate conda environment with Mamba:
+	- mamba activate /nfs4/HORT/Vining_Lab/Users/talbots/bin/EDTA
+
+1C. Run EDTA.pl 
+	- EDTA.pl --genome GenomeAssembly.fa --anno 1 --sensitive 1 --threads X
+
+To submit this job to SGE, use this script:
+where the cd command holds the working directory containing the fasta file of interest, 
+in the /data/ drive of hoser for appropriate I/O acceess
+
+--threads X (specify # of processors to use).
+
+Create submission file:
+
+
+#!/usr/bin/env bash
+###########
+### EDTA
+###########
+
+eval "$(conda shell.bash hook)"
+conda activate /nfs4/HORT/Vining_Lab/Users/talbots/bin/EDTA
+
+cd /data/yourDirectory
+
+EDTA.pl --genome GenomeAssembly.fa --anno 1 --sensitive 1 --threads X
+
+conda deactivate
+####
+
+#Grant permission: chmod +rwx EDTA_run.sh
+#Submit this script, while in bash: SGE_Batch -P X -c "EDTA_run.sh" -q hoser -r EDTA_Run1
+
+1D. Softmask the output.
+	python /nfs4/HORT/Vining_Lab/Users/talbots/bin/Replace_Ns.py
+example: python /nfs4/HORT/Vining_Lab/Users/talbots/bin/Replace_Ns.py GenomeAssembly.fa GenomeAssembly.fasta.mod.MAKER.masked GenomeAssembly_softmasked.fa  
+
+	## usage: Replace_Ns.py [-h] original modified output
+	# GenomeAssembly.fa is your original fasta file (input to EDTA)
+	# GenomeAssembly.fasta.mod.MAKER.masked is your modified, hard masked genome output from EDTA
+	# GenomeAssembly_softmasked.fa is your output, a softmasked fasta file
+
+1E. Only run after completing 3A->3B
+	
+	Now that you've completed your first BRAKER3 run, rerun EDTA to account for these annotations, and thus clean TE annotations
+	# New inputs
+	# braker.codingseq
+	# braker_genes.bed
+
+	# To generate braker_genes.bed, create a bed file from braker.gtf by extracting columns:
+	# cat braker.gtf | awk '{print $1"\t"$4"\t"$5}' > braker_genes.bed
+	
+
+#!/bin/env bash
+###########
+### EDTA
+###########
+
+eval "$(conda shell.bash hook)"
+conda activate /nfs4/HORT/Vining_Lab/Users/talbots/bin/EDTA
+
+cd /data/yourDirectory
+
+EDTA.pl --genome GenomeAssembly.fa --cds inputs:braker.codingseq--bed braker_genes.bed --anno 1 --sensitive 1 --threads X
+
+conda deactivate
+
+
+#Submit this script via SGE_Batch -P X -c "EDTA_run2.sh" -q hoser -r EDTA_Run2
+	
+2. Run Hisat2 
+
+What you need: 
+	RNA-seq data from all possible tissue types
+
+!!!!    Be aware of the amount of space available on /data/ and in generating these intermediary files. 
+!!!!	DO NOT run samtools or hisat2 on /nfsX/your/user/folder ; only run on /data/ on hoser
+
+## Find RNA-seq data on NCBI genbank and SRA
+# What you need: All tissue types possible
+# If you have a choice between same tissue types, download the one that uses the most recent sequencing platform (Ie. Novaseq 6000 > Hiseq3000)
+# Paired-end reads are preferable since the fragment size is often larger than single end
+# Ideally the RNA-seq dataset should be >350 million reads
+
+2A. On the same adjusted GenomeAssembly.fa with reduced headers (>= 12 characters) as used in EDTA, generate a Hisat2 index with a named suffix of your choice:
+	hisat2-build GenomeAssembly.fa YourNamedIndexSuffix
+
+
+2B. 
+
+
+To access /data/ folder when submitting a job requiring multiple cores, create file:
+nano myCommand.sh
+
+#!/usr/bin/env bash
+
+cd /data/
+
+MyCommand -t X blah blah > output_blah
+
+###########
+
+Grant write permissions to new file: chmod +rwx myCommand.sh
+
+Submit: SGE_Batch -P X -c "myCommand.sh" -q hoser -r myCommand_RunData
+
+hisat2 -p X -x YourNamedIndexSuffix -1 RNA_seqRead_Forward_R1.fastq -2 RNA_seqRead_Reverse_R2.fastq -S GenomeAssembly_RNASeq_Alignment.sam
+	
+	# -p X represents the number of threads
+	# For PairedEnd: -1 and -2 represent Forward and reverse RNA-seq reads, can be gzipped
+	# For singleEnd: -U fastq.gz 
+	# -S outputs a .sam file
+
+2C. Convert .sam files to .bam
+	
+	samtools view -@ X -bS GenomeAssembly_RNASeq_Alignment.sam > GenomeAssembly_RNASeq_Alignment.bam
+
+	# -@ X represents number of threads
+
+2D. Merge RNA-seq bam files into one
+
+	samtools merge -@ X -o Merged_AlignedRNASeqReads.bam RNA_alignment1.bam RNA_alignment2.bam RNA_alignment3.bam
+	# -@ X represents number of threads
+	# -o is the output of your new merged bam file
+
+2E. sort the bam file
+	samtools sort -@ X Merged_AlignedRNASeqReads.bam > Merged_AlignedRNASeqReads_sorted.bam
+
+3. Gene Annotation
+	
+3A. BRAKER3
+	
+	# (3) Input files in a working directory on /data/: 
+	# softmasked genome
+	# Merged_sorted_RNASeqReads.bam
+	# Viridplantae.fa
+	# Download the ODB11 Viridiplantae protein set that the BRAKER team curated:
+	https://bioinf.uni-greifswald.de/bioinf/partitioned_odb11/ 
+
+3B. Submitting the command
+
+	# BRAKER3 operates from a singularity container, stored at /nfs4/HORT/Vining_Lab/Users/talbots/bin/Braker3/braker3.sif
+	# Singularity is called from the command: singularity exec braker3.sif braker.pl 
+	# To check commands, while logged into hoser: singularity exec /nfs4/HORT/Vining_Lab/Users/talbots/bin/Braker3/braker3.sif braker.pl --help
+	# BRAKER3 runs on a minimum of 8 processors	
+	# Create a directory called SingularityCache in your bin and set this directory in the following bash command
+
+#!/bin/bash
+
+export SINGULARITY_CACHEDIR=/nfs4/HORT/Vining_Lab/you/you/bin/SingularityCache
+export SINGULARITY_BIND=/data:/tmp,/data:/data
+
+cd /data/yourBRAKER3Directory
+
+PATH=/usr/bin/:${PATH} singularity exec -B $PWD:$PWD /nfs4/HORT/Vining_Lab/Users/talbots/bin/Braker3/braker3.sif braker.pl --genome=GenomeAssembly_softmasked.fa  --prot_seq=Viridiplantae.fa --bam=Merged_AlignedRNASeqReads_sorted.bam --softmasking --gff3 --AUGUSTUS_ab_initio --threads X
+
+
+
+##############
+	# To submit, while in bash, not on host node: SGE_Batch -P X -c "your_braker3.sh" -q hoser -r Braker3Run
+
+
+	A successful braker run means that it completed successfully. Check the braker.log file, you should see:
+#**********************************************************************************
+#                               BRAKER RUN FINISHED
+#**********************************************************************************
+(END)
+
+
+3C. Remask genome with BRAKER3 output by EDTA
+
+3D. Generate homology-based predicted gene set using BRAKER2 GenomeThreader integration
+	#Using this script to active cluster genomeThreader
+	#SGE_Batch -P X -c "genomethreader_Braker2Run.sh" -q hoser -r GTH_Braker2
+	# INPUTS: softmasked genome and proteins.fasta placed in /data/yourDirectory
+	# Proteins.fasta should be derived from same species annotations (use prior reference)
+	# Conda environment is on the infrastructure: /local/cluster/braker2-gth
+
+
+Create file:
+
+
+#!/usr/bin/env bash
+
+#################
+#Run SGE_Batch of BRAKER
+###########
+
+
+eval "$(conda shell.bash hook)"
+conda activate /local/cluster/braker2-gth
+cd /data/your_folder
+
+braker.pl --cores X --AUGUSTUS_CONFIG_PATH=/nfs4/HORT/Vining_Lab/Users/talbots/bin/config --ALIGNMENT_TOOL_PATH=/local/cluster/braker2-gth/bin --genome=GenomeAssembly_softmasked.fa --useexisting=arabidopsis --softmasking --gff3 --AUGUSTUS_ab_initio --prot_seq=Your_Proteins.fa --prg=gth --trainFromGth
+
+###########
+Give permission: chmod +rwx myBraker2GTH_Run.sh
+Then submit, while logged into bash: SGE_Batch -P X -c "myBraker2GTH_Run.sh" -q hoser -r BRAKER2GTHRUN
+
+3E. Generate a homology-based predicted gene set using BRAKER3 GALBA (Optional)
+
+	# GALBA /nfs4/HORT/Vining_Lab/Users/talbots/bin/GALBA/galba.sif
+	# INPUTS: softmasked genome and proteins.fasta placed in /data/yourDirectory
+	# Proteins.fasta should be derived from same species annotations (use prior reference)
+	# Your proteins file should be preferably from one genome, not multiple.
+	# SingularityCache directory (same as BRAKER3)
+
+
+
+#!/usr/bin/env bash
+
+export SINGULARITY_CACHEDIR=/nfs4/HORT/Vining_Lab/Users/talbots/bin/SingularityCache
+export SINGULARITY_BIND=/data:/tmp,/data:/data
+
+cd /data/yourDirectory
+
+PATH=/usr/bin/:${PATH} singularity exec -B $PWD:$PWD /nfs4/HORT/Vining_Lab/Users/talbots/bin/GALBA/galba.sif galba.pl --genome=GenomeAssembly_softmasked.fa --prot_seq=proteins.fasta --threads X --gff3 --AUGUSTUS_ab_initio
+
+
+# Submit this while logged into Vaughn, and bash, SGE_Batch -P X -c "GALBA_Run1.sh" -q hoser -r GALBARUN1
+
+
+3E. Combining braker results using TSEBRA
+
+	# Download TSEBRA the most recent version of TSEBRA
+	# git clone https://github.com/Gaius-Augustus/TSEBRA
+	# -c is the config file, located in the TSEBRA config folder /your/dir/TSEBRA/
+
+tsebra.py -g /data/yourBRAKER3run/braker/braker.gtf,/data/yourBraker2GTHrun/braker/galba.gtf -e /data/yourBRAKER3run/braker/hintsfile.gff,/data/yourBRAKER2GTHrun/braker/hintsfile.gff -c braker3.cfg -o BRAKER3_plus_BRAKER2GTH.gtf
+OR
+tsebra.py -g /data/yourBRAKER3run/braker/braker.gtf,/data/yourGALBArun/braker/galba.gtf -e /data/yourBRAKER3run/braker/hintsfile.gff,/data/yourGALBArun/braker/hintsfile.gff -c braker3.cfg -o BRAKER3_plus_GALBA.gtf
+
+3F. Rename genes (only after you've verified that this gene set is high quality (step 4)
+#Rename your genes
+
+# within TSEBRA install:
+	# Vining Lab GENEID conventions: SpeciesCultivar(a/b if haplotyped).version
+	# Example for standard genome (primary): Mlong585.v4
+	# Example for haplotyped genomes: Mlong585a.v4
+
+
+rename_gtf.py --gtf BRAKER3_plus_BRAKER2GTH.gtf --prefix Mlong585.v4 --translation_tab
+
+# translation_tab gives you a table with old annotation IDs to new renamed ones. 
+
+
+4. Assessing your output
+
+	# Check ratio of mono to multi exons (for paper: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10439824/ )
+	# Value should be between ~0.2 - 0.4
+	
+	wget https://raw.githubusercontent.com/Gaius-Augustus/GALBA/master/scripts/analyze_exons.py
+	analyze_exons.py -f braker.gtf
+	
+
+4A. BUSCO
+
+	# The coding sequences need to be translated to aminoacid:
+	# /local/cluster/augustus/scripts/getAnnoFasta.pl BRAKER3_final.gtf --seqfile=GenomeAssembly.fa --chop_cds
+	# transeq -sequence BRAKER3_final.codingseq -frame 1 -outseq BRAKER3_final.aa
+	# BUSCO in protein mode
+	# embryophyta
+
+	# Latest version of BUSCO is only available through a conda environment!
+	# Load conda environment for BUSCO /nfs3/HORT/Vining_Lab/Users/talbots/bin/BuscoTest2
+	# in bash submit command: SGE_Batch -P X -c "busco.sh" -q hoser -r BuscoRun1
+
+
+
+#!/usr/bin/env bash
+#################
+#Run SGE_Batch of BUSCO
+###########
+
+
+eval "$(conda shell.bash hook)"
+conda activate /nfs3/HORT/Vining_Lab/Users/talbots/bin/BuscoTest2
+
+busco -c X -m protein -i BRAKER3_final.aa -o BRAKER3_final_BUSCO_embryophyta -l embryophyta
+
+conda deactivate
+
+
+	# -c is # of processors
+	# -m is mode (genome or protein)
+	# -i provide yourGenome.fasta for genome mode or yourTranslatedProteins.fasta
+	# -l is species orthodb, use the closest clade for more accuracy (check busco --list-datasets) ((if no clade available, use embryophyta))
+
+
+	Compare: A highly accurate gene prediction means your BUSCO completion percentage in protein mode should be equal to your genome mode completion percentage.
+
+
+
+4B. Visualize your annotations (CRUCIAL)!!
+
+	IN IGV:
+
+	# Load in genome file, load in your combined braker3+homology gtf file
+	# Load in a bed file of the BUSCOs.
+	# Load in hintsfile.gff to check gene structure support (in output /braker folder)
+	# look at BUSCOs, see how fragmented they are.
+	# Check that gene structures are supported by evidence (hintsfile.gff)
+	
+
+	Do you have specific genes of interest that you know are present? Ie. previously characterized biosynthesis or resistance genes?
+	# Use BLASTP of these genes, from the past annotation reference or what is available on NCBI, and check if they are present.
+	
+
+4C. (OPTIONAL) EST. time = ~30 minutes
+
+	# Need Luca.h5 db file (https://omabrowser.org/All/LUCA.h5) ((if unable to use the one provided in talbots/bin/.../OMark , download locally (20Gb) then transfer to infrastructure with WINSCP -- do not use wget))
+	#
+	# Why? OMark has a bigger protein set than BUSCO
+
+	OMark
+	# OMark is an additional tool that supplements BUSCO
+	
+	While in bash, activate environment:
+	# mamba activate /nfs7/HORT/Vining_Lab/temp/talbots/bin/OmamerConda
+
+	Run omamer
+	# omamer search --db /nfs4/HORT/Vining_Lab/Users/talbots/bin/Omark/OMArk/LUCA.h5 --query BRAKER3_plus_BRAKER2GTH_Proteins.fa --out BRAKER3_plus_GALBA_Proteins.omamer
+	
+	# Before running OMark, you need to make it aware of splicing. 
+	# To prepare a .splice file, use /nfs4/HORT/Vining_Lab/Users/talbots/bin/split_genes.py
+	# Input : Take a list of gene IDs from proteins.fa (cat BRAKER3_plus_BRAKER2GTH_Proteins.fasta | grep '>' > list_of_geneIDs.txt) and group them to create a split file
+	# Output: BRAKER3_plus_BRAKER2GTH_geneIDs.splice
+	# Example: /nfs4/HORT/Vining_Lab/Users/talbots/bin/split_genes.py BRAKER3_plus_BRAKER2GTH_Proteins.fasta BRAKER3_plus_BRAKER2GTH_geneIDs.splice
+
+	Run OMark
+	# create an output folder: mkdir omark_output
+	# omark -f BRAKER3_plus_GALBA_Proteins.omamer -i BRAKER3_plus_BRAKER2GTH_geneIDs.splice -d /nfs4/HORT/Vining_Lab/Users/talbots/bin/Omark/OMArk/LUCA.h5 -o omark_output
+	
+	Generate a plot
+	# /nfs4/HORT/Vining_Lab/Users/talbots/bin/Omark/OMArk/utils/plot_all_results.py -i omark_output -o your_omark_output.png
+	
+	
+6. Functional Annotation
+
+	# You've verified that the predicted gene structures are of high quality. Now you need to functionally annotate them.
+	# Two routes: 
+	# 1) Talk to Kelly about using OmicsBox. OmicsBox uses "points" which cost $$$
+	# 2) Use eggnogg and InterPro (free)
+
+	# Eggnogg and InterPro are easily accessible on the infrastructure.
+	
+	#############################
+	# TO BE CONTINUED ###########
+	#############################
+		
+	
