@@ -12,7 +12,7 @@ awk '/^S/{print ">"$2;print $3}' Jefferson_hifi_w_trio_fix2.asm.dip.hap1.p_ctg.g
 awk '/^S/{print ">"$2;print $3}' Jefferson_hifi_w_trio_fix2.asm.dip.hap2.p_ctg.gfa > Jefferson_hifi_w_trio_fix2.asm.dip.hap2.p_ctg.fa 
 
 #### Hi-C scaffolding
-##################
+################## Haplotype1:
 
 bwa index -a bwtsw -p Jeff_V4H1 /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/trio/Jeff_trio_fix2_hifiasm/Jefferson_hifi_w_trio_fix2.asm.dip.hap1.p_ctg.fa
 
