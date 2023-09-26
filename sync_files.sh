@@ -28,9 +28,14 @@ DEST="~/Vining_Lab_nfs7/Users/knausb"
 
 CMD="rsync -avz $SRC $DEST"
 
+SECONDS=0
+
 echo $CMD
 
 # Uncomment the following line to execute/evaluate.
 # eval $CMD
+
+ELAPSED="Elapsed: $(($SECONDS / 3600))hrs $((($SECONDS / 60) % 60))min $(($SECONDS % 60))sec"
+echo $ELAPSED
 
 # EOF.
