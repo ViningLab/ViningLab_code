@@ -6,6 +6,8 @@
 ## Vining Lab
 #####################################
 
+#Before beginning this. Make sure your contig headers are named properly.
+
 ##################
 STEP 1)RepeatMasking with EDTA
 
