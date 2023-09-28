@@ -53,12 +53,12 @@ fi
 
 cd $DATA_DIR
 
-SECONDS=0
+##### ##### ##### ##### #####
 
 # Script to activate conda.
-MYCMD="source /local/cluster/EDTA-1.9.6/activate.sh"
 # eval "$(/local/cluster/miniconda3_base/bin/conda shell.bash hook)"
 # conda activate /local/cluster/EDTA-1.9.6
+MYCMD="source /local/cluster/EDTA-1.9.6/activate.sh"
 echo $MYCMD
 eval $MYCMD
 
@@ -70,40 +70,26 @@ eval $MYCMD
 # --anno        [0|1]   Perform (1) or not perform (0, default) whole-genome TE annotation
 #                       after TE library construction.
 
-MY_EDTA="/local/cluster/EDTA-1.9.6/share/EDTA/EDTA.pl"
-
-# readlink -f GCF_900626175.2_cs10_genomic_rehead.fna 
-# /nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/CBDRx/GCF_900626175/EDTA/GCF_900626175.2_cs10_genomic_rehead.fna
-
+# MY_EDTA="/local/cluster/EDTA-1.9.6/share/EDTA/EDTA.pl"
 
 # We need a full PATH for input files so we can access them from /data.
+# GENOME="GCF_900626175.2_cs10_genomic_rehead.fna"
+# readlink -f GCF_900626175.2_cs10_genomic_rehead.fna 
 GENOME="/nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/CBDRx/GCF_900626175/EDTA/GCF_900626175.2_cs10_genomic_rehead.fna"
 
-#GENOME="GCF_900626175.2_cs10_genomic_rehead.fna"
-
 CMD="EDTA.pl --genome $GENOME --anno 1 --sensitive 1 --threads 1"
-
-# CMD="EDTA.pl --genome GCF_900626175.2_cs10_genomic_rehead.fna --anno 1 --sensitive 1 --threads 1"
-
-# CMD="EDTA.pl --genome GCF_900626175.2_cs10_genomic_rehead.fna"
-# CMD="EDTA.pl --genome GCF_900626175.2_cs10_genomic_rehead.fna --check_dependencies F"
-
-#CMD="EDTA.pl --genome GCF_900626175.2_cs10_genomic_rehead.fna --check_dependencies"
-
-#CMD="EDTA.pl -genome GCF_900626175.2_cs10_genomic_rehead.fa"
 
 SECONDS=0
 
 echo $CMD
 
 # Uncomment the following line to execute/evaluate.
-# 
-eval $CMD
+# eval $CMD
 
-
+# If you need an example output.
 # CMD="date > my_date.txt"
-#echo $CMD
-#eval $CMD
+# echo $CMD
+# eval $CMD
 
 ##### ##### ##### ##### #####
 # Return to original dir, copy your results.
@@ -118,6 +104,7 @@ echo $CMD
 eval $CMD
 
 
+# Report elapsed time.
 echo
 ELAPSED="Elapsed: $(($SECONDS / 3600))hrs $((($SECONDS / 60) % 60))min $(($SECONDS % 60))sec"
 echo $ELAPSED
