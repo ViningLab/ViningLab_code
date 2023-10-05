@@ -14,7 +14,7 @@ Lieberman-Aiden, E., Van Berkum, N.L., Williams, L., Imakaev, M., Ragoczy, T., T
 - [ArimaGenomics](https://github.com/ArimaGenomics/mapping_pipeline)
 
 
-## Scaffolding tools GitHub links
+## Scaffolding tools
 
 - [Juicebox](https://github.com/aidenlab/Juicebox)
 - [yahs](https://github.com/c-zhou/yahs)
