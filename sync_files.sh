@@ -3,21 +3,21 @@
 # Submit this script to the SGE system as follows.
 # qsub sync_files.sh
 
-#$ -cwd
-#$ -S /bin/bash
-#$ -N sync
-#$ -e syncerr
-#$ -o syncout
-#$ -q (hoser|bassil)
-# $ -pe thread 3
-# $ -pe thread 10
-# $ -pe thread 20
-# #$ -l mem_free=10G
-#$ -V
-# #$ -h
-# $ -t 1-2:1
+#$ -cwd # Execute from current working directory.
+#$ -V # Export current environment variables.
+#$ -S /bin/bash # Use bash.
+#$ -N sync # Job name.
+#$ -e syncerr # Where to redirect standard error.
+#$ -o syncout # Where to redirect standard out.
+#$ -q (hoser) # Queue(s), regex style.
+# $ -l mem_free=10G # Memory requirement.
+# $ -pe thread 3 # Thread requirement.
+# $ -h # Submit job with a hold.
+# $ -t 1-2:1 # Task array for batch jobs.
 
+# Create a 0-based counter from 1-based SGE.
 #i=$(expr $SGE_TASK_ID - 1)
+
 
 # From man rsync:
 # You can think of  a trailing  /  on  a source as meaning "copy the contents of this direc‐
