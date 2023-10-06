@@ -3,18 +3,19 @@
 # Submit this script to the SGE system as follows.
 # qsub run_EDTA.sh
 
-#$ -cwd
-#$ -S /bin/bash
-#$ -N EDTA
-#$ -e EDTAerr
-#$ -o EDTAout
-#$ -q (hoser)
-# $ -l mem_free=10G
-# $ -pe thread 3
-#$ -V
-# $ -h
-# $ -t 1-2:1
+#$ -cwd # Execute from current working directory.
+#$ -S /bin/bash # Use bash.
+#$ -N EDTA # Job name.
+#$ -e EDTAerr # Where to redirect standard error.
+#$ -o EDTAout # Where to redirect standard out.
+#$ -q (hoser) # Queue(s), regex style.
+# $ -l mem_free=10G # Memory requirement.
+# $ -pe thread 3 # Thread requirement.
+#$ -V # Export current environment variables.
+# $ -h # Submit job with a hold.
+# $ -t 1-2:1 # Task array for batch jobs.
 
+# Create a 0-based counter from 1-based SGE.
 #i=$(expr $SGE_TASK_ID - 1)
 
 echo "Using shell: "$0
