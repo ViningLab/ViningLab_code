@@ -40,9 +40,15 @@ echo
 ORIG_DIR=`pwd`
 DATA_DIR='/data/'$USER'_'$JOB_ID
 
-if [ ${DATA_DIR: -1} ]; then
-  echo "DATA_DIR is not terminated with a forward slash, adding it now."
-  DATA_DIR=$DATA_DIR"/"
+# if [ ${DATA_DIR: -1} ]; then
+#   echo "DATA_DIR is not terminated with a forward slash, adding it now."
+#   DATA_DIR=$DATA_DIR"/"
+# fi
+
+if [[ "$DATA_DIR" == *\/ ]]; then
+  echo "DATA_DIR is terminated with a forward slash, removing it now."
+  DATA_DIR=${DATA_DIR::-1}
+  echo "yes";
 fi
 
 if [ ! -d "$DATA_DIR" ]; then
