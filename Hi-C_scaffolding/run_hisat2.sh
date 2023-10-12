@@ -71,7 +71,7 @@ CMD="$HISAT2 -x $SNAME \
      --rg LB:${arr[0]} \
      --rg PL:illumina \
      --rg SM:${arr[0]} \
-     --rg PU:${arr[0]} | $SAMT view -bh -S - > bams/${arr[0]}.bam"
+     --rg PU:${arr[0]} | $SAMT view -@ 8 -bh -S - > bams/${arr[0]}.bam"
 
 
 #     --rg $RG | $SAMT view -bh > bams/${arr[0]}.bam"
@@ -86,7 +86,7 @@ echo
 date
 echo
 
-CMD="$SAMT sort bams/${arr[0]}.bam -o bams/${arr[0]}_sorted.bam"
+CMD="$SAMT sort -@ 8 bams/${arr[0]}.bam -o bams/${arr[0]}_sorted.bam"
 
 #
 echo $CMD
