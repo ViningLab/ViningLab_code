@@ -72,6 +72,8 @@ eval $MYCMD
 #eval "$(conda shell.bash hook)"
 #conda activate /nfs4/HORT/Vining_Lab/Users/talbots/bin/EDTA
 
+##### ##### ##### ##### #####
+
 # --sensitive   [0|1]   Use RepeatModeler to identify remaining TEs (1) or not (0,
 #                       default). This step is slow but MAY help to recover some TEs.
 # --anno        [0|1]   Perform (1) or not perform (0, default) whole-genome TE annotation
@@ -86,6 +88,7 @@ GENOME="/nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/CBDRx/GCF_90062
 
 CMD="EDTA.pl --genome $GENOME --anno 1 --sensitive 1 --threads 1"
 
+# Seconds since the shell was spawned, reset to zero here.
 SECONDS=0
 
 echo $CMD
