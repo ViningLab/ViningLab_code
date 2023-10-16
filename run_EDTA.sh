@@ -3,6 +3,8 @@
 # Submit this script to the SGE system as follows.
 # qsub run_EDTA.sh
 
+# One complete run will require ~30 GB of drive space.
+
 #$ -cwd # Execute from current working directory.
 #$ -S /bin/bash # Use bash.
 #$ -N EDTA # Job name.
