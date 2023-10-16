@@ -60,11 +60,9 @@ fi
 cd $DATA_DIR
 
 # We need a full PATH for input files so we can access them from /data.
-# GENOME="GCF_900626175.2_cs10_genomic_rehead.fna"
-# readlink -f GCF_900626175.2_cs10_genomic_rehead.fna 
-GENOME="/nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/CBDRx/GCF_900626175/EDTA/GCF_900626175.2_cs10_genomic_rehead.fna"
-
-CMD="EDTA.pl --genome $GENOME --anno 1 --sensitive 1 --threads 1"
+REF=""
+FASTQ1=""
+FASTQ2=""
 
 # Usage: bwa mem [options] <idxbase> <in1.fq> [in2.fq]
 # -t INT        number of threads [1]
@@ -73,6 +71,8 @@ CMD="EDTA.pl --genome $GENOME --anno 1 --sensitive 1 --threads 1"
 # -T INT        minimum score to output [30]
 # -q, --min-MQ INT           ...have mapping quality >= INT
 # -M            mark shorter split hits as secondary
+
+
 
 #CMD="$BWA mem -M -R \"$RG\" $BREF ${arr[1]} ${arr[2]} > sams/${arr[0]}.sam"
 CMD="bwa mem -t 4 $REF $FASTQ1 $FASTQ2 | samtools view -@ 4 --bam --with-header > my.bam"
