@@ -60,7 +60,7 @@ fi
 cd $DATA_DIR
 
 # We need a full PATH for input files so we can access them from /data.
-REF=""
+INDEX=""
 FASTQ1=""
 FASTQ2=""
 
@@ -75,7 +75,7 @@ FASTQ2=""
 
 
 #CMD="$BWA mem -M -R \"$RG\" $BREF ${arr[1]} ${arr[2]} > sams/${arr[0]}.sam"
-CMD="bwa mem -t 4 $REF $FASTQ1 $FASTQ2 | samtools view -@ 4 --bam --with-header > my.bam"
+CMD="bwa mem -t 4 $INDEX $FASTQ1 $FASTQ2 | samtools view -@ 4 --bam --with-header > my.bam"
 
 # Seconds since the shell was spawned, reset to zero here.
 SECONDS=0
