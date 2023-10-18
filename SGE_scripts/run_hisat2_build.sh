@@ -37,7 +37,7 @@ echo
 date
 
 # hisat2-build genome.fa genome
-CMD="$HISAT2 build $GENOME $SNAME"
+CMD="$HISAT2-build $GENOME $SNAME"
 
 #
 echo $CMD
