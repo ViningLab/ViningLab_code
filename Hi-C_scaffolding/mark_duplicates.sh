@@ -17,6 +17,9 @@
 
 MY_SAMPLE_NAME="myPA99"
 
+# Seconds since the shell was spawned, reset to zero here.
+SECONDS=0
+
 # SAMT="~/bin/samtools-1.9/samtools-1.9/samtools"
 SAMT="samtools"
 
