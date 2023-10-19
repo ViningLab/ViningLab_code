@@ -3,8 +3,6 @@
 # Submit this script to the SGE system as follows.
 # qsub mark_duplicates.sh
 
-# One complete run will require ~30 GB of drive space.
-
 #$ -S /bin/bash       # Use bash.
 #$ -cwd               # Execute from current working directory.
 #$ -V                 # Export current environment variables
@@ -103,6 +101,11 @@ echo
 CMD="$SAMT stats "$MY_SAMPLE_NAME"_dupmk.bam | gzip -c > "$MY_SAMPLE_NAME"_dupmark_stats.txt.gz"
 echo $CMD
 eval $CMD
+
+# Report elapsed time.
+echo
+ELAPSED="Elapsed: $(($SECONDS / 3600))hrs $((($SECONDS / 60) % 60))min $(($SECONDS % 60))sec"
+echo $ELAPSED
 
 
 # EOF.
