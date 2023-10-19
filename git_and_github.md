@@ -2,6 +2,9 @@
 
 Add some text.
 
+Link to the [git book](https://git-scm.com/book/en/v2) at git-scm.com.
+
+
 ## git status
 
 ```
