@@ -29,4 +29,9 @@ $ git push origin main
 Everything up-to-date
 ```
 
+## sync a fork
+
+Post on [stackoverflow](https://stackoverflow.com/q/7244321)
+
+
 
