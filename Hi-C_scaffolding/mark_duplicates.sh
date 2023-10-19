@@ -5,17 +5,20 @@
 
 # One complete run will require ~30 GB of drive space.
 
-#$ -S /bin/bash # Use bash.
+#$ -S /bin/bash       # Use bash.
 #$ -cwd               # Execute from current working directory.
 #$ -V                 # Export current environment variables
-#$ -N PA99_mkdups     # Job name.
-#$ -e PA99_mkdupserr  # Where to redirect standard error.
-#$ -o PA99_mkdupsout  # Where to redirect standard out.
+#$ -N mkdups          # Job name.
+#$ -e mkdupserr       # Where to redirect standard error.
+#$ -o mkdupsout       # Where to redirect standard out.
 #$ -q (hoser)         # Queue(s), regex style.
 # $ -l mem_free=10G   # Memory requirement.
 # $ -pe thread 3      # Thread requirement.
-.
-SAMT="~/bin/samtools-1.9/samtools-1.9/samtools "
+
+MY_SAMPLE_NAME="myPA99"
+
+# SAMT="~/bin/samtools-1.9/samtools-1.9/samtools"
+SAMT="samtools"
 
 # MarkDuplicates (Picard)
 # SortSam (Picard)
@@ -26,7 +29,7 @@ PICARD="/local/cluster/picard"
 
 JAVA="java"
 
-##report versions of softwares
+# Report versions of software.
 
 # Java version.
 echo "java info"
@@ -52,8 +55,8 @@ echo
 ##first line is basically java creating and using a temp-dir for running the job
 CMD="$JAVA -Djava.io.tmpdir=/data/ \
      -jar $PICARD SortSam \
-     I=myPA99.bam \
-     O=myPA99_sorted.bam \
+     I="$MY_SAMPLE_NAME".bam \
+     O="$MY_SAMPLE_NAME"_sorted.bam \
      TMP_DIR=/data/ \
      SORT_ORDER=coordinate"
 
@@ -68,11 +71,11 @@ echo
 # Mark duplicates
 CMD="$JAVA -Djava.io.tmpdir=/data/ \
      -jar $PICARD MarkDuplicates \
-     I=myPA99_sorted.bam \
-     O=myPA99_dupmk.bam \
+     I="$MY_SAMPLE_NAME"_sorted.bam \
+     O="$MY_SAMPLE_NAME"_dupmk.bam \
      MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=8000 \
      ASSUME_SORT_ORDER=coordinate \
-     M=myPA99_marked_dup_metrics.txt"
+     M="$MY_SAMPLE_NAME"_marked_dup_metrics.txt"
 
 #date
 #echo
@@ -85,7 +88,7 @@ echo
 ##### ##### ##### ##### #####
 # Index
 #CMD="$SAMT index $TEMP${arr[0]}_sorted.bam"
-CMD="$SAMT index myPA99_dupmk.bam"
+CMD="$SAMT index "$MY_SAMPLE_NAME"_dupmk.bam"
 echo $CMD
 eval $CMD
 echo
@@ -94,7 +97,7 @@ echo
 
 
 # Generate stats to validate the bam.
-CMD="$SAMT stats myPA99_dupmk.bam | gzip -c > myPA99_dupmark_stats.txt.gz"
+CMD="$SAMT stats "$MY_SAMPLE_NAME"_dupmk.bam | gzip -c > "$MY_SAMPLE_NAME"_dupmark_stats.txt.gz"
 echo $CMD
 eval $CMD
 
