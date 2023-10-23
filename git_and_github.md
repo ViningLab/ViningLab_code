@@ -37,4 +37,10 @@ Everything up-to-date
 Post on [stackoverflow](https://stackoverflow.com/q/7244321)
 
 
+## Example: contributing to a repository where I can create a branch
+
+
+## Example: contributing to someone else's repository, fork
+
+
 
