@@ -1,0 +1,38 @@
+### Jefferson hifiasm assembly pipeline
+# G3 submission G3-2023-404568
+# Sam Talbot
+###########
+
+yak count -k31 -b37 -t16 -o pat.yak /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/252146_HiseqPE150_all_ALL_cleaned.fq.gz
+yak count -k31 -b37 -t16 -o mat.yak /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/414062_HiseqPE150_all_ALL_cleaned.fq.gz
+
+hifiasm -o Jefferson_hifi_w_trio_fix2.asm -t 32 -1 /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/trio/yak_redo/pat_414.yak -2 /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/trio/yak_redo/mat_252.yak /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/raw_PB_SequelII_Jeff/m64047_211027_220234.ccs.fastq /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/raw_PB_SequelII_Jeff/m64047_211019_235749.ccs.fastq
+
+awk '/^S/{print ">"$2;print $3}' Jefferson_hifi_w_trio_fix2.asm.dip.hap1.p_ctg.gfa > Jefferson_hifi_w_trio_fix2.asm.dip.hap1.p_ctg.fa
+awk '/^S/{print ">"$2;print $3}' Jefferson_hifi_w_trio_fix2.asm.dip.hap2.p_ctg.gfa > Jefferson_hifi_w_trio_fix2.asm.dip.hap2.p_ctg.fa 
+
+#### Hi-C scaffolding
+################## Haplotype1:
+
+bwa index -a bwtsw -p Jeff_V4H1 /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/trio/Jeff_trio_fix2_hifiasm/Jefferson_hifi_w_trio_fix2.asm.dip.hap1.p_ctg.fa
+
+bwa mem -t 4 /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/trio/Jeff_trio_fix2_hifiasm/Jefferson_hifi_w_trio_fix2.asm.dip.hap1.p_ctg.fa /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/DTG-HiC-167_R2_001.fastq | samtools view -@ 4 -Sb > JV4H1_HiC2_map.bam
+bwa mem -t 4 /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/trio/Jeff_trio_fix2_hifiasm/Jefferson_hifi_w_trio_fix2.asm.dip.hap1.p_ctg.fa /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/DTG-HiC-167_R1_001.fastq | samtools view -@ 4 -Sb > JV4H1_HiC1_map.bam
+samtools view -h JV4H1_HiC2_map.bam | perl /nfs4/HORT/Vining_Lab/Users/talbots/bin/Scripts/mapping_pipeline/filter_five_end.pl | samtools view -Sb > filtered_JV4H1_HiC2_map.bam
+samtools view -h JV4H1_HiC1_map.bam | perl /nfs4/HORT/Vining_Lab/Users/talbots/bin/Scripts/mapping_pipeline/filter_five_end.pl | samtools view -Sb > filtered_JV4H1_HiC1_map.bam
+
+perl /nfs4/HORT/Vining_Lab/Users/talbots/bin/Scripts/mapping_pipeline/two_read_bam_combiner.pl filtered_JV4H1_HiC1_map.bam filtered_JV4H1_HiC2_map.bam samtools 10 | samtools view -bS -t /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/trio/Jeff_trio_fix2_hifiasm/Jefferson_hifi_w_trio_fix2.asm.dip.hap1.p_ctg.fa.fai | samtools sort -@ 4 -o pair_JV4H1_HiC12.bam
+
+Picard AddOrReplaceReadGroups INPUT=pair_JV4H1_HiC12.bam OUTPUT=sorted_Addr_JV4H1_HiC12.bam ID=JeffH1 LB=HiCJeff-LIB SM=Jefferson PL=ILLUMINA PU=none
+
+Picard MarkDuplicates Input=sorted_Addr_JV4H1_HiC12.bam Output=Mdup_sorted_Addr_JV4H1_HiC12.bam M=MetricsMdup.txt ASSUME_SORTED=TRUE VALIDATION_STRINGENCY=LENIENT REMOVE_DUPLICATES=TRUE
+
+samtools index Mdup_sorted_Addr_JV4H1_HiC12.bam
+
+samtools sort -n Mdup_sorted_Addr_JV4H1_HiC12.bam > Mdup_sortN_Addr_JV4H1_HiC12.bam
+
+/nfs4/HORT/Vining_Lab/Users/talbots/bin/YaHs/yahs/yahs -e GATC /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/trio/Jeff_trio_fix2_hifiasm/Jefferson_hifi_w_trio_fix2.asm.dip.hap1.p_ctg.fa Mdup_sortN_addr_pair_JV4H1_HiC12.bam
+
+/nfs4/HORT/Vining_Lab/Users/talbots/bin/YaHs/yahs/juicer_pre -a -o out_JBAT yahs.out.bin yahs.out_scaffolds_final.agp /nfs3/HORT/Vining_Lab/Users/talbots/hazelnut_genomes/trio/Jeff_trio_fix2_hifiasm/Jefferson_hifi_w_trio_fix2.asm.dip.hap1.p_ctg.fa.fai > out_JBAT.log 2>&1
+
+#Same process was done for Haplotype 2.
