@@ -98,7 +98,7 @@ GENOME="/nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/CBDRx/GCF_90062
 CMD="EDTA.pl --genome $GENOME --anno 1 --sensitive 1 --threads 4"
 
 # If including previously identified coding sequences, use --cds.
-# CMD="EDTA.pl --genome $GENOME --anno 1 --sensitive 1 --threads 4 --cds cds.FASTA"
+# CMD="EDTA.pl --genome $GENOME --anno 1 --sensitive 1 --threads 4 --cds braker.codingseq"
 
 # Seconds since the shell was spawned, reset to zero here.
 SECONDS=0
