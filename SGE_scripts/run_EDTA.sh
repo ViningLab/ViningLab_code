@@ -80,6 +80,9 @@ eval $MYCMD
 #                       default). This step is slow but MAY help to recover some TEs.
 # --anno        [0|1]   Perform (1) or not perform (0, default) whole-genome TE annotation
 #                       after TE library construction.
+# --cds [File]    Provide a FASTA file containing the coding sequence (no 
+#                       UTRs, nor TEs) of this genome or its close relative.
+
 
 # MY_EDTA="/local/cluster/EDTA-1.9.6/share/EDTA/EDTA.pl"
 
