@@ -45,16 +45,16 @@ MYSAMP="rice_hap1"
 date
 echo
 
-MYCMD="which busco"
-eval $MYCMD
-MYCMD="busco --version"
-echo
 
 # Script to activate conda.
 MYCMD="source /local/cluster/busco/activate.sh"
 echo $MYCMD
 eval $MYCMD
 
+MYCMD="which busco"
+eval $MYCMD
+MYCMD="busco --version"
+echo
 
 # busco -i [SEQUENCE_FILE] -l [LINEAGE] -o [OUTPUT_NAME] -m [MODE] [OTHER OPTIONS]
 #busco -i ../GCF_900626175.2_cs10_genomic.fna -l eudicots_odb10 -o cbdrx_busco -m genome 
