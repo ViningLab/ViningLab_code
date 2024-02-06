@@ -12,7 +12,7 @@
 #$ -o EDTAout # Where to redirect standard out.
 #$ -q (hoser) # Queue(s), regex style.
 # $ -l mem_free=10G # Memory requirement.
-# $ -pe thread 3 # Thread requirement.
+#$ -pe thread 4 # Thread requirement.
 #$ -V # Export current environment variables.
 # $ -h # Submit job with a hold.
 # $ -t 1-2:1 # Task array for batch jobs.
@@ -68,11 +68,17 @@ cd $DATA_DIR
 # eval "$(/local/cluster/miniconda3_base/bin/conda shell.bash hook)"
 # conda activate /local/cluster/EDTA-1.9.6
 MYCMD="source /local/cluster/EDTA-1.9.6/activate.sh"
-echo $MYCMD
-eval $MYCMD
+# echo $MYCMD
+# eval $MYCMD
 
-#eval "$(conda shell.bash hook)"
-#conda activate /nfs4/HORT/Vining_Lab/Users/talbots/bin/EDTA
+# v2.1.0 from Sam's account.
+# eval "$(/local/cluster/miniconda3_base/bin/conda shell.bash hook)"
+# eval "$(conda shell.bash hook)"
+# conda activate /nfs4/HORT/Vining_Lab/Users/talbots/bin/EDTA
+
+# v2.1.0 CQLS version.
+# /local/cluster/bin/EDTA.pl
+
 
 ##### ##### ##### ##### #####
 
@@ -80,15 +86,19 @@ eval $MYCMD
 #                       default). This step is slow but MAY help to recover some TEs.
 # --anno        [0|1]   Perform (1) or not perform (0, default) whole-genome TE annotation
 #                       after TE library construction.
+# --cds [File]    Provide a FASTA file containing the coding sequence (no 
+#                       UTRs, nor TEs) of this genome or its close relative.
 
-# MY_EDTA="/local/cluster/EDTA-1.9.6/share/EDTA/EDTA.pl"
 
 # We need a full PATH for input files so we can access them from /data.
 # GENOME="GCF_900626175.2_cs10_genomic_rehead.fna"
 # readlink -f GCF_900626175.2_cs10_genomic_rehead.fna 
 GENOME="/nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/CBDRx/GCF_900626175/EDTA/GCF_900626175.2_cs10_genomic_rehead.fna"
 
-CMD="EDTA.pl --genome $GENOME --anno 1 --sensitive 1 --threads 1"
+CMD="EDTA.pl --genome $GENOME --anno 1 --sensitive 1 --threads 4"
+
+# If including previously identified coding sequences, use --cds.
+# CMD="EDTA.pl --genome $GENOME --anno 1 --sensitive 1 --threads 4 --cds braker.codingseq"
 
 # Seconds since the shell was spawned, reset to zero here.
 SECONDS=0
