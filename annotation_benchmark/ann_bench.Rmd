@@ -1,0 +1,106 @@
+---
+title: "Annotation benchmarks"
+output: html_document
+date: "2024-02-05"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+cbdrx_rm <- read.csv("nuccomp/CBDRx_masked_nospace_nuccomp.csv")
+#cbdrx_edta2 <- read.csv("nuccomp/CBDRx_EDTAv2_GCF_900626175.2_cs10_genomic_rehead_softmasked_nuccomp.csv")
+cbdrx_edta5 <- read.csv("nuccomp/CBDRx_v5_GCF_900626175.2_cs10_genomic_rehead_softmasked_nuccomp.csv")
+cbdrx_edta6 <- read.csv("nuccomp/CBDRx_EDTA_v6_step2_GCF_900626175.2_cs10_genomic_rehead_softmasked_nuccomp.csv")
+
+cbdrx <- c(sum(cbdrx_rm$Length),
+  sum(colSums(cbdrx_rm[, grep("^[nN]$", colnames(cbdrx_rm))])),
+  sum(colSums(cbdrx_rm[, grep("^[ACGTWSMKRY]$", colnames(cbdrx_rm))])),
+  sum(colSums(cbdrx_rm[, grep("^[acgtwsmkry]$", colnames(cbdrx_rm))])),
+
+  # sum(colSums(cbdrx_edta2[, grep("^[nN]$", colnames(cbdrx_edta2))])),
+  # sum(colSums(cbdrx_edta2[, grep("^[ACGTWSMKRY]$", colnames(cbdrx_edta2))])),
+  # sum(colSums(cbdrx_edta2[, grep("^[acgtwsmkry]$", colnames(cbdrx_edta2))])),
+
+  sum(colSums(cbdrx_edta5[, grep("^[nN]$", colnames(cbdrx_edta5))])),
+  sum(colSums(cbdrx_edta5[, grep("^[ACGTWSMKRY]$", colnames(cbdrx_edta5))])),
+  sum(colSums(cbdrx_edta5[, grep("^[acgtwsmkry]$", colnames(cbdrx_edta5))])),
+  
+  sum(colSums(cbdrx_edta6[, grep("^[nN]$", colnames(cbdrx_edta6))])),
+  sum(colSums(cbdrx_edta6[, grep("^[ACGTWSMKRY]$", colnames(cbdrx_edta6))])),
+  sum(colSums(cbdrx_edta6[, grep("^[acgtwsmkry]$", colnames(cbdrx_edta6))]))
+)
+
+```
+
+
+```{r}
+pk_rm <- read.csv("nuccomp/PK_RM_GCA_000230575.5_ASM23057v5_genomic.fna.masked_nuccomp.csv")
+pk_edta1 <- read.csv("nuccomp/PK_EDTAv1_GCA_000230575.5_ASM23057v5_genomic_rehead_softmasked_nuccomp.csv")
+pk_edta2 <- read.csv("nuccomp/PK_EDTAv2_GCA_000230575.5_ASM23057v5_genomic_rehead_softmasked_nuccomp.csv")
+
+pk <- c(sum(pk_rm$Length),
+  sum(colSums(pk_rm[, grep("^[nN]$", colnames(pk_rm))])),
+  sum(colSums(pk_rm[, grep("^[ACGTWSMKRY]$", colnames(pk_rm))])),
+  sum(colSums(pk_rm[, grep("^[acgtwsmkry]$", colnames(pk_rm))])),
+
+  sum(colSums(pk_edta1[, grep("^[nN]$", colnames(pk_edta1))])),
+  sum(colSums(pk_edta1[, grep("^[ACGTWSMKRY]$", colnames(pk_edta1))])),
+  sum(colSums(pk_edta1[, grep("^[acgtwsmkry]$", colnames(pk_edta1))])),
+
+  sum(colSums(pk_edta2[, grep("^[nN]$", colnames(pk_edta2))])),
+  sum(colSums(pk_edta2[, grep("^[ACGTWSMKRY]$", colnames(pk_edta2))])),
+  sum(colSums(pk_edta2[, grep("^[acgtwsmkry]$", colnames(pk_edta2))]))
+)
+
+```
+
+
+```{r}
+bench <- data.frame(cbind(cbdrx, pk))
+
+bench <- data.frame(
+  cbdrx = bench$cbdrx,
+  cbdrx_perc = bench$cbdrx/ bench$cbdrx[1] * 100,
+  pk = bench$pk,
+  pk_perc = bench$pk/ bench$pk[1] * 100
+)
+
+rownames(bench) <- c("Length", "Nn", "RM_Up", "RM_Low", 
+                     "EDTA1_Nn", "EDTA1_Up", "EDTA1_Low", "EDTA2_Nn", "EDTA2_Up", "EDTA2_Low")
+
+
+knitr::kable(bench,  format.args = list(big.mark = ","), digits = 1)
+
+```
+
+
+## braker
+
+
+```{r}
+
+bench2 <- bench[1:5, c(1, 3)]
+bench2[3:5, ] <- NA
+
+rownames(bench2)[3:5] <- c("braker12", "braker3_1", "braker3_2")
+
+bench2$cbdrx[3] <- 37654
+bench2$cbdrx[4] <- 30861
+bench2$cbdrx[5] <- 31950
+
+bench2$pk[3] <- 50758
+bench2$pk[4] <- 35463
+bench2$pk[5] <- 36851
+
+knitr::kable(bench2,  format.args = list(big.mark = ","), digits = 1)
+
+```
+
+
+

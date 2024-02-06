@@ -33,7 +33,15 @@ line_map <- function(x, alpha = 1, ...){
   palette( "default" )
 }
 
-
+#' @param busc A matrix of BUSCO coordinates for one chromosome/scaffold.
+#' @param rect A number.
+#' @param palpha A number.
+#' @param size A number.
+#' @param lalpha A number.
+#' @param linewidth A number.
+#' @param line_na_rm A number.
+#' 
+#' @returns A ggplot object
 gg_line_map <- function( busc, 
                          rect = FALSE, 
                          palpha = 1.0, size = 1.0,
@@ -63,7 +71,10 @@ gg_line_map <- function( busc,
   
   names(data_long)[2:3] <- c("Sample", "POS")
   data_long$Sample <- factor(data_long$Sample , levels = unique(data_long$Sample))
-  data_long <- data_long[ !is.na(data_long$POS), ]
+  if( line_na_rm == TRUE ){
+    #cat(paste("line_na_rm:", line_na_rm))
+    data_long <- data_long[ !is.na(data_long$POS), ]
+  }
   
   p <- ggplot(data_long, aes(x = Sample, y = POS, color = Busco_id, group = Busco_id)) + 
     geom_point( size = size, alpha = palpha ) +
