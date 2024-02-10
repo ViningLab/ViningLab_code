@@ -55,6 +55,14 @@ my_seqList = [record_dict[my_list[0]], record_dict[my_list[1]], record_dict[my_l
 
 # Write the list of SeqIO objects to FASTA file.
 #SeqIO.write(my_seqList, "example.FASTA", "fasta")
+
+# Subset to one sequence.
+my_seq = record_dict[my_list[0]]
+# A python slice includes the start but omits the end position.
+my_seq.seq = my_seq.seq[0:10]
+len(my_seq.seq)
+#SeqIO.write(my_seq, "example2.FASTA", "fasta")
+
 ```
 
 
