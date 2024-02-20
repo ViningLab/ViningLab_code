@@ -79,9 +79,28 @@ p <- p + ggtitle( "EH23" )
 p
 
 p + xlim(1.6, 4)
-+ ylim(30e6, 40e6)
+#+ ylim(30e6, 40e6)
 
 
 ```
+
+
+
+```{r}
+
+my_dat <- data.frame(
+#  my_x = rep( unique(EH23a$Id), times = 2 ),
+  my_x = rep( 1:10, times = 2 ),
+  my_y = rnorm( n = 20, mean = 40e6, sd = 10e6),
+  my_bg <- rep("#B22222", times = 20)
+)
+
+#
+p + geom_point( data = my_dat, mapping = aes( x = my_x, y = my_y, fill = my_bg), shape = 21, size = 8)
+
+
+```
+
+
 
 
