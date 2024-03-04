@@ -15,7 +15,8 @@ Data input
 
 ```{r}
 t1 <- Sys.time()
-EH23a <- read.csv("../../CannabisPangenome/FigureSideo/EH23a.softmasked_nuccomp.csv")
+#EH23a <- read.csv("../../CannabisPangenome/FigureSideo/EH23a.softmasked_nuccomp.csv")
+EH23a <- read.csv("../ideograms/EH23b.softmasked_nuccomp.csv")
 EH23a$chrom_num <- sub(".+chr", "", EH23a$Id)
 EH23a$chrom_num[ EH23a$chrom_num == "X" ] <- 10
 EH23a$chrom_num <- as.numeric(EH23a$chrom_num)
