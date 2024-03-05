@@ -15,7 +15,9 @@ Data input
 
 ```{r}
 t1 <- Sys.time()
-EH23a <- read.csv("../../CannabisPangenome/FigureSideo/EH23a.softmasked_nuccomp.csv")
+#EH23a <- read.csv("../../CannabisPangenome/FigureSideo/EH23a.softmasked_nuccomp.csv")
+EH23a <- read.csv("../ideograms/EH23b.softmasked_nuccomp.csv")
+
 EH23a$chrom_num <- sub(".+chr", "", EH23a$Id)
 EH23a$chrom_num[ EH23a$chrom_num == "X" ] <- 10
 EH23a$chrom_num <- as.numeric(EH23a$chrom_num)
@@ -30,13 +32,13 @@ Plot
 library(ggplot2)
 
 chrom_wid <- 0.05
-chrom_offset <- 0.2
+chrom_offset <- 0.0
 
 p <- ggplot2::ggplot()
 p <- p + theme_bw()
 p <- p + ggplot2::geom_rect( 
-  data = EH23a, 
-  ggplot2::aes( xmin = chrom_num - chrom_wid - chrom_offset,
+  data = EH23a,
+  mapping = ggplot2::aes( xmin = chrom_num - chrom_wid - chrom_offset,
                 xmax = chrom_num + chrom_wid - chrom_offset,
                 ymin = 1, ymax = Length),
   fill = "#DCDCDC",
@@ -62,7 +64,7 @@ p <- p + scale_y_continuous(
   breaks = seq( 0, 120e6, by = 10e6), 
   labels = seq( 0, 120, by = 10)
 )
-  
+
 #  p <- p + ggplot2::theme_bw() + 
 p <- p + ggplot2::theme( 
       #      panel.grid.minor.x = ggplot2::element_blank(), 
@@ -74,7 +76,7 @@ p <- p + ggplot2::theme(
   )
   
 p <- p + ggplot2::ylab("Position (Mbp)")
-p <- p + ggtitle( "EH23" )
+p <- p + ggtitle( "A) EH23" )
 
 p
 
@@ -92,12 +94,12 @@ my_dat <- data.frame(
 #  my_x = rep( unique(EH23a$Id), times = 2 ),
   my_x = rep( 1:10, times = 2 ),
   my_y = rnorm( n = 20, mean = 40e6, sd = 10e6),
-  my_bg <- rep("#B22222", times = 20)
+  #my_bg = rep("#B2222266", times = 20)
+  my_bg = rep(c("#B2222266", "#1E90FF"), times = 10)
 )
 
-#
-p + geom_point( data = my_dat, mapping = aes( x = my_x, y = my_y, fill = my_bg), shape = 21, size = 8)
-
+#p + geom_point( data = my_dat, mapping = aes( x = my_x, y = my_y, fill = my_bg), shape = 21, size = 8)
+p + geom_point( data = my_dat, mapping = aes( x = my_x, y = my_y, fill = my_bg), fill = my_dat$my_bg, shape = 21, size = 8)
 
 ```
 
