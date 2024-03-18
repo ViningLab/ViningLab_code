@@ -1,0 +1,33 @@
+## Black Mitcham hifiasm assembly pipeline
+# G3 submission G3-2024-XXXX
+# Sam Talbot
+###########
+
+hifiasm -o BM_1.asm -t 32 /nfs3/HORT/Vining_Lab/PROJECTS/BM_NS_genomes/rawData/BM/analysis-BM-440-m64058_210708_211850.hifi_reads.fastq.gz
+
+awk '/^S/{print ">"$2;print $3}' BM_1.asm.a_ctg.gfa > BM_1.asm.p_ctg.fa
+
+
+#### Hi-C scaffolding
+################## Haplotype1:
+
+bwa index -a bwtsw -p BM BM_1.asm.p_ctg.fa
+
+bwa mem -t 4 BM_1.asm.p_ctg.fa /nfs3/HORT/Vining_Lab/PROJECTS/BM_NS_genomes/CantataBio_data/Jun2023/ORE3417/DTG-OmniC-381_R1_001.fastq.gz | samtools view -@ 4 -Sb > BM_HiC1_map.bam
+bwa mem -t 4 BM_1.asm.p_ctg.fa /nfs3/HORT/Vining_Lab/PROJECTS/BM_NS_genomes/CantataBio_data/Jun2023/ORE3417/DTG-OmniC-381_R2_001.fastq.gz | samtools view -@ 4 -Sb > BM_HiC2_map.bam
+samtools view -h BM_HiC1_map.bam | perl /nfs4/HORT/Vining_Lab/Users/talbots/bin/Scripts/mapping_pipeline/filter_five_end.pl | samtools view -Sb > filtered_BM_HiC1_map.bam
+samtools view -h BM_HiC2_map.bam | perl /nfs4/HORT/Vining_Lab/Users/talbots/bin/Scripts/mapping_pipeline/filter_five_end.pl | samtools view -Sb > filtered_BM_HiC2_map.bam
+
+perl /nfs4/HORT/Vining_Lab/Users/talbots/bin/Scripts/mapping_pipeline/two_read_bam_combiner.pl filtered_BM_HiC1_map.bam filtered_BM_HiC2_map.bam samtools 10 | samtools view -bS -t BM_1.asm.p_ctg.fa.fai | samtools sort -@ 4 -o paired_filtered_BM_HiC1_map.bam
+
+Picard AddOrReplaceReadGroups INPUT=paired_filtered_BM_HiC1_map.bam OUTPUT=Addr_sorted_paired_filtered_BM_HiC1_map.bam ID=BM LB=HiCBM-LIB SM=BlackMitcham PL=ILLUMINA PU=none
+
+Picard MarkDuplicates Input=Addr_sorted_paired_filtered_BM_HiC1_map.bam Output=Mdup_Addr_sorted_paired_filtered_BM_HiC1_map.bam M=MetricsMdup.txt ASSUME_SORTED=TRUE VALIDATION_STRINGENCY=LENIENT REMOVE_DUPLICATES=TRUE
+
+samtools index Addr_sorted_paired_filtered_BM_HiC1_map.bam
+
+samtools sort -n Addr_sorted_paired_filtered_BM_HiC1_map.bam > Addr_sortN_paired_filtered_BM_HiC1_map.bam
+
+/nfs4/HORT/Vining_Lab/Users/talbots/bin/YaHs/yahs/yahs BM_1.asm.p_ctg.fa Addr_sortN_paired_filtered_BM_HiC1_map.bam
+
+/nfs4/HORT/Vining_Lab/Users/talbots/bin/YaHs/yahs/juicer_pre -a -o out_JBAT yahs.out.bin yahs.out_scaffolds_final.agp BM_1.asm.p_ctg.fa.fai > out_JBAT.log 2>&1

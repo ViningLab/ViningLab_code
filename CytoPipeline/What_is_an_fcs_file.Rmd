@@ -49,7 +49,14 @@ summary(x)
 ```{r}
 parameters(x)
 pData(parameters(x))
+pData(parameters(x))[, 'name']
+# ?AnnotatedDataFrame
 
+colnames(x)
+featureNames(x)
+# keyword(x)
+keyword(x,c("$P1E", "$P2E", "$P3E", "$P4E"))
+identifier(x)
 ```
 
 
@@ -60,6 +67,8 @@ pData(parameters(x))
 exprs(x)[1:3,]
 
 plot(exprs(x)[, 1])
+#plot(exprs(x)[, c("FL1-H", "Time")])
+plot(exprs(x)[, c("Time", "FL1-H")])
 
 # library(flowviz)
 
