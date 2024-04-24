@@ -50,12 +50,6 @@ Mark III Systems (training)
 
 https://trending.markiiisys.com/osu-aiseries-2024
 
-
-Jupytr
-
-https://jupyter.org
-
-
 Introduction to AI & ML
 
 https://colab.research.google.com/drive/1IA9JWy_Q60Jcn9N51PNXsu9jdyqavQek?usp=sharing#scrollTo=tZo_ZVF7N_eW
@@ -65,6 +59,10 @@ Introduction to Deep Learning
 
 https://colab.research.google.com/drive/1YaYZPJ8ZlydNMFFvh8C6zRqvtNvZxgxn?usp=sharing
 
+
+Jupytr
+
+https://jupyter.org
 
 
 
