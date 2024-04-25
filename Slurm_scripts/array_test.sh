@@ -5,6 +5,8 @@
 # squeue
 
 #SBATCH --job-name=myarrayjob
+#SBATCH --error=myarray%A_%a.err
+#SBATCH --output=myarray%A_%a.out
 #SBATCH --partition=hoser
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
