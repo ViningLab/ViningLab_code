@@ -24,9 +24,11 @@
 # tory" as opposed to "copy the directory by name"
 
 SRC="~/Vining_Lab_nfs4/Users/knausb/"
+# SRC="username@files.cgrb.oregonstate.edu:~/Vining_Lab_nfs4/Users/knausb/"
 DEST="~/Vining_Lab_nfs7/Users/knausb"
 
 CMD="rsync -avz $SRC $DEST"
+# CMD="rsync -avz -e 'ssh -p 22' $SRC $DEST"
 
 SECONDS=0
 
