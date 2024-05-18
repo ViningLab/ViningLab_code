@@ -150,7 +150,7 @@ lines(x = my_x, y = my_y3)
 #dat_mult <- makemultdata()
 #mm1 <- multmixEM(my_dat$`FL1-H`, lambda = 5)
 
-
+#plot( x = my_dat$`FL1-H`, y = my_dat$`FL2-H`)
 ```
 
 
