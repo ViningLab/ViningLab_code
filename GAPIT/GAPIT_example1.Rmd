@@ -1,0 +1,49 @@
+---
+title: "GAPIT example"
+author: "Brian J. Knaus"
+date: "`r format(Sys.time(), '%Y, %B %d')`"
+output:
+  html_document:
+    toc: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(fig.align = "center")
+knitr::opts_chunk$set(fig.height = 4)
+knitr::opts_chunk$set(fig.width = 4)
+st1 <- Sys.time()
+```
+
+
+
+
+```{r}
+library(vcfR)
+```
+
+
+```{r, results='hide'}
+#vcf <- read.vcfR("Scaffold_5__2_bifiltered.vcf.gz")
+#vcf <- read.vcfR("Scaffold_8__2_bifiltered.vcf.gz")
+#vcf <- read.vcfR("Scaffold_6__2_bifiltered.vcf.gz")
+#vcf <- read.vcfR("Scaffold_3__2_bifiltered.vcf.gz")
+vcf <- read.vcfR("/media/knausb/Vining_lab/knausb/autoflower1/20220402_GWAS_Scaffold_3__2/Scaffold_3__2_bifiltered.vcf.gz")
+
+```
+
+
+```{r}
+set.seed(9)
+vcf <- vcf[sample(1:nrow(vcf@fix), size = 2e3), ]
+vcf
+write.vcf(vcf, file = "Scaffold_3_2.vcf.gz")
+
+```
+
+
