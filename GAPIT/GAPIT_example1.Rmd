@@ -22,6 +22,33 @@ st1 <- Sys.time()
 
 
 
+## GAPIT test
+
+
+```{r}
+# library(GAPIT)
+# 
+# myPhenoFile <- system.file("extdata", "mdp_traits.txt.gz", package = "GAPIT")
+# myGenoFile <- system.file("extdata", "mdp_genotype_test.hmp.txt.gz", package = "GAPIT")
+# myPhenotypes <- read.table(myPhenoFile, header = TRUE)
+# myGenotypes  <- read.table(myGenoFile, header = FALSE)
+# 
+# myGAPIT <- GAPIT(
+#   Y = myPhenotypes,
+#   G = myGenotypes,
+#   PCA.total = 3,
+#   file.output = FALSE,
+#   model = "MLM"
+# #  model = "FarmCPU"
+# )
+```
+
+
+
+
+
+## Genotypes
+
 
 ```{r}
 library(vcfR)
@@ -29,21 +56,113 @@ library(vcfR)
 
 
 ```{r, results='hide'}
-#vcf <- read.vcfR("Scaffold_5__2_bifiltered.vcf.gz")
-#vcf <- read.vcfR("Scaffold_8__2_bifiltered.vcf.gz")
-#vcf <- read.vcfR("Scaffold_6__2_bifiltered.vcf.gz")
-#vcf <- read.vcfR("Scaffold_3__2_bifiltered.vcf.gz")
-vcf <- read.vcfR("/media/knausb/Vining_lab/knausb/autoflower1/20220402_GWAS_Scaffold_3__2/Scaffold_3__2_bifiltered.vcf.gz")
-
+vcf <- read.vcfR("Scaffold_3_2.vcf.gz")
 ```
 
 
 ```{r}
-set.seed(9)
-vcf <- vcf[sample(1:nrow(vcf@fix), size = 2e3), ]
 vcf
-write.vcf(vcf, file = "Scaffold_3_2.vcf.gz")
+# my_hapmap <- vcfR2hapmap(vcf)
 
+# my_hapmap <- myG
+# my_hapmap <- my_hapmap[, -300]
+# my_hapmap[1, ]
+
+# write.table( x = my_hapmap, file = "Sacffold_3_2_hmp.txt",
+#              sep = "\t", row.names = FALSE, col.names = FALSE)
 ```
 
+
+## Phenotypes
+
+
+```{r}
+library(readxl)
+pheno <- read_xlsx("Phenotypes.xlsx")
+
+#write.table(pheno, file = "Phenotypes.txt", sep = "\t", row.names = FALSE, col.names = TRUE)
+
+#pheno$ID <- as.character(pheno$ID)
+names(pheno)[1] <- "Taxa"
+pheno$Taxa <- as.character(pheno$Taxa)
+head(pheno)
+```
+
+
+
+## Synchronize P&G
+
+
+```{r}
+colnames(vcf@gt)[1:8]
+colnames(vcf@gt) <- sub("-.+", "", colnames(vcf@gt))
+colnames(vcf@gt)[1:8]
+
+pheno$Taxa[1:8]
+
+# 1:10 %in% 2:4
+
+pheno <- pheno[ pheno$Taxa %in% colnames(vcf@gt)[-1], ]
+pheno <- pheno[ sort.int(pheno$Taxa, index.return = TRUE)$ix, ]
+
+vcf@gt <- vcf@gt[ , colnames(vcf@gt) %in% c("FORMAT", pheno$Taxa)]
+vcf@gt <- vcf@gt[ , c(1, sort.int(colnames(vcf@gt)[-1], index.return = TRUE)$ix + 1)]
+
+# Validate membership.
+all(colnames(vcf@gt)[-1] %in% pheno$Taxa)
+# Validate order.
+all(colnames(vcf@gt)[-1] == pheno$Taxa)
+```
+
+
+## HapMap
+
+```{r}
+hapmap_geno <- vcfR2hapmap(vcf)
+hapmap_geno[1:3, c(1, 3, 4, 12:14)]
+
+all(hapmap_geno[1, 12:ncol(hapmap_geno)] == pheno$Taxa)
+pheno
+```
+
+
+## GAPIT
+
+
+```{r}
+# devtools::install_github("jiabowang/GAPIT", force=TRUE)
+
+st1 <- Sys.time()
+#library(GAPIT3)
+library(GAPIT)
+```
+
+
+```{r GAPIT3}
+st4 <- Sys.time()
+
+Analysis1<- GAPIT(
+  Y = pheno[, c(1, 3)],
+#  Y = pheno[, c(1, 3, 4, 6)],
+#  Y = pheno[, c(1, 4)],
+  G = hapmap_geno,
+  model = "MLM",
+#  SNP.impute = "Major",
+  SNP.impute = "Middle",
+  PCA.total = 3,
+#  Major.allele.zero=TRUE,
+  Major.allele.zero=FALSE,
+#  file.output = TRUE,
+  file.output = FALSE,
+  )
+
+st5 <- Sys.time()
+st5 - st4
+```
+
+
+
+```{r}
+st5 - st1
+```
 
