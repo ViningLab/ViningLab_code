@@ -1,4 +1,8 @@
 
+CQLS HPC Documentation Website:    
+
+https://docs.hpc.oregonstate.edu/cqls/
+
 # Slurm scripts and background
 
 RONIN: A SIMPLE SLURM GUIDE FOR BEGINNERS
