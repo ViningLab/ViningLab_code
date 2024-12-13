@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 # Submit job as follows.
 # sbatch sync_files.sh  
