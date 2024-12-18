@@ -17,6 +17,9 @@
 i=${SLURM_ARRAY_TASK_ID}
 #CMD="This is array task ${SLURM_ARRAY_TASK_ID}"
 
+HOST=$(hostname)
+echo ‘Running on host: %s\n’ $HOST
+
 BASE_DIR="/nfs4/HORT/Vining_Lab/GENOMES/hemp/private_data/salk/releases/scaffolded"
 
 MYSAMPS=( `ls $BASE_DIR`)
