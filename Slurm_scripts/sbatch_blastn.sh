@@ -67,5 +67,6 @@ if [ ! -d "$OUTF" ]; then
 
 fi
 
+# c("qseqid","qlen","sseqid","slen","qstart","qend","sstart","send","evalue","bitscore","score","length","pident","nident","mismatch","positive","gapopen","gaps","ppos","sstrand")
 
 # EOF.
