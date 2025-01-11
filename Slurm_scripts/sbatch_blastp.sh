@@ -5,8 +5,8 @@
 # squeue
 
 #SBATCH --job-name=blastp
-#SBATCH --error=blastp_%A.err
-#SBATCH --output=blastp_%A.out
+#SBATCH --error=blastp_%A_%a.err
+#SBATCH --output=blastp_%A_%a.out
 # SBATCH --partition=hoser
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
@@ -36,7 +36,7 @@ echo "${MYSAMPS[$i]}"
 SAMPDB="$BASE_DIR/${MYSAMPS[$i]}/blastdb_primary_high_confidence.proteins/${MYSAMPS[$i]}"
 echo $SAMPDB
 
-OUTF="${MYSAMPS[$i]}_blast.csv"
+OUTF="${MYSAMPS[$i]}_blastp.csv"
 
 # QUERY="cesa_tair.FASTA"
 # QUERY="autoflower_CsAP2_CsPRR37.fasta"
