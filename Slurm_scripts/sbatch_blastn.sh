@@ -5,8 +5,8 @@
 # squeue
 
 #SBATCH --job-name=blastn
-#SBATCH --error=blastn_%A.err
-#SBATCH --output=blastn_%A.out
+#SBATCH --error=blastn_%A_%a.err
+#SBATCH --output=blastn_%A_%a.out
 # SBATCH --partition=hoser
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
