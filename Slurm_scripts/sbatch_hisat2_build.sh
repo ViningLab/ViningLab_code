@@ -25,7 +25,11 @@ HISAT2="hisat2"
 #SNAME="Cannbio-2"
 GENOME="../repeatmodeler/GCA_000230575.5_ASM23057v5_genomic.fna.masked"
 SNAME="Purpl_Kush"
+
+# agat_convert_sp_gff2gtf.pl --gff 1_test.gff -o 1_test_agat.gtf
 GTF="my_annotations.gtf"
+
+
 
 ##### ##### ##### ##### #####
 
