@@ -16,6 +16,9 @@
 i=${SLURM_ARRAY_TASK_ID}
 #CMD="This is array task ${SLURM_ARRAY_TASK_ID}"
 
+HOST=$(hostname)
+echo 'Running on host:' $HOST 
+
 ##### ##### ##### ##### #####
 
 # https://github.com/gpertea/stringtie
@@ -63,8 +66,7 @@ CMD="$STRINGTIE \
         -e \
         -G $ANNOTATIONS \
         -p 1 \
-        -o stringtie_gtf/"${arr[0]}"/"${arr[0]}"_stringtie.gtf bams/"${arr[0]}"_
-sorted.bam"
+        -o stringtie_gtf/"${arr[0]}"/"${arr[0]}"_stringtie.gtf bams/"${arr[0]}"_sorted.bam"
 
 #
 echo $CMD
