@@ -8,8 +8,7 @@
 #SBATCH --error=sbhello_%A.err
 #SBATCH --output=sbhello_%A.out
 #SBATCH --account=green
-# SBATCH --partition=hoser
-# SBATCH --partition=all.q
+# SBATCH --partition=all.q,green
 # SBATCH --partition=green
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
