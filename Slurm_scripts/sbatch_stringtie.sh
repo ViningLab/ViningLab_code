@@ -7,6 +7,8 @@
 #SBATCH --job-name=strtie
 #SBATCH --error=stringtie_eo/stringtie_%A_%a.err
 #SBATCH --output=stringtie_eo/stringtie_%A_%a.out
+#SBATCH --account=green
+#SBATCH --partition=all.q,green
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 # SBATCH --cpus-per-task=4
