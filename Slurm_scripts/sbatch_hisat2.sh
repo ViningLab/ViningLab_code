@@ -7,7 +7,8 @@
 #SBATCH --job-name=hs
 #SBATCH --error=hs_%A.err
 #SBATCH --output=hs_%A.out
-# SBATCH --partition=hoser
+#SBATCH --account=green
+#SBATCH --partition=all.q,green
 #SBATCH --ntasks=1
 # SBATCH --cpus-per-task=1
 # SBATCH --cpus-per-task=4
@@ -36,7 +37,7 @@ FILE=( `cat "samples.txt" `)
 IFS=';' read -a arr <<< "${FILE[$i]}"
 echo "${arr[1]}"
 
-RG="@RG\tID:${arr[0]}\tLB:${arr[0]}\tPL:illumina\tSM:${arr[0]}\tPU:${arr[0]}"
+#RG="@RG\tID:${arr[0]}\tLB:${arr[0]}\tPL:illumina\tSM:${arr[0]}\tPU:${arr[0]}"
 
 ##### ##### ##### ##### #####
 
@@ -58,7 +59,12 @@ CMD="$HISAT2 -x $SNAME \
      -p 8 \
      -1 ${arr[1]} \
      -2 ${arr[2]} \
-     --rg $RG | $SAMT view  -@ 8 -bh -S - > bams/${arr[0]}.bam"
+     --rg-id ${arr[0]} \
+     --rg LB:${arr[0]} \
+     --rg PL:illumina \
+     --rg SM:${arr[0]} \
+     --rg PU:${arr[0]} \
+     --dta | $SAMT view  -@ 8 -bh -S - > bams/${arr[0]}.bam"
      
 #
 echo $CMD
