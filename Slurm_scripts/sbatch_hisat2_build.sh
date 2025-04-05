@@ -61,7 +61,7 @@ fi
 
 # hisat2-build genome.fa genome
 # CMD="$HISAT2-build $GENOME $SNAME"
-CMD="$HISAT2-build --ss splicesites.txt --exons exons.txt $GENOME $SNAME"
+CMD="$HISAT2-build --ss splicesites.txt --exon exons.txt $GENOME $SNAME"
 
 #
 echo $CMD
