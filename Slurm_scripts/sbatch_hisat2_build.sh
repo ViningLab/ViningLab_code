@@ -8,7 +8,8 @@
 #SBATCH --error=hsbuild_%A.err
 #SBATCH --output=hsbuild_%A.out
 #SBATCH --account=green
-# SBATCH --partition=hoser
+#SBATCH --partition=all.q,green
+#SBATCH --exclude=aspen9
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 # SBATCH --cpus-per-task=4
