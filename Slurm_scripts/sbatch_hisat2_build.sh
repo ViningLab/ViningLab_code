@@ -13,6 +13,8 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 # SBATCH --cpus-per-task=4
+#SBATCH --mem=200G
+
 
 ##### ##### ##### ##### #####
 
