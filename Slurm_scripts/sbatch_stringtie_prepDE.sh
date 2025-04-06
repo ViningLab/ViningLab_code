@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Submit job as follows.
-# sbatch sbatch_hello.sh  
+# sbatch sbatch_stringtie_prepDE.sh  
 # squeue
 
 #SBATCH --job-name=prepDE
