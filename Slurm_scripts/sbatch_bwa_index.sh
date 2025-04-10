@@ -19,6 +19,8 @@ echo "Running on host: $HOST"
 
 ##### ##### ##### ##### #####
 
+# https://github.com/lh3/bwa
+
 REF="../GCF_029168945.1_ASM2916894v1_genomic.fna.gz"
 REF_NAME="Pink_pepper"
 
