@@ -29,6 +29,7 @@ FASTA="ERBxHO40_23_hirisehap1.fa"
 # Seconds since the shell was spawned, reset to zero here.
 SECONDS=0
 
+# Writes to the directory where the FASTA is located.
 CMD="~/bin/gatk4/gatk-4.1.4.1/gatk CreateSequenceDictionary -R $FASTA"
 
 # 
@@ -36,6 +37,7 @@ echo $CMD
 # 
 eval $CMD
 
+# SAMtools doesn't like gzip.
 CMD="~/bin/samtools-1.11/samtools faidx $FASTA"
 
 # 
