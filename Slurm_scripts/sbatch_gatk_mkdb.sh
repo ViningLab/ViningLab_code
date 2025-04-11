@@ -5,8 +5,8 @@
 # squeue
 
 #SBATCH --job-name=gatk_mkdb
-#SBATCH --error=gatk_mkdb_%A_%a.err
-#SBATCH --output=gatk_mkdb_%A_%a.out
+#SBATCH --error=gatk_mkdb_%A.err
+#SBATCH --output=gatk_mkdb_%A.out
 #SBATCH --account=green
 #SBATCH --partition=all.q,green
 # SBATCH --partition=green
