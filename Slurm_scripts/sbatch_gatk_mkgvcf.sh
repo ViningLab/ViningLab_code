@@ -54,10 +54,22 @@ Workflows
 GATK="~/bin/gatk4/gatk-4.1.4.1/gatk"
 JAVA="/home/bpp/knausb/bin/javadir/jre1.8.0_25/bin/java"
 
-
 ##### ##### ##### ##### #####
 
+# Mark duplicates
+CMD="$JAVA -Djava.io.tmpdir=/data/ \
+     -jar $PICARD MarkDuplicates \
+     I=bams/${arr[0]}_sorted.bam \
+     O=bams/${arr[0]}_dupmrk.bam \
+     MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=8000 \
+     ASSUME_SORT_ORDER=coordinate \
+     M=bams/${arr[0]}_marked_dup_metrics.txt"
 
+#date
+#echo
+echo $CMD
+#
+#eval $CMD
 
 
 ##### ##### ##### ##### #####
