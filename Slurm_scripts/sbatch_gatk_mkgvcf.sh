@@ -5,8 +5,8 @@
 # squeue
 
 #SBATCH --job-name=gatk_mkgvcf
-#SBATCH --error=gatk_kmgvcf_%A_%a.err
-#SBATCH --output=gatk_mkgvcf_%A_%a.out
+#SBATCH --error=gatkerr/gatk_kmgvcf_%A_%a.err
+#SBATCH --output=gatkout/gatk_mkgvcf_%A_%a.out
 #SBATCH --account=green
 #SBATCH --partition=all.q,green
 # SBATCH --partition=green
