@@ -65,7 +65,7 @@ fi
 # https://ccb.jhu.edu/software/stringtie/index.shtml?t=manual#deseq
 
 CMD="$STRINGTIE \
-        -e \
+        -e -B \
         -G $ANNOTATIONS \
         -p 1 \
         -o stringtie_gtf/"${arr[0]}"/"${arr[0]}"_stringtie.gtf bams/"${arr[0]}"_sorted.bam"
