@@ -17,7 +17,7 @@
 # SBATCH --cpus-per-task=8
 # SBATCH --array=0-9
 # SBATCH --array=15-15
-# SBATCH --array=0:20%4
+# SBATCH --array=0-20%4
 
 # https://stackoverflow.com/a/55431306
 # scontrol update ArrayTaskThrottle=<count> JobId=<jobID>
