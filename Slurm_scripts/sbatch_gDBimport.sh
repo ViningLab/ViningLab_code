@@ -29,6 +29,9 @@ HOST=$(hostname)
 echo "Running on host: $HOST"
 
 ##### ##### ##### ##### #####
+
+MY_INTERVALS=( `cat "intervals.list" `)
+
 ##### ##### ##### ##### #####
 
 JAVA="/home/bpp/knausb/bin/javadir/jre1.8.0_25/bin/java"
@@ -41,7 +44,9 @@ GREF="~/Vining_Lab_nfs4/GENOMES/hemp/public_databases/NCBI/Pink_pepper/gatk_dict
 
 # MY_DB="my_database"
 # MY_DB="fiber_hemp"
-MY_DB="PinkPepper_gDB_18seq"
+# MY_DB="PinkPepper_gDB_18seq"
+MY_DB="PinkPepper_gDB"
+MY_DB="${MY_DB}_${MY_INTERVALS[${i}]}"
 
 # Seconds since the shell was spawned, reset to zero here.
 SECONDS=0
@@ -52,7 +57,7 @@ CMD="$GATK --java-options \"-Xmx8g -Xms8g\" \
        -R $GREF \
        --genomicsdb-workspace-path $MY_DB \
        --batch-size 50 \
-       --intervals intervals.list \
+       --intervals MY_INTERVALS[${i}] \
        --sample-name-map cohort.sample_map \
        --tmp-dir /scratch/ \
        --reader-threads 16"
@@ -61,12 +66,12 @@ echo $CMD
 #
 eval $CMD
 
+#       --intervals intervals.list \
 
 # Report elapsed time.
 echo
 ELAPSED="Elapsed: $(($SECONDS / 3600))hrs $((($SECONDS / 60) % 60))min $(($SECONDS % 60))sec"
 echo $ELAPSED
-
 
 
 ##### ##### ##### ##### #####
