@@ -17,11 +17,12 @@
 # SBATCH --cpus-per-task=1
 # SBATCH --cpus-per-task=4
 #SBATCH --cpus-per-task=16
+#SBATCH --array=0-1
 # SBATCH --array=0-2
 # SBATCH --array=0-9
 # SBATCH --array=15-15
 
-#i=${SLURM_ARRAY_TASK_ID}
+i=${SLURM_ARRAY_TASK_ID}
 #CMD="This is array task ${SLURM_ARRAY_TASK_ID}"
 #echo $CMD
 
@@ -46,7 +47,7 @@ GREF="~/Vining_Lab_nfs4/GENOMES/hemp/public_databases/NCBI/Pink_pepper/gatk_dict
 # MY_DB="fiber_hemp"
 # MY_DB="PinkPepper_gDB_18seq"
 MY_DB="PinkPepper_gDB"
-MY_DB="${MY_DB}_${MY_INTERVALS[${i}]}"
+MY_DB="${MY_DB}_${MY_INTERVALS[$i]}"
 
 # Seconds since the shell was spawned, reset to zero here.
 SECONDS=0
@@ -57,7 +58,7 @@ CMD="$GATK --java-options \"-Xmx8g -Xms8g\" \
        -R $GREF \
        --genomicsdb-workspace-path $MY_DB \
        --batch-size 50 \
-       --intervals MY_INTERVALS[${i}] \
+       --intervals ${MY_INTERVALS[$i]} \
        --sample-name-map cohort.sample_map \
        --tmp-dir /scratch/ \
        --reader-threads 16"
