@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Submit job as follows.
 # sbatch array_test.sh  
