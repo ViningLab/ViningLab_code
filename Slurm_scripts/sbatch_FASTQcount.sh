@@ -8,9 +8,7 @@
 #SBATCH --error=FQcnt_%A.err
 #SBATCH --output=FQcnt_%A.out
 #SBATCH --account=green
-# SBATCH --partition=hoser
-# SBATCH --partition=all.q
-# SBATCH --partition=green
+#SBATCH --partition=all.q,green
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 
