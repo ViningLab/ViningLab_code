@@ -4,7 +4,7 @@
 # sbatch sbatch_FASTQcount.sh  
 # squeue
 
-#SBATCH --job-name=sbFQcnt
+#SBATCH --job-name=FQcnt
 #SBATCH --error=FQcnt_%A.err
 #SBATCH --output=FQcnt_%A.out
 #SBATCH --account=green
