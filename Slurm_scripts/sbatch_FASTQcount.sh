@@ -5,8 +5,8 @@
 # squeue
 
 #SBATCH --job-name=sbFQcnt
-#SBATCH --error=sbFQcnt_%A.err
-#SBATCH --output=sbFQcnt_%A.out
+#SBATCH --error=FQcnt_%A.err
+#SBATCH --output=FQcnt_%A.out
 #SBATCH --account=green
 # SBATCH --partition=hoser
 # SBATCH --partition=all.q
