@@ -40,6 +40,7 @@ This script will accomplish the following.
 - Activate our conda environment
 - Call our R script
 
+This script is available in this repository and is named `sbatch_DESeq2.sh`.
 Once we have the script we can submit it as follows.
 
 ```
