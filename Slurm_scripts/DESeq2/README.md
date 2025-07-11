@@ -27,6 +27,11 @@ https://anaconda.org/conda-forge/r-base
 ## Install R packages
 
 
+## Create a script to submit to Slurm
+
+
+
+
 ## Run a test script
 
 
