@@ -1,6 +1,7 @@
 
 
 library("DESeq2")
+# https://rockefelleruniversity.github.io/RU_RNAseq/presentations/singlepage/RU_RNAseq_p2.html
 #setClassUnion("ExpData", c("matrix", "SummarizedExperiment"))
 
 countData <- matrix(1:100,ncol=4)
