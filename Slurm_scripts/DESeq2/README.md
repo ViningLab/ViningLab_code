@@ -24,10 +24,15 @@ https://anaconda.org/conda-forge/zlib
 https://anaconda.org/conda-forge/r-base    
 
 
-## Install R packages
-
-
 ## Create a script to submit to Slurm
+
+```
+sbatch sbatch_DESeq2.sh
+squeue
+```
+
+
+## Install R packages
 
 
 
