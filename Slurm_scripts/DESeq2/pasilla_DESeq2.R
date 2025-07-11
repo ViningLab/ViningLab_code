@@ -45,6 +45,7 @@ print(cts[1:3, ])
 print(coldata)
 
 # library("DESeq2")
+# https://rockefelleruniversity.github.io/RU_RNAseq/presentations/singlepage/RU_RNAseq_p2.html
 # setClassUnion("ExpData", c("matrix", "SummarizedExperiment"))
 
 print("")
