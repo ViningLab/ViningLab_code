@@ -141,7 +141,7 @@ We can modify our `sbatch_DESeq2.sh` script to call this script as follows.
 # CMD="Rscript HELLO_DESeq2.R"
 # CMD="Rscript instpkgs.R"
 # CMD="Rscript sim_DESeq2.R"
-#CMD="Rscript pasilla_DESeq2.R"
+# CMD="Rscript pasilla_DESeq2.R"
 CMD="Rscript pasilla_BPDESeq2.R"
 ```
 
