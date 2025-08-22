@@ -51,9 +51,10 @@ dds <- DESeqDataSetFromMatrix(countData = cts,
 dds
 
 ## ----addFeatureData-----------------------------------------------------------
-featureData <- data.frame(gene=rownames(cts))
-mcols(dds) <- DataFrame(mcols(dds), featureData)
-mcols(dds)
+#featureData <- data.frame(gene=rownames(cts))
+#featureData[1:3, , drop = F]
+#mcols(dds) <- DataFrame(mcols(dds), featureData)
+#mcols(dds)
 ```
 
 
@@ -61,21 +62,6 @@ mcols(dds)
 dds <- DESeq(dds)
 res <- results(dds)
 res
-```
-
-
-```{r}
-class(dds)
-str(dds)
-
-normalized=TRUE
-normalized=FALSE
-replaced=FALSE
-
-gene <- "FBgn0000370"
-
-cnts <- counts(dds,normalized=normalized,replaced=replaced)[gene,]
-
 ```
 
 
@@ -88,21 +74,61 @@ plotCounts(dds, gene = gene)
 
 
 ```{r}
+class(dds)
+str(dds)
+
+normalized=TRUE
+#normalized=FALSE
+replaced=FALSE
+
+gene <- "FBgn0000370"
+
+cnts <- counts(dds,normalized=normalized,replaced=replaced)
+cnts[1:3, ]
 class(cnts)
-
-cnts <- data.frame( Counts = cnts, Condition = names(cnts) )
-cnts$Condition2 <- sub("[[:digit:]]$", "", cnts$Condition)
-cnts$Condition2 <- as.factor(cnts$Condition2)
-
-
-library(ggplot2)
-
-p <- ggplot(data = cnts, mapping = aes( x = Condition2, y = Counts) )
-p <- p + geom_boxplot()
-p + geom_jitter( size = 10 )
+#[gene,]
 
 ```
 
 
+
+
+
+```{r}
+
+cnts <- cnts[ "FBgn0000370", ]
+class(cnts)
+
+cnts <- data.frame( Counts = cnts, Condition = names(cnts) )
+cnts[1:3, ]
+
+cnts$Condition2 <- sub("[[:digit:]]$", "", cnts$Condition)
+cnts$Condition2 <- as.factor(cnts$Condition2)
+cnts[1:3, ]
+
+library(ggplot2)
+
+p <- ggplot(data = cnts, mapping = aes( x = Condition2, y = Counts, fill = Condition2) )
+p <- p + geom_boxplot()
+p <- p + geom_jitter( size = 4, width = 0.1 )
+p <- p + theme_bw()
+p <- p + theme(legend.position="none")
+p <- p + theme(axis.title.y=element_blank())
+p <- p + theme(axis.title.x=element_blank())
+p <- p + ggtitle( "Gene: FBgn0000370" )
+p
+```
+
+
+```{r}
+library(ggpubr)
+
+ggarrange(p, p, labels = c("A", "B"))
+
+ggarrange(p, p, labels = c("A", "B"), ncol = 1)
+
+ggarrange(p, p, p, p, p, p, p, p, labels = c("A", "B"), ncol = 4, nrow=2)
+
+```
 
 
