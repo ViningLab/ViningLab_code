@@ -4,6 +4,8 @@
 # sbatch sbatch_hello.sh  
 # squeue
 
+# srun --account=green --partition=green --pty bash
+
 #SBATCH --job-name=sbhello
 #SBATCH --error=sbhello_%A.err
 #SBATCH --output=sbhello_%A.out
