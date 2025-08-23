@@ -5,6 +5,9 @@
 # squeue
 
 # srun --account=green --partition=green --pty bash
+# squeue -o"%.7i %.9P %.8j %.8u %.2t %.10M %.6D %C" | less -S
+#	sinfo -o "%n %e %m %a %c %C" | less
+
 
 #SBATCH --job-name=sbhello
 #SBATCH --error=sbhello_%A.err
