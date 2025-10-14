@@ -675,12 +675,13 @@ centers</a></li>
 <ul>
 <li><a href="#seqel-ii" id="toc-seqel-ii">Seqel II</a></li>
 <li><a href="#revio" id="toc-revio">Revio</a></li>
-<li><a href="#osu-cqls-costs" id="toc-osu-cqls-costs">OSU CQLS
-costs</a></li>
+<li><a href="#osu-cqls-pacbio-costs" id="toc-osu-cqls-pacbio-costs">OSU
+CQLS PacBio costs</a></li>
 </ul></li>
 <li><a href="#illumina" id="toc-illumina">Illumina</a>
 <ul>
 <li><a href="#nextseq2000" id="toc-nextseq2000">NextSeq2000</a></li>
+<li><a href="#osu-cqls-illumina-costs" id="toc-osu-cqls-illumina-costs">OSU CQLS Illumina costs</a></li>
 </ul></li>
 </ul>
 </div>
@@ -834,8 +835,8 @@ Revio
 This makes it challenging to consistently predict it’s output. No range
 was reported for Sequel_II, so the min and max are the same.</p>
 </div>
-<div id="osu-cqls-costs" class="section level3">
-<h3>OSU CQLS costs</h3>
+<div id="osu-cqls-pacbio-costs" class="section level3">
+<h3>OSU CQLS PacBio costs</h3>
 <pre class="r"><code>number_of_samples &lt;- 96
 
 # Full 96-well plate price.
@@ -940,6 +941,28 @@ P4
 <p>Read count is reported by Illumina as being independent of read
 length. Here we’ve used paired end 100 bp reads for ( 2 * 100 = ) 200 bp
 of sequence.</p>
+</div>
+<div id="osu-cqls-illumina-costs" class="section level3">
+<h3>OSU CQLS Illumina costs</h3>
+<pre class="r"><code>number_of_samples &lt;- 96
+
+# Full 96-well plate price.
+per_sample_extraction &lt;- 4.90
+
+# IL-Lib: SeqWell plexWell-Set of 96 samples 
+library_prep &lt;- 2047.00
+
+# NextSeq: P4 XLEAP 100bp Paired End with Kit 
+per_lane_sequencing &lt;- 4190.00
+# lane_count &lt;- 1
+lane_count &lt;- 2
+
+my_cost &lt;- (number_of_samples * per_sample_extraction) + 
+  (library_prep) + 
+  (per_lane_sequencing * lane_count)
+
+format(my_cost, big.mark = &quot;,&quot;)</code></pre>
+<pre><code>## [1] &quot;10,897.4&quot;</code></pre>
 </div>
 </div>
 

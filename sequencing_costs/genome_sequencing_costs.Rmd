@@ -109,11 +109,10 @@ No range was reported for Sequel_II, so the min and max are the same.
 
 
 
-### OSU CQLS costs
+### OSU CQLS PacBio costs
 
 
 ```{r}
-
 number_of_samples <- 96
 
 # Full 96-well plate price.
@@ -132,7 +131,6 @@ my_cost <- (number_of_samples * per_sample_extraction) +
   (per_SMRTcell_sequencing * SMRTcell_count)
 
 format(my_cost, big.mark = ",")
-
 ```
 
 
@@ -169,5 +167,32 @@ kable(my_df, caption = my_cap) %>%
 
 Read count is reported by Illumina as being independent of read length.
 Here we've used paired end 100 bp reads for ( 2 * 100 = ) 200 bp of sequence.
+
+
+
+### OSU CQLS Illumina costs
+
+
+```{r}
+number_of_samples <- 96
+
+# Full 96-well plate price.
+per_sample_extraction <- 4.90
+
+# IL-Lib: SeqWell plexWell-Set of 96 samples 
+library_prep <- 2047.00
+
+# NextSeq: P4 XLEAP 100bp Paired End with Kit 
+per_lane_sequencing <- 4190.00
+# lane_count <- 1
+lane_count <- 2
+
+my_cost <- (number_of_samples * per_sample_extraction) + 
+  (library_prep) + 
+  (per_lane_sequencing * lane_count)
+
+format(my_cost, big.mark = ",")
+```
+
 
 
