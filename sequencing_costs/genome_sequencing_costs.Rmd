@@ -1,0 +1,143 @@
+---
+title: "Genome Sequencing Costs"
+output: 
+  html_document:
+    toc: true
+    code_folding: hide
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+## Target genomes
+
+
+```{r}
+
+my_df <- data.frame(
+  CBDRx = 876147649,
+  PinkPepper =  770685239,
+  EH23a = 739940807,
+  EH23b = 737334414
+)
+
+my_df <- t(my_df)
+colnames(my_df) <- "Length (bp)"
+my_df[, "Length (bp)"] <- format(my_df[, "Length (bp)"], big.mark = ",")
+
+library(kableExtra)
+my_cap <- "Table 1. Cannabis genome assembly sizes."
+kable(my_df, caption = my_cap) %>% 
+  kable_styling( full_width = FALSE )
+
+```
+
+
+
+## Sequencing centers
+
+
+- Oregon State CQLS: https://cqls.oregonstate.edu/
+
+- Washington State: https://lbb.wsu.edu/pacbio/
+
+- University of Oregon GC3F: https://gc3f.uoregon.edu/genomics
+
+
+
+## PacBio
+
+https://www.pacb.com/technology/hifi-sequencing/sequel-system/
+
+
+```{r}
+my_df <- data.frame(
+  Platform = c("Sequel_II", "Revio"),
+  Genome_Cov_min = NA,
+  Genome_Cov_max = NA
+)
+```
+
+
+### Seqel II
+
+
+```{r}
+my_genome <- 770685239
+genome_count <- 96
+my_throughput <- 30e9
+
+my_df$Genome_Cov_min[1] <- my_throughput / ( genome_count * my_genome )
+my_df$Genome_Cov_max[1] <- my_throughput / ( genome_count * my_genome )
+```
+
+
+### Revio
+
+
+```{r}
+my_genome <- 770685239
+genome_count <- 96
+min_throughput <- 120e9
+max_throughput <- 480e9
+
+my_df$Genome_Cov_min[2] <- min_throughput / ( genome_count * my_genome )
+my_df$Genome_Cov_max[2] <- max_throughput / ( genome_count * my_genome )
+```
+
+
+
+```{r}
+
+my_cap <- "Table 2. Cannabis genome expected coverage for PacBio."
+kable(my_df, caption = my_cap) %>% 
+  kable_styling( full_width = FALSE )
+
+```
+
+
+Note that the Revio system has a large predicted range for output.
+This makes it challenging to consistently predict it's output.
+No range was reported for Sequel_II, so the min and max are the same.
+
+
+
+## Illumina
+
+### NextSeq2000
+
+https://cqls.oregonstate.edu/core/genomics/illumina
+
+
+```{r}
+my_genome <- 770685239
+genome_count <- 96
+
+my_df <- data.frame(
+  Type = c("P1", "P2", "P3", "P4"),
+  Reads = c(100e6, 400e6, 1.2e9, 1.8e9)
+)
+my_df$Genome_Cov <- (my_df$Reads * (2 * 100)) / ( genome_count * my_genome )
+
+```
+
+
+
+```{r}
+my_cap <- "Table 3. Cannabis genome expected coverage for Illumina sequencing."
+kable(my_df, caption = my_cap) %>% 
+  kable_styling( full_width = FALSE )
+```
+
+
+Read count is reported by Illumina as being independent of read length.
+Here we've used paired end 100 bp reads for ( 2 * 100 = ) 200 bp of sequence.
+
+
