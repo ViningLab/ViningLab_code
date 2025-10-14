@@ -661,7 +661,7 @@ display: none;
 
 
 <h1 class="title toc-ignore">Genome Sequencing Costs</h1>
-<h4 class="date">13 October, 2025</h4>
+<h4 class="date">14 October, 2025</h4>
 
 </div>
 
@@ -669,10 +669,14 @@ display: none;
 <ul>
 <li><a href="#target-genomes" id="toc-target-genomes">Target
 genomes</a></li>
+<li><a href="#sequencing-centers" id="toc-sequencing-centers">Sequencing
+centers</a></li>
 <li><a href="#pacbio" id="toc-pacbio">PacBio</a>
 <ul>
 <li><a href="#seqel-ii" id="toc-seqel-ii">Seqel II</a></li>
 <li><a href="#revio" id="toc-revio">Revio</a></li>
+<li><a href="#osu-cqls-costs" id="toc-osu-cqls-costs">OSU CQLS
+costs</a></li>
 </ul></li>
 <li><a href="#illumina" id="toc-illumina">Illumina</a>
 <ul>
@@ -746,6 +750,14 @@ EH23b
 </tr>
 </tbody>
 </table>
+</div>
+<div id="sequencing-centers" class="section level2">
+<h2>Sequencing centers</h2>
+<ul>
+<li><p>Oregon State CQLS: <a href="https://cqls.oregonstate.edu/" class="uri">https://cqls.oregonstate.edu/</a></p></li>
+<li><p>Washington State: <a href="https://lbb.wsu.edu/pacbio/" class="uri">https://lbb.wsu.edu/pacbio/</a></p></li>
+<li><p>University of Oregon GC3F: <a href="https://gc3f.uoregon.edu/genomics" class="uri">https://gc3f.uoregon.edu/genomics</a></p></li>
+</ul>
 </div>
 <div id="pacbio" class="section level2">
 <h2>PacBio</h2>
@@ -821,6 +833,28 @@ Revio
 <p>Note that the Revio system has a large predicted range for output.
 This makes it challenging to consistently predict it’s output. No range
 was reported for Sequel_II, so the min and max are the same.</p>
+</div>
+<div id="osu-cqls-costs" class="section level3">
+<h3>OSU CQLS costs</h3>
+<pre class="r"><code>number_of_samples &lt;- 96
+
+# Full 96-well plate price.
+per_sample_extraction &lt;- 4.90
+
+# PacBio SMRTbell Template Preparation 2-8 sample
+per_sample_library_prep &lt;- 105.00
+
+# Unavailable, guess
+per_SMRTcell_sequencing &lt;- 3000
+SMRTcell_count &lt;- 1
+SMRTcell_count &lt;- 5
+
+my_cost &lt;- (number_of_samples * per_sample_extraction) + 
+  (number_of_samples * per_sample_library_prep) + 
+  (per_SMRTcell_sequencing * SMRTcell_count)
+
+format(my_cost, big.mark = &quot;,&quot;)</code></pre>
+<pre><code>## [1] &quot;25,550.4&quot;</code></pre>
 </div>
 </div>
 <div id="illumina" class="section level2">
