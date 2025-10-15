@@ -112,6 +112,7 @@ No range was reported for Sequel_II, so the min and max are the same.
 ### OSU CQLS PacBio costs
 
 
+
 ```{r}
 number_of_samples <- 96
 
@@ -119,18 +120,28 @@ number_of_samples <- 96
 per_sample_extraction <- 4.90
 
 # PacBio SMRTbell Template Preparation 2-8 sample
-per_sample_library_prep <- 105.00
+#per_sample_library_prep <- 105.00
+
+# First library
+# plus subsequent libraries.
+library_prep <- 555 + 95 * 105
+
 
 # Unavailable, guess
-per_SMRTcell_sequencing <- 3000
-SMRTcell_count <- 1
+# per_SMRTcell_sequencing <- 3000
+# UofO GC3F
+per_SMRTcell_sequencing <- 1519
+
+
+#SMRTcell_count <- 1
 SMRTcell_count <- 5
 
 my_cost <- (number_of_samples * per_sample_extraction) + 
-  (number_of_samples * per_sample_library_prep) + 
+  (library_prep) + 
   (per_SMRTcell_sequencing * SMRTcell_count)
 
 format(my_cost, big.mark = ",")
+5 * 1.6
 ```
 
 
@@ -185,13 +196,16 @@ library_prep <- 2047.00
 # NextSeq: P4 XLEAP 100bp Paired End with Kit 
 per_lane_sequencing <- 4190.00
 # lane_count <- 1
-lane_count <- 2
+lane_count <- 3
 
 my_cost <- (number_of_samples * per_sample_extraction) + 
   (library_prep) + 
   (per_lane_sequencing * lane_count)
 
 format(my_cost, big.mark = ",")
+
+2 * 4.8
+3 * 4.8
 ```
 
 
