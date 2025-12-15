@@ -17,8 +17,10 @@
 #SBATCH --job-name=sbhello
 #SBATCH --error=sbhello_%A.err
 #SBATCH --output=sbhello_%A.out
-#SBATCH --account=boris,green
-#SBATCH --partition=all.q,boris,green
+#SBATCH --account=boris
+# SBATCH --account=boris,green
+#SBATCH --partition=boris
+# SBATCH --partition=all.q,boris,green
 #SBATCH --exclude=aspen9
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
@@ -40,6 +42,11 @@ SECONDS=0
 
 CMD="Hello SLURM!"
 echo $CMD
+
+CMD="nvidia-smi"
+echo $CMD
+eval $CMD
+
 
 CMD="sleep 5"
 echo $CMD
