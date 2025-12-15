@@ -128,13 +128,17 @@ library_prep <- 555 + 95 * 105
 
 
 # Unavailable, guess
+
+#per_SMRTcell_sequencing <- 3000
+per_SMRTcell_sequencing <- 927
+SMRTcell_count <- 1
+
 # per_SMRTcell_sequencing <- 3000
 # UofO GC3F
-per_SMRTcell_sequencing <- 1519
-
+#per_SMRTcell_sequencing <- 1519
 
 #SMRTcell_count <- 1
-SMRTcell_count <- 5
+#SMRTcell_count <- 5
 
 my_cost <- (number_of_samples * per_sample_extraction) + 
   (library_prep) + 
@@ -163,9 +167,28 @@ my_df <- data.frame(
   Type = c("P1", "P2", "P3", "P4"),
   Reads = c(100e6, 400e6, 1.2e9, 1.8e9)
 )
-my_df$Genome_Cov <- (my_df$Reads * (2 * 100)) / ( genome_count * my_genome )
+read_length <- 100
+read_length <- 150
+my_df$Genome_Cov <- (my_df$Reads * (2 * read_length)) / ( genome_count * my_genome )
 
 ```
+
+
+```{r}
+my_genome <- 770685239
+genome_count <- 96
+
+my_df <- data.frame(
+  Type = c("SP", "S1", "S4"),
+  Reads = c(400e6, 800e6, 2.0e9)
+)
+#read_length <- 100
+read_length <- 150
+my_df$Genome_Cov <- (my_df$Reads * (2 * read_length)) / ( genome_count * my_genome )
+
+```
+
+
 
 
 
@@ -185,17 +208,22 @@ Here we've used paired end 100 bp reads for ( 2 * 100 = ) 200 bp of sequence.
 
 
 ```{r}
-number_of_samples <- 96
-
+#number_of_samples <- 96
+number_of_samples <- 96 * 4
 # Full 96-well plate price.
 per_sample_extraction <- 4.90
 
 # IL-Lib: SeqWell plexWell-Set of 96 samples 
-library_prep <- 2047.00
+#library_prep <- 2047.00
+library_prep <- 2047.00 * 4
 
 # NextSeq: P4 XLEAP 100bp Paired End with Kit 
 per_lane_sequencing <- 4190.00
+# NextSeq: P4 XLEAP 150bp Paired End with Kit 
+per_lane_sequencing <- 4739.00
 # lane_count <- 1
+#lane_count <- 2
+#lane_count <- 4
 lane_count <- 3
 
 my_cost <- (number_of_samples * per_sample_extraction) + 

@@ -661,7 +661,7 @@ display: none;
 
 
 <h1 class="title toc-ignore">Genome Sequencing Costs</h1>
-<h4 class="date">16 October, 2025</h4>
+<h4 class="date">15 December, 2025</h4>
 
 </div>
 
@@ -851,20 +851,24 @@ library_prep &lt;- 555 + 95 * 105
 
 
 # Unavailable, guess
+
+#per_SMRTcell_sequencing &lt;- 3000
+per_SMRTcell_sequencing &lt;- 927
+SMRTcell_count &lt;- 1
+
 # per_SMRTcell_sequencing &lt;- 3000
 # UofO GC3F
-per_SMRTcell_sequencing &lt;- 1519
-
+#per_SMRTcell_sequencing &lt;- 1519
 
 #SMRTcell_count &lt;- 1
-SMRTcell_count &lt;- 5
+#SMRTcell_count &lt;- 5
 
 my_cost &lt;- (number_of_samples * per_sample_extraction) + 
   (library_prep) + 
   (per_SMRTcell_sequencing * SMRTcell_count)
 
 format(my_cost, big.mark = &quot;,&quot;)</code></pre>
-<pre><code>## [1] &quot;18,595.4&quot;</code></pre>
+<pre><code>## [1] &quot;11,927.4&quot;</code></pre>
 <pre class="r"><code>5 * 1.6</code></pre>
 <pre><code>## [1] 8</code></pre>
 </div>
@@ -881,7 +885,19 @@ my_df &lt;- data.frame(
   Type = c(&quot;P1&quot;, &quot;P2&quot;, &quot;P3&quot;, &quot;P4&quot;),
   Reads = c(100e6, 400e6, 1.2e9, 1.8e9)
 )
-my_df$Genome_Cov &lt;- (my_df$Reads * (2 * 100)) / ( genome_count * my_genome )</code></pre>
+read_length &lt;- 100
+read_length &lt;- 150
+my_df$Genome_Cov &lt;- (my_df$Reads * (2 * read_length)) / ( genome_count * my_genome )</code></pre>
+<pre class="r"><code>my_genome &lt;- 770685239
+genome_count &lt;- 96
+
+my_df &lt;- data.frame(
+  Type = c(&quot;SP&quot;, &quot;S1&quot;, &quot;S4&quot;),
+  Reads = c(400e6, 800e6, 2.0e9)
+)
+#read_length &lt;- 100
+read_length &lt;- 150
+my_df$Genome_Cov &lt;- (my_df$Reads * (2 * read_length)) / ( genome_count * my_genome )</code></pre>
 <pre class="r"><code>my_cap &lt;- &quot;Table 3. Cannabis genome expected coverage for Illumina sequencing.&quot;
 kable(my_df, caption = my_cap) %&gt;% 
   kable_styling( full_width = FALSE )</code></pre>
@@ -905,46 +921,35 @@ Genome_Cov
 <tbody>
 <tr>
 <td style="text-align:left;">
-P1
+SP
 </td>
 <td style="text-align:right;">
-1.0e+08
+4e+08
 </td>
 <td style="text-align:right;">
-0.2703222
+1.621933
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-P2
+S1
 </td>
 <td style="text-align:right;">
-4.0e+08
+8e+08
 </td>
 <td style="text-align:right;">
-1.0812888
+3.243867
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-P3
+S4
 </td>
 <td style="text-align:right;">
-1.2e+09
+2e+09
 </td>
 <td style="text-align:right;">
-3.2438665
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-P4
-</td>
-<td style="text-align:right;">
-1.8e+09
-</td>
-<td style="text-align:right;">
-4.8657997
+8.109666
 </td>
 </tr>
 </tbody>
@@ -955,17 +960,22 @@ of sequence.</p>
 </div>
 <div id="osu-cqls-illumina-costs" class="section level3">
 <h3>OSU CQLS Illumina costs</h3>
-<pre class="r"><code>number_of_samples &lt;- 96
-
+<pre class="r"><code>#number_of_samples &lt;- 96
+number_of_samples &lt;- 96 * 4
 # Full 96-well plate price.
 per_sample_extraction &lt;- 4.90
 
 # IL-Lib: SeqWell plexWell-Set of 96 samples 
-library_prep &lt;- 2047.00
+#library_prep &lt;- 2047.00
+library_prep &lt;- 2047.00 * 4
 
 # NextSeq: P4 XLEAP 100bp Paired End with Kit 
 per_lane_sequencing &lt;- 4190.00
+# NextSeq: P4 XLEAP 150bp Paired End with Kit 
+per_lane_sequencing &lt;- 4739.00
 # lane_count &lt;- 1
+#lane_count &lt;- 2
+#lane_count &lt;- 4
 lane_count &lt;- 3
 
 my_cost &lt;- (number_of_samples * per_sample_extraction) + 
@@ -973,7 +983,7 @@ my_cost &lt;- (number_of_samples * per_sample_extraction) +
   (per_lane_sequencing * lane_count)
 
 format(my_cost, big.mark = &quot;,&quot;)</code></pre>
-<pre><code>## [1] &quot;15,087.4&quot;</code></pre>
+<pre><code>## [1] &quot;24,286.6&quot;</code></pre>
 <pre class="r"><code>2 * 4.8</code></pre>
 <pre><code>## [1] 9.6</code></pre>
 <pre class="r"><code>3 * 4.8</code></pre>
