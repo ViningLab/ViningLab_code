@@ -661,7 +661,7 @@ display: none;
 
 
 <h1 class="title toc-ignore">Genome Sequencing Costs</h1>
-<h4 class="date">16 October, 2025</h4>
+<h4 class="date">15 December, 2025</h4>
 
 </div>
 
@@ -843,20 +843,34 @@ was reported for Sequel_II, so the min and max are the same.</p>
 per_sample_extraction &lt;- 4.90
 
 # PacBio SMRTbell Template Preparation 2-8 sample
-per_sample_library_prep &lt;- 105.00
+#per_sample_library_prep &lt;- 105.00
+
+# First library
+# plus subsequent libraries.
+library_prep &lt;- 555 + 95 * 105
+
 
 # Unavailable, guess
+
 #per_SMRTcell_sequencing &lt;- 3000
 per_SMRTcell_sequencing &lt;- 927
 SMRTcell_count &lt;- 1
-SMRTcell_count &lt;- 5
+
+# per_SMRTcell_sequencing &lt;- 3000
+# UofO GC3F
+#per_SMRTcell_sequencing &lt;- 1519
+
+#SMRTcell_count &lt;- 1
+#SMRTcell_count &lt;- 5
 
 my_cost &lt;- (number_of_samples * per_sample_extraction) + 
-  (number_of_samples * per_sample_library_prep) + 
+  (library_prep) + 
   (per_SMRTcell_sequencing * SMRTcell_count)
 
 format(my_cost, big.mark = &quot;,&quot;)</code></pre>
-<pre><code>## [1] &quot;15,185.4&quot;</code></pre>
+<pre><code>## [1] &quot;11,927.4&quot;</code></pre>
+<pre class="r"><code>5 * 1.6</code></pre>
+<pre><code>## [1] 8</code></pre>
 </div>
 </div>
 <div id="illumina" class="section level2">
@@ -960,15 +974,20 @@ per_lane_sequencing &lt;- 4190.00
 # NextSeq: P4 XLEAP 150bp Paired End with Kit 
 per_lane_sequencing &lt;- 4739.00
 # lane_count &lt;- 1
-lane_count &lt;- 2
-lane_count &lt;- 4
+#lane_count &lt;- 2
+#lane_count &lt;- 4
+lane_count &lt;- 3
 
 my_cost &lt;- (number_of_samples * per_sample_extraction) + 
   (library_prep) + 
   (per_lane_sequencing * lane_count)
 
 format(my_cost, big.mark = &quot;,&quot;)</code></pre>
-<pre><code>## [1] &quot;29,025.6&quot;</code></pre>
+<pre><code>## [1] &quot;24,286.6&quot;</code></pre>
+<pre class="r"><code>2 * 4.8</code></pre>
+<pre><code>## [1] 9.6</code></pre>
+<pre class="r"><code>3 * 4.8</code></pre>
+<pre><code>## [1] 14.4</code></pre>
 </div>
 </div>
 
