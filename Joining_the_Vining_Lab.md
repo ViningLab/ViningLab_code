@@ -15,3 +15,7 @@ https://corvallispolice.policetocitizen.com/EventMap
 - When will I receive my first paycheck? The end of November?
 - Will my health benefits have providers outside of Salem (the State capitol)?
 
+## Mapping a departmental network drive
+
+https://support.roots.oregonstate.edu/roots/faqs/map-network-drive
+
