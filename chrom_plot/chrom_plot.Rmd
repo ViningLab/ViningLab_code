@@ -1,66 +1,119 @@
 ---
 title: "CHROM plot"
-output: html_document
-date: "2023-04-04"
+output: 
+  html_document:
+    toc: true
+    code_folding: show
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 editor_options: 
   chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.align = "center")
 ```
 
-
-Data input
 
 ```{r}
 t1 <- Sys.time()
-#EH23a <- read.csv("../../CannabisPangenome/FigureSideo/EH23a.softmasked_nuccomp.csv")
-EH23a <- read.csv("../ideograms/EH23b.softmasked_nuccomp.csv")
-<<<<<<< HEAD
-
-=======
->>>>>>> 1bc31c832a36d45062d3fb0210d90267e7b78198
-EH23a$chrom_num <- sub(".+chr", "", EH23a$Id)
-EH23a$chrom_num[ EH23a$chrom_num == "X" ] <- 10
-EH23a$chrom_num <- as.numeric(EH23a$chrom_num)
-EH23a[1:3, ]
 ```
 
 
-Plot
+## Data input
+
+
+In order to create a plot of chromosomes we need information on the chromosome names and their lengths.
+Here we read this information in from a comma delimited files (\*.csv).
+For the purposes of this example, we decided it would be best to have a 'stand alone' code example that does not require any inputs.
+To acomplish this, the following code chunck has been disabled, but has been left as an example.
+
+
+```{r, eval=FALSE}
+nucs <- read.csv("../ideograms/EH23b.softmasked_nuccomp.csv")
+```
+
+
+In order to create a stand alone example, that does not require file input, we've saved a data structure below so that it can be read into memory.
+This is similar to what we could have accomplished through file input.
+
+
+```{r}
+#dput(nucs[ , c("Id", "Length")])
+nucs <- structure(list(Id = c("EH23b.chr1", "EH23b.chr5", "EH23b.chr2", 
+"EH23b.chr3", "EH23b.chr4", "EH23b.chr7", "EH23b.chr8", "EH23b.chr9", 
+"EH23b.chr6", "EH23b.chrX"), Length = c(63722626L, 78289000L, 
+80157000L, 83805000L, 81133510L, 64212500L, 55650000L, 65951000L, 
+80012778L, 84401000L)), class = "data.frame", row.names = c(NA, 
+-10L))
+nucs[1:3, ]
+```
+
+
+Our goal here is to start with a `data.frame` that has at least two columns named 'Id' and 'length'.
+We will be using `ggplot2` to plot our chromosomes, and ggplot2 uses column names to specify which columns to use.
+This means the user may have to add these themselves.
+An example of how this might be accomplished follows.
+
+
+```{r, eval=FALSE}
+colnames(nucs)[c(1, 2)] <- c("Id", "Length")
+```
+
+
+The column names 'Id' is a 'word' name for each chromosome.
+We also need a numeric chromosome name that specifies the order the chromosomes should appear in the plot.
+Our chromosome numbers are embedded in the 'Id' column.
+We can make this information available with a little bit of code.
+
+
+```{r}
+nucs$chrom_num <- sub(".+chr", "", nucs$Id)
+nucs$chrom_num[ nucs$chrom_num == "X" ] <- 10
+nucs$chrom_num <- as.numeric(nucs$chrom_num)
+nucs[1:3, ]
+```
+
+
+The goal is to create a column named 'chrom_num' which contains the chromosome number.
+You may not have the chromosome number embeded in your 'Id' and may have to retrieve this data elsewhere.
+
+
+## A Simple Plot
+
+
+We can now use the data.frame created above to create a simple plot with ggplot2.
 
 
 ```{r}
 library(ggplot2)
+chr_width <- 0.08
 
-chrom_wid <- 0.05
-chrom_offset <- 0.0
-
-p <- ggplot2::ggplot()
-p <- p + theme_bw()
-p <- p + ggplot2::geom_rect( 
-  data = EH23a,
-  mapping = ggplot2::aes( xmin = chrom_num - chrom_wid - chrom_offset,
-                xmax = chrom_num + chrom_wid - chrom_offset,
-                ymin = 1, ymax = Length),
-  fill = "#DCDCDC",
-  color = "#000000"
-)
-
+p <- ggplot( data = nucs, 
+             mapping = aes( 
+               xmin = chrom_num - chr_width, 
+               xmax = chrom_num + chr_width,
+               ymin = 1,
+               ymax = Length) )
+p <- p + geom_rect( fill = "#C0C0C0", color = "#808080" )
 p
-
 ```
+
+
+I refer to this plot as simple because it uses default values for plotting.
+This allows us to validate that we have successfully plotted the correct information.
+Once we have a simple plot, we can modify it to make it aesthetically pleasing.
+
+
 
 
 ```{r}
 # Theme
-p <- p + ggplot2::scale_x_continuous( 
-  breaks = EH23a$chrom_num,
+p <- p + theme_bw()
+p <- p + scale_x_continuous( 
+  breaks = nucs$chrom_num,
 #  limits = c(0.6, 10.4),
-#  limits = c(0.5, 10.5),
-#  labels = EH23a$Id
-  labels = sub("a.chr", ".chr", EH23a$Id)
+  labels = sub("a.chr", ".chr", nucs$Id)
 )
   
 p <- p + scale_y_continuous(
@@ -68,44 +121,152 @@ p <- p + scale_y_continuous(
   labels = seq( 0, 120, by = 10)
 )
 
-#  p <- p + ggplot2::theme_bw() + 
-p <- p + ggplot2::theme( 
-      #      panel.grid.minor.x = ggplot2::element_blank(), 
-    panel.grid.minor.x = ggplot2::element_line( linewidth = 0.4, color = "#C0C0C0", linetype = 3 ),
+
+p <- p + theme( 
+    panel.grid.minor.x = element_line( 
+      linewidth = 0.4, color = "#C0C0C0", linetype = 3 ),
     axis.text.x = element_text(angle = 60, hjust = 1),
-    axis.title.x=element_blank(),
-    panel.grid.major.y = ggplot2::element_line( linewidth = 0.4, color = "#C0C0C0", linetype = 1 ),
-    panel.grid.minor.y = ggplot2::element_line( linewidth = 0.4, color = "#C0C0C0", linetype = 3 )
+    axis.title.x = element_blank(),
+    panel.grid.major.y = element_line( 
+      linewidth = 0.4, color = "#C0C0C0", linetype = 1 ),
+    panel.grid.minor.y = element_line( 
+      linewidth = 0.4, color = "#C0C0C0", linetype = 3 )
   )
   
-p <- p + ggplot2::ylab("Position (Mbp)")
-p <- p + ggtitle( "A) EH23" )
+p <- p + ylab("Position (Mbp)")
+p <- p + ggtitle( "A) EH23b" )
 
 p
-
-p + xlim(1.6, 4)
-#+ ylim(30e6, 40e6)
-
-
 ```
 
+
+
+## Add features
+
+
+We can now add features to our chromosomes.
+These features may be genes, or exons, or anything.
+We'll need to know the chromosome and start and end positions for each feature.
+This information may come from a biological feature format file (BED, GFF, GTF, etc.), which presents an issue because they typically do not include header information that can be used as column names.
+This is an issue because ggplot2 uses column names to select columns of data.
+This can be added manually by modifying the below example to the specifics of your data.
+
+
+```{r, eval=FALSE}
+colnames(nucs)[c(1, 3, 4)] <- c("CHROM", "START", "STOP")
+```
+
+
+For the purposes of our example, we will simulate some feature coordinates.
 
 
 ```{r}
 
-my_dat <- data.frame(
-#  my_x = rep( unique(EH23a$Id), times = 2 ),
-  my_x = rep( 1:10, times = 2 ),
-  my_y = rnorm( n = 20, mean = 40e6, sd = 10e6),
-  #my_bg = rep("#B2222266", times = 20)
-  my_bg = rep(c("#B2222266", "#1E90FF"), times = 10)
+n_feats <- 10
+my_feats <- data.frame(
+  chrom = sample(nucs$chrom_num, size = n_feats, replace = TRUE),
+  start = rnorm( n = n_feats, mean = 40e6, sd = 1e7)
 )
+my_feats$end <- my_feats$start + 1e7
+my_feats
+```
 
-#p + geom_point( data = my_dat, mapping = aes( x = my_x, y = my_y, fill = my_bg), shape = 21, size = 8)
-p + geom_point( data = my_dat, mapping = aes( x = my_x, y = my_y, fill = my_bg), fill = my_dat$my_bg, shape = 21, size = 8)
+
+Our goal here is to have a data.frame that has columns named 'chrom', 'start', and 'end'.
+This information can be used to add rectangular features to the plot.
+
+
+```{r}
+feat_width <- 0.3
+
+p + geom_rect( data = my_feats, 
+               mapping = aes(
+                 xmin = chrom - feat_width,
+                 xmax = chrom + feat_width,
+                 ymin = start, ymax = end), 
+               colour = "#000000", fill = "#0000FF44", linewidth = 1
+)
 
 ```
 
+
+Here, the features are 10 million base pairs tall (1e7; a one with seven zeros), which is fairly large.
+This illustrates that rectangles consist of a fill and a border.
+The border is specified by the linewidth parameter and it's size is independent of the feature's height.
+This may be desirable for small features.
+The border may be omitted by using a transparent color("#00000000") leaving just the fill, which may represent the size of the feature better.
+However, if the feature is small it may not plot.
+These paramenters may be adjusted to find a combination that appears pleasing.
+
+
+```{r}
+feat_width <- 0.3
+my_feats$end <- my_feats$start + 1e2
+
+p <- p + geom_rect( data = my_feats, 
+               mapping = aes(
+                 xmin = chrom - feat_width,
+                 xmax = chrom + feat_width,
+                 ymin = start, ymax = end), 
+               colour = "#0000FF44", fill = "#0000FF00", linewidth = 3
+)
+p
+```
+
+
+## Zoom
+
+
+Regions of the plot may be specified as follows.
+
+
+```{r}
+#p + xlim(1.6, 4)
+p + coord_cartesian( xlim = c(1, 4) )
+```
+
+
+```{r}
+p + coord_cartesian( ylim = c(20e6, 40e6) )
+```
+
+
+```{r}
+p + coord_cartesian( xlim = c(3.5, 6.5), ylim = c(20e6, 40e6) )
+```
+
+
+## Save graphic
+
+
+This graphic can be saved in any of the file types supported by R.
+Below are examples of png (good for electronic media) and tiff (for manuscripts).
+
+
+```{r, eval=FALSE}
+ggsave( filename = "my_ideogram.png", plot = p,
+        device = "png", 
+        width = 6.5, height = 6.5, 
+        units = "in", dpi = 300)
+```
+
+
+```{r, eval=FALSE}
+ggsave( filename = "my_ideogram.tiff", plot = p,
+        device = "tiff", 
+        width = 6.5, height = 6.5, 
+        units = "in", dpi = 300, compression = "lzw")
+```
+
+
+
+
+
+
+```{r}
+t99 <- Sys.time()
+t99 - t1
+```
 
 
 
