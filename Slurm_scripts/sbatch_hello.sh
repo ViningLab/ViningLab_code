@@ -13,10 +13,10 @@
 #SBATCH --job-name=sbhello
 #SBATCH --error=sbhello_%A.err
 #SBATCH --output=sbhello_%A.out
-#SBATCH --account=green
-#SBATCH --partition=all.q,green
+# SBATCH --account=green
+# SBATCH --partition=all.q,green
 # SBATCH --partition=green
-#SBATCH --exclude=aspen9
+# SBATCH --exclude=aspen9
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 # SBATCH --cpus-per-task=4
