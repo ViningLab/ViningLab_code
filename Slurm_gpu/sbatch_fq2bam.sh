@@ -38,7 +38,7 @@
 # SBATCH --mem=16000M
 # SBATCH --mem=32000M
 #SBATCH --mem=48000M
-# SBATCH --array=0-0%1
+#SBATCH --array=0-0%1
 # SBATCH --array=1-10%1
 # SBATCH --array=7-10%1
 # SBATCH --array=11-20%1
@@ -49,7 +49,6 @@ i=${SLURM_ARRAY_TASK_ID}
 CMD="This is array task ${SLURM_ARRAY_TASK_ID}"
 echo $CMD
 eval $CMD
-
 
 HOST=$(hostname)
 echo "Running on host: $HOST"
@@ -81,27 +80,17 @@ BASE_DIR="/nfs4/HORT/Vining_Lab/Users/knausb/fiber_hemp/"
 REF_DIR="~/Vining_Lab_nfs4/GENOMES/hemp/public_databases/NCBI/Pink_pepper/gatk_dict/"
 MY_REF="GCF_029168945.1_ASM2916894v1_genomic.fna"
 
-BAM_DIR="/home/bpp/knausb/Vining_Lab_nfs7/PROJECTS/hemp/fiber/growing_year_2024_variants/MarkDuplicates/bams/"
-#MY_BAM="OR-1_S1_dupmrk.bam"
-MY_BAM=$MY_SAMPLE"_dupmrk.bam"
-
-
-# OUT_DIR="/nfs4/HORT/Vining_Lab/Users/knausb/fiber_hemp/vcfs"
-GVCF_DIR="/nfs4/HORT/Vining_Lab/Users/knausb/fiber_hemp/gvcfs"
-GVCF_DIR="${BASE_DIR}gvcfs/"
-MY_GVCF="${MY_SAMPLE}.g.vcf.gz"
-
 # SINGULARITYENV_CUDA_VISIBLE_DEVICES=0 singularity shell --nv ../singularity_images/clara-parabricks_4.6.0-1.sif 
 
 # singularity shell --nv --bind /home/bpp/knausb/Vining_Lab_nfs7/PROJECTS/hemp/fiber/growing_year_2024_variants/MarkDuplicates/bams/:/bamdir ../singularity_images/clara-parabricks_4.6.0-1.sif
 
+# Select GPU number; zero-based, machine dependent.
 #
 CMD="export SINGULARITYENV_CUDA_VISIBLE_DEVICES=0"
 #CMD="export SINGULARITYENV_CUDA_VISIBLE_DEVICES=1"
 
-
 echo $CMD
-#eval $CMD
+eval $CMD
 echo
 
 
@@ -120,7 +109,7 @@ CMD="singularity run --nv \
   --bind $(pwd):/outputdir \
   --workdir /workdir \
   $MY_SIF \
-  pbrun deepvariant \
+  pbrun fq2bam \
   --mode shortread \
   --ref /refdir/${MY_REF} \
   --in-bam /bamdir/${MY_BAM} \
