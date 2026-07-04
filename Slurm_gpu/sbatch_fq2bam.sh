@@ -67,14 +67,6 @@ SECONDS=0
 # https://docs.sylabs.io/guides/latest/user-guide/index.html
 # https://docs.sylabs.io/guides/3.5/user-guide/gpu.html
 
-# https://docs.nvidia.com/clara/parabricks/latest/documentation/tooldocs/man_deepvariant.html
-# https://docs.nvidia.com/clara/parabricks/4.0.1/documentation/tooldocs/man_deepvariant.html#man-deepvariant
-
-# https://docs.nvidia.com/clara/parabricks/latest/tutorials/dvtraining.html
-
-# https://github.com/google/deepvariant/tree/r1.6.1
-
-
 MY_SIF="/nfs4/HORT/Vining_Lab/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif"
 
 # MY_SAMPLE="OR-1_S1"
