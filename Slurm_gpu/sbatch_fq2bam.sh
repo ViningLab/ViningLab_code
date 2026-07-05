@@ -7,7 +7,16 @@
 
 # https://docs.nvidia.com/clara/parabricks/latest/documentation/tooldocs/man_fq2bam.html
 
+# hqavail --gpu --show-full
 # salloc --account=boris --partition=boris --gpus-per-node=1 --mem=4000M
+# salloc --account=papilio --partition=cqls_gpu
+# salloc --account=cqls_gpu --partition=papilio
+
+#salloc --account=cqls_gpu4 --partition=cqls_gpu
+#papilio
+#cqls-gpu4
+#cqls-gpu3
+
 
 # nvidia-smi
 # watch -d -n 0.5 nvidia-smi
