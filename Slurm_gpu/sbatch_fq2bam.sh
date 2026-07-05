@@ -73,12 +73,15 @@ MY_SIF="/nfs4/HORT/Vining_Lab/Users/knausb/singularity_images/clara-parabricks_4
 # MY_SAMPLE="OR-3_S3"
 # MY_SAMPLE="OR-4_S4"
 
-BASE_DIR="/nfs4/HORT/Vining_Lab/Users/knausb/fiber_hemp/"
+#BASE_DIR="/nfs4/HORT/Vining_Lab/Users/knausb/fiber_hemp/"
+BASE_DIR="/nfs5/HORT/Vining_Lab/PROJECTS/hemp/fiber/growing_year_2025_variants/"
 
 #REF_DIR="~/Vining_Lab_nfs4/GENOMES/hemp/public_databases/NCBI/Pink_pepper/"
 #MY_REF="GCF_029168945.1_ASM2916894v1_genomic.fna.gz"
 REF_DIR="~/Vining_Lab_nfs4/GENOMES/hemp/public_databases/NCBI/Pink_pepper/gatk_dict/"
-MY_REF="GCF_029168945.1_ASM2916894v1_genomic.fna"
+REF_FILE="GCF_029168945.1_ASM2916894v1_genomic.fna"
+
+TEMP_DIR="/scratch/"
 
 # SINGULARITYENV_CUDA_VISIBLE_DEVICES=0 singularity shell --nv ../singularity_images/clara-parabricks_4.6.0-1.sif 
 
@@ -104,19 +107,30 @@ echo
 CMD="singularity run --nv \
   --bind ${REF_DIR}:/refdir \
   --bind ${BAM_DIR}:/bamdir \
-  --bind ${GVCF_DIR}:/gvcfdir \
   --bind /scratch:/workdir \
   --bind $(pwd):/outputdir \
   --workdir /workdir \
   $MY_SIF \
   pbrun fq2bam \
-  --mode shortread \
-  --ref /refdir/${MY_REF} \
-  --in-bam /bamdir/${MY_BAM} \
-  --out-variants /gvcfdir/${MY_GVCF} \
-  --gvcf \
-  --num-cpu-threads-per-stream 6 \
-  --num-gpus 1"
+    --ref /ref_dir/${REF_FILE} \
+    --in-fq-list IN_FQ_LIST \
+    --gpuwrite \
+    --gpusort \
+    --cigar-on-gpu \
+    --fix-mate \
+    --bwa-cpu-thread-pool 16 \
+    --num-gpus 1 \
+    --tmp-dir ${TEMP_DIR} \
+    --bwa-options=\"-K 10000000\" \
+    --out-bam /{$BAM_DIR}/${OUTPUT_BAM} \
+    --out-recal-file /outputdir/${OUTPUT_RECAL_FILE}"
+
+
+#    --knownSites /workdir/${KNOWN_SITES_FILE} \
+#    --in-fq /workdir/${INPUT_FASTQ_1} /workdir/${INPUT_FASTQ_2}  \  
+#  --mode shortread \
+#  --num-cpu-threads-per-stream 6 \
+
 
 
 
@@ -140,4 +154,3 @@ echo $ELAPSED
 
 ##### ##### ##### ##### #####
 # EOF.
-
