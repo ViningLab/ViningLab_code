@@ -96,6 +96,18 @@ TEMP_DIR="/scratch/"
 
 # singularity shell --nv --bind /home/bpp/knausb/Vining_Lab_nfs7/PROJECTS/hemp/fiber/growing_year_2024_variants/MarkDuplicates/bams/:/bamdir ../singularity_images/clara-parabricks_4.6.0-1.sif
 
+SINGULARITYENV_CUDA_VISIBLE_DEVICES=0 singularity shell --nv ~/Vining_Lab_nfs4/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif 
+
+singularity shell --nv ~/Vining_Lab_nfs4/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif 
+singularity shell --nv --bind /nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/Pink_pepper/bwa_index_genomic:/refdir ~/Vining_Lab_nfs4/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif 
+
+  --bind ${REF_DIR}:/refdir \
+  --bind /scratch:/workdir \
+  --bind $(pwd):/outputdir \
+  --workdir /workdir \
+  ~/Vining_Lab_nfs4/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif 
+
+
 # Select GPU number; zero-based, machine dependent.
 #
 CMD="export SINGULARITYENV_CUDA_VISIBLE_DEVICES=0"
