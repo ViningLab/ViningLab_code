@@ -71,7 +71,7 @@
 ##### ##### ##### ##### #####
 
 i=${SLURM_ARRAY_TASK_ID}
-CMD="This is array task ${SLURM_ARRAY_TASK_ID}"
+CMD="This is array task: ${SLURM_ARRAY_TASK_ID}"
 echo $CMD
 eval $CMD
 
