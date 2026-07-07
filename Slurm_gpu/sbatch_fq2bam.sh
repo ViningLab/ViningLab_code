@@ -36,7 +36,7 @@
 # singularity shell --nv --bind /nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/Pink_pepper/bwa_index_genomic/:/refdir /nfs4/HORT/Vining_Lab/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif
 # singularity shell --nv --bind /nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/Pink_pepper/bwa_index_genomic/:/refdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/Hemp:/fqdir /nfs4/HORT/Vining_Lab/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif
 # singularity shell --nv --bind /nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/Pink_pepper/bwa_index_genomic/:/refdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/Hemp:/fqdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/growing_year_2025_variants/bams:/bamdir /nfs4/HORT/Vining_Lab/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif
-
+# singularity shell --nv --bind /nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/Pink_pepper/bwa_index_genomic/:/refdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/Hemp:/fqdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/growing_year_2025_variants/bams:/bamdir /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/growing_year_2025_variants/fqlists/:fqlistdir /nfs4/HORT/Vining_Lab/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif
 
 ##### ##### ##### ##### #####
 # Slurm
