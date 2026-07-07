@@ -36,7 +36,10 @@
 # singularity shell --nv --bind /nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/Pink_pepper/bwa_index_genomic/:/refdir /nfs4/HORT/Vining_Lab/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif
 # singularity shell --nv --bind /nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/Pink_pepper/bwa_index_genomic/:/refdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/Hemp:/fqdir /nfs4/HORT/Vining_Lab/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif
 # singularity shell --nv --bind /nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/Pink_pepper/bwa_index_genomic/:/refdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/Hemp:/fqdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/growing_year_2025_variants/bams:/bamdir /nfs4/HORT/Vining_Lab/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif
-# singularity shell --nv --bind /nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/Pink_pepper/bwa_index_genomic/:/refdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/Hemp:/fqdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/growing_year_2025_variants/bams:/bamdir /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/growing_year_2025_variants/fqlists/:fqlistdir /nfs4/HORT/Vining_Lab/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif
+# singularity shell --nv --bind /nfs4/HORT/Vining_Lab/GENOMES/hemp/public_databases/NCBI/Pink_pepper/bwa_index_genomic/:/refdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/growing_year_2025_variants/fqlists:/fqlistdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/Hemp:/fqdir --bind /nfs5/HORT/Vining_Lab/RawData/hemp/Illumina/SAS_fiber_hemp/2025_data/growing_year_2025_variants/bams:/bamdir /nfs4/HORT/Vining_Lab/Users/knausb/singularity_images/clara-parabricks_4.6.0-1.sif
+
+# pbrun fq2bam --ref /refdir/Pink_pepper --in-fq-list /fqlistdir/CA-100_S270.fqlist --out-bam /bamdir/CA-100_S270.bam
+
 
 ##### ##### ##### ##### #####
 # Slurm
@@ -158,7 +161,7 @@ CMD="singularity run --nv \
     --num-gpus 1 \
     --tmp-dir /tempdir \
     --bwa-options=\"-K 10000000\" \
-    --out-bam bamdir/${SAMPLE}.bam"
+    --out-bam /bamdir/${SAMPLE}.bam"
 
 
 #    --out-recal-file /outputdir/${OUTPUT_RECAL_FILE}"
