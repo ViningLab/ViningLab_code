@@ -1,3 +1,4 @@
+rm nodelist Resources
 #!/usr/bin/env bash
 
 # Submit job as follows.
