@@ -23,18 +23,7 @@ echo "Running on host: $HOST"
 # Seconds since the shell was spawned, reset to zero here.
 SECONDS=0
 
-NCPU=8
-
-CMD="$BWA mem -t $NCPU -M -R \"$RG\" $DBPREFIX ${arr[1]} ${arr[2]} | $SAMT view -@ $NCPU -bh > bams/"${arr[0]}".bam"
-
-
-#
-echo $CMD
-#
-eval $CMD
-
 CMD="zgrep -c '^@' *fastq.gz > counts.txt"
-
 #
 echo $CMD
 #
